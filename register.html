@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account — Tunify</title>
+  <meta name="description" content="Join Tunify — track orders, save wishlists, and unlock exclusive member deals on premium music instruments."/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+  <style>
+    /* ── Register Page Enhancements ── */
+    .register-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated ambient orbs */
+    .register-page::before,
+    .register-page::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: orb-float 8s ease-in-out infinite;
+    }
+    .register-page::before {
+      width: 500px; height: 500px;
+      top: -10%; left: -15%;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, transparent 65%);
+    }
+    .register-page::after {
+      width: 400px; height: 400px;
+      bottom: -10%; right: -10%;
+      background: radial-gradient(circle, rgba(192, 132, 252, 0.07) 0%, transparent 65%);
+      animation-delay: -4s;
+    }
+    @keyframes orb-float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* Floating music notes background */
+    .music-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .music-note {
+      position: absolute;
+      color: rgba(251, 191, 36, 0.06);
+      font-size: 1.5rem;
+      animation: note-rise linear infinite;
+    }
+    @keyframes note-rise {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Register card — wider than standard auth */
+    .register-card {
+      background: rgba(10, 7, 16, 0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 24px;
+      padding: 2.5rem 3rem;
+      box-shadow:
+        0 32px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(251, 191, 36, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      position: relative;
+      z-index: 1;
+      animation: card-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes card-appear {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Gold accent top bar */
+    .register-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 2.5rem; right: 2.5rem;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--accent-purple), transparent);
+      border-radius: 0 0 2px 2px;
+      opacity: 0.7;
+    }
+
+    /* Header */
+    .register-header {
+      margin-bottom: 2rem;
+    }
+    .register-eyebrow {
+      font-family: var(--font-mono);
+      font-size: .65rem;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .75rem;
+    }
+    .register-eyebrow::before {
+      content: '';
+      width: 20px; height: 1.5px;
+      background: var(--gold);
+    }
+    .register-header h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .3rem;
+      line-height: 1.15;
+    }
+    .register-header h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .register-sub {
+      color: var(--silver);
+      font-size: .875rem;
+      margin-bottom: 0;
+    }
+
+    /* ── Step Progress ── */
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 2rem;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 1;
+    }
+    .step-bubble {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-dim);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      z-index: 2;
+    }
+    .step-item.active .step-bubble {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+      color: var(--gold);
+      box-shadow: 0 0 20px rgba(251,191,36,0.3);
+    }
+    .step-item.done .step-bubble {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: #000;
+    }
+    .step-label {
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: .4rem;
+      white-space: nowrap;
+      transition: color 0.3s;
+    }
+    .step-item.active .step-label,
+    .step-item.done .step-label {
+      color: var(--gold);
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.07);
+      position: relative;
+      top: -12px;
+      margin: 0 -2px;
+      overflow: hidden;
+    }
+    .step-line-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), var(--accent-purple));
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ── Step Panels ── */
+    .step-panel {
+      display: none;
+      animation: step-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .step-panel.active {
+      display: block;
+    }
+    @keyframes step-in {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes step-in-back {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .step-panel.slide-back {
+      animation: step-in-back 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ── Avatar Upload ── */
+    .avatar-zone {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border: 1.5px dashed rgba(255,255,255,0.1);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .avatar-zone:hover {
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.03);
+    }
+    .avatar-zone.drag-over {
+      border-color: var(--gold);
+      background: rgba(251, 191, 36, 0.07);
+    }
+    .avatar-preview-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      border: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 1.8rem;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: border-color 0.25s;
+      position: relative;
+    }
+    .avatar-preview-circle img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .avatar-preview-circle .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      border-radius: 50%;
+      transition: opacity 0.2s;
+      color: #fff;
+      font-size: .9rem;
+    }
+    .avatar-zone:hover .avatar-preview-circle .avatar-overlay {
+      opacity: 1;
+    }
+    .avatar-info { flex: 1; }
+    .avatar-info strong {
+      display: block;
+      color: var(--text);
+      font-size: .88rem;
+      margin-bottom: .2rem;
+    }
+    .avatar-info span {
+      font-size: .75rem;
+      color: var(--text-dim);
+    }
+    .avatar-info .btn-outline-gold {
+      margin-top: .6rem;
+      font-size: .72rem;
+      padding: .3rem .85rem;
+    }
+
+    /* ── Form Fields Enhanced ── */
+    .field-group {
+      margin-bottom: 1.25rem;
+    }
+    .field-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--silver);
+      margin-bottom: .4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .field-label .field-hint {
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-dim);
+    }
+    .field-label .field-required {
+      color: var(--accent);
+      margin-left: 3px;
+      font-size: .8rem;
+    }
+
+    .tunify-input {
+      width: 100%;
+      background: rgba(13, 23, 42, 0.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: .9rem;
+      font-family: var(--font-body);
+      padding: .75rem 1rem;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+    .tunify-input::placeholder { color: var(--text-dim); font-size: .85rem; }
+    .tunify-input:focus {
+      background: rgba(13, 23, 42, 0.7);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(251,191,36,0.1), 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .tunify-input.is-valid {
+      border-color: #A3E635;
+      box-shadow: 0 0 0 3px rgba(163,230,53,0.08);
+    }
+    .tunify-input.is-invalid {
+      border-color: #F87171;
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.08);
+    }
+    .tunify-input:focus.is-valid { box-shadow: 0 0 0 3px rgba(163,230,53,0.12); }
+    .tunify-input:focus.is-invalid { box-shadow: 0 0 0 3px rgba(248,113,113,0.12); }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 1rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: .85rem;
+      pointer-events: none;
+      transition: color 0.25s;
+    }
+    .input-wrap:focus-within .input-icon { color: var(--gold); }
+    .input-wrap .tunify-input { padding-left: 2.6rem; }
+    .input-end-icon {
+      position: absolute;
+      right: .85rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .field-status-icon {
+      font-size: .85rem;
+      transition: all 0.2s;
+    }
+    .field-status-icon.valid { color: #A3E635; }
+    .field-status-icon.invalid { color: #F87171; }
+
+    .field-msg {
+      font-size: .72rem;
+      margin-top: .35rem;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      transition: all 0.2s;
+    }
+    .field-msg.error { color: #F87171; }
+    .field-msg.success { color: #A3E635; }
+    .field-msg.hint { color: var(--text-dim); }
+
+    /* Password wrap */
+    .pw-toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0;
+      font-size: .85rem;
+      transition: color 0.2s;
+    }
+    .pw-toggle-btn:hover { color: var(--gold); }
+
+    /* ── Strength Meter Enhanced ── */
+    .strength-section {
+      margin-top: .6rem;
+    }
+    .strength-bars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: .3rem;
+    }
+    .strength-segment {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.07);
+      transition: background 0.3s ease;
+    }
+    .strength-segment.filled-1 { background: #F87171; }
+    .strength-segment.filled-2 { background: #FBBF24; }
+    .strength-segment.filled-3 { background: #86EFAC; }
+    .strength-segment.filled-4 { background: #A3E635; }
+    .strength-label {
+      font-size: .68rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      transition: color 0.3s;
+    }
+
+    /* ── Password Requirements Checklist ── */
+    .pw-requirements {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      margin-top: .5rem;
+    }
+    .pw-req-item {
+      font-size: .72rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .15rem 0;
+      transition: color 0.25s;
+    }
+    .pw-req-item i {
+      font-size: .65rem;
+      width: 14px;
+      transition: color 0.25s;
+    }
+    .pw-req-item.met { color: #A3E635; }
+    .pw-req-item.met i { color: #A3E635; }
+
+    /* ── Birthdate Picker ── */
+    .ui-datepicker {
+      background: rgba(10, 7, 16, 0.98) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important;
+    }
+    .ui-datepicker-header {
+      background: rgba(255,255,255,0.04) !important;
+      border-color: rgba(255,255,255,0.06) !important;
+      color: var(--text) !important;
+      border-radius: 12px 12px 0 0 !important;
+    }
+    .ui-datepicker th { color: var(--text-dim) !important; }
+    .ui-datepicker td a {
+      color: var(--silver) !important;
+      background: transparent !important;
+    }
+    .ui-datepicker td a:hover {
+      background: rgba(251,191,36,0.15) !important;
+      color: var(--gold) !important;
+    }
+    .ui-datepicker .ui-state-active {
+      background: var(--gold) !important;
+      color: #000 !important;
+    }
+    .ui-datepicker select.ui-datepicker-month,
+    .ui-datepicker select.ui-datepicker-year {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+
+    /* ── Terms ── */
+    .terms-box {
+      background: rgba(255,255,255,0.02);
+      border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .9rem;
+      margin-bottom: 1.25rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .terms-box:hover { border-color: rgba(251,191,36,0.25); }
+    .terms-box.checked {
+      border-color: rgba(163, 230, 53, 0.3);
+      background: rgba(163, 230, 53, 0.03);
+    }
+    .terms-box.shake {
+      animation: shake 0.35s ease;
+      border-color: rgba(248,113,113,0.5) !important;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .custom-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.2s ease;
+    }
+    .custom-checkbox.checked {
+      background: #A3E635;
+      border-color: #A3E635;
+    }
+    .custom-checkbox i {
+      color: #000;
+      font-size: .65rem;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-checkbox.checked i {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .terms-text {
+      font-size: .8rem;
+      color: var(--silver);
+      line-height: 1.5;
+    }
+    .terms-text a { color: var(--gold); font-weight: 600; }
+    .terms-text a:hover { color: #fff; }
+
+    /* ── Navigation Buttons ── */
+    .step-nav {
+      display: flex;
+      gap: .75rem;
+      margin-top: 1.5rem;
+    }
+    .btn-prev {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      color: var(--silver);
+      font-family: var(--font-body);
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      padding: .75rem 1.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .btn-prev:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .btn-next, .btn-submit {
+      flex: 1;
+      background: linear-gradient(135deg, var(--gold) 0%, #D97706 100%);
+      border: none;
+      color: #040914 !important;
+      font-family: var(--font-body);
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      padding: .8rem 1.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      box-shadow: 0 4px 20px rgba(251,191,36,0.25);
+    }
+    .btn-next:hover, .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(251,191,36,0.4);
+    }
+    .btn-next:disabled, .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #A3E635 0%, #65A30D 100%);
+      box-shadow: 0 4px 20px rgba(163,230,53,0.2);
+    }
+    .btn-submit:hover {
+      box-shadow: 0 8px 30px rgba(163,230,53,0.35);
+    }
+
+    /* ── Review Panel (Step 3) ── */
+    .review-panel {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+    .review-header {
+      padding: .65rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .review-edit-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: .7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .review-edit-btn:hover { color: var(--gold); }
+    .review-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--gold-glow);
+      border: 1px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: .75rem;
+      flex-shrink: 0;
+    }
+    .review-key {
+      font-size: .68rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      display: block;
+    }
+    .review-val {
+      font-size: .85rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .review-avatar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .85rem 1rem;
+    }
+    .review-avatar-circle {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      border: 2px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--gold);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .review-avatar-circle img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .review-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .review-email-sub {
+      font-size: .78rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Benefits Strip ── */
+    .register-benefits {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .benefit-pill {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .8rem;
+      background: rgba(251,191,36,0.06);
+      border: 1px solid rgba(251,191,36,0.12);
+      border-radius: 20px;
+      font-size: .7rem;
+      color: var(--silver);
+      transition: all 0.2s;
+    }
+    .benefit-pill i { color: var(--gold); font-size: .65rem; }
+    .benefit-pill:hover {
+      background: rgba(251,191,36,0.1);
+      border-color: rgba(251,191,36,0.25);
+      color: var(--text);
+    }
+
+    /* ── Social Login ── */
+    .social-divider {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin: 1.25rem 0;
+    }
+    .social-divider::before,
+    .social-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+    .social-divider span {
+      font-size: .68rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .social-btns {
+      display: flex;
+      gap: .6rem;
+    }
+    .btn-social {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .65rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: var(--silver);
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .btn-social:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text);
+    }
+    .btn-social i { font-size: .9rem; }
+
+    /* ── Success State ── */
+    .success-panel {
+      display: none;
+      text-align: center;
+      padding: 1.5rem 0;
+      animation: card-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .success-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(163,230,53,0.12);
+      border: 2px solid #A3E635;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #A3E635;
+      margin: 0 auto 1.25rem;
+      animation: success-pop 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes success-pop {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .register-card { padding: 1.75rem 1.5rem; }
+      .register-benefits { display: none; }
+      .step-label { display: none; }
+      .social-btns .btn-text { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="tunifyNav"></div>
+
+<!-- Floating music notes -->
+<div class="music-bg" id="musicBg"></div>
+
+<section class="register-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-7 col-xl-6">
+        <div class="register-card">
+
+          <!-- Header -->
+          <div class="register-header">
+            <div class="register-eyebrow"><i class="fas fa-music"></i> Tunify Membership</div>
+            <h1>Create your <em>account</em></h1>
+            <p class="register-sub">Join thousands of music lovers — track orders, save wishlists, and unlock member deals.</p>
+          </div>
+
+          <!-- Benefits strip -->
+          <div class="register-benefits">
+            <span class="benefit-pill"><i class="fas fa-box"></i> Order Tracking</span>
+            <span class="benefit-pill"><i class="fas fa-heart"></i> Wishlists</span>
+            <span class="benefit-pill"><i class="fas fa-tag"></i> Member Deals</span>
+            <span class="benefit-pill"><i class="fas fa-shield-alt"></i> Secure Checkout</span>
+          </div>
+
+          <!-- Step Progress -->
+          <div class="step-progress" id="stepProgress">
+            <div class="step-item active" id="stepItem1">
+              <div class="step-bubble" id="stepBubble1">1</div>
+              <div class="step-label">Profile</div>
+            </div>
+            <div class="step-line">
+              <div class="step-line-fill" id="stepLine1"></div>
+            </div>
+            <div class="step-item" id="stepItem2">
+              <div class="step-bubble" id="stepBubble2">2</div>
+              <div class="step-label">Security</div>
+            </div>
+            <div class="step-line">
+              <div class="step-line-fill" id="stepLine2"></div>
+            </div>
+            <div class="step-item" id="stepItem3">
+              <div class="step-bubble" id="stepBubble3">3</div>
+              <div class="step-label">Review</div>
+            </div>
+          </div>
+
+          <!-- FORM -->
+          <form id="authForm" novalidate>
+
+            <!-- Step 1: Profile Info -->
+            <div class="step-panel active" id="panel1">
+              <!-- Avatar Upload -->
+              <div class="avatar-zone" id="avatarZone" onclick="document.getElementById('profilePicture').click()">
+                <div class="avatar-preview-circle" id="avatarPreviewCircle">
+                  <i class="fas fa-user"></i>
+                  <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
+                </div>
+                <div class="avatar-info">
+                  <strong>Profile Photo</strong>
+                  <span>JPG, PNG, or WEBP · Max 2MB</span>
+                  <div>
+                    <span class="btn-outline-gold" style="font-size:.72rem; padding:.3rem .85rem; display:inline-flex; cursor:pointer;">
+                      <i class="fas fa-camera mr-1"></i> Choose Photo
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <input type="file" id="profilePicture" accept="image/*" style="display:none;"/>
+
+              <!-- Full Name -->
+              <div class="field-group">
+                <label class="field-label">
+                  Full Name <span class="field-required">*</span>
+                  <span class="field-hint">As it appears on your ID</span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-user input-icon"></i>
+                  <input type="text" class="tunify-input" id="fullname" placeholder="Your full name" autocomplete="name"/>
+                  <div class="input-end-icon">
+                    <i class="fas fa-check field-status-icon" id="nameStat" style="display:none;"></i>
+                  </div>
+                </div>
+                <div class="field-msg hint" id="nameMsg"><i class="fas fa-info-circle"></i> At least 2 characters</div>
+              </div>
+
+              <!-- Email -->
+              <div class="field-group">
+                <label class="field-label">
+                  Email Address <span class="field-required">*</span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-envelope input-icon"></i>
+                  <input type="email" class="tunify-input" id="email" placeholder="you@example.com" autocomplete="email"/>
+                  <div class="input-end-icon">
+                    <i class="fas fa-check field-status-icon" id="emailStat" style="display:none;"></i>
+                  </div>
+                </div>
+                <div class="field-msg hint" id="emailMsg"><i class="fas fa-info-circle"></i> We'll send a confirmation here</div>
+              </div>
+
+              <!-- Birthdate -->
+              <div class="field-group">
+                <label class="field-label">
+                  Birthdate <span class="field-required">*</span>
+                  <span class="field-hint">Must be 13+</span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-calendar-alt input-icon"></i>
+                  <input type="text" class="tunify-input" id="birthdate" placeholder="Select your birthdate" readonly/>
+                  <div class="input-end-icon">
+                    <i class="fas fa-chevron-down" style="color:var(--text-dim); font-size:.75rem;"></i>
+                  </div>
+                </div>
+                <div class="field-msg hint" id="birthdateMsg"><i class="fas fa-lock"></i> Used to personalize your experience</div>
+              </div>
+
+              <div class="step-nav">
+                <button type="button" class="btn-next" id="toStep2">
+                  Continue <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Social Divider -->
+              <div class="social-divider"><span>or sign up with</span></div>
+              <div class="social-btns">
+                <button type="button" class="btn-social" onclick="Tunify.toast('Google sign-up coming soon!', 'fa-info-circle')">
+                  <i class="fab fa-google" style="color:#EA4335;"></i>
+                  <span class="btn-text">Google</span>
+                </button>
+                <button type="button" class="btn-social" onclick="Tunify.toast('Facebook sign-up coming soon!', 'fa-info-circle')">
+                  <i class="fab fa-facebook-f" style="color:#1877F2;"></i>
+                  <span class="btn-text">Facebook</span>
+                </button>
+                <button type="button" class="btn-social" onclick="Tunify.toast('Apple sign-up coming soon!', 'fa-info-circle')">
+                  <i class="fab fa-apple" style="color:#fff;"></i>
+                  <span class="btn-text">Apple</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Security -->
+            <div class="step-panel" id="panel2">
+              <!-- Password -->
+              <div class="field-group">
+                <label class="field-label">
+                  Password <span class="field-required">*</span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-lock input-icon"></i>
+                  <input type="password" class="tunify-input" id="password" placeholder="Create a strong password" autocomplete="new-password" style="padding-right: 5rem;"/>
+                  <div class="input-end-icon" style="right:.75rem;">
+                    <i class="fas fa-check field-status-icon" id="passStat" style="display:none;"></i>
+                    <button type="button" class="pw-toggle-btn" id="togglePass">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Strength meter -->
+                <div class="strength-section">
+                  <div class="strength-bars">
+                    <div class="strength-segment" id="seg1"></div>
+                    <div class="strength-segment" id="seg2"></div>
+                    <div class="strength-segment" id="seg3"></div>
+                    <div class="strength-segment" id="seg4"></div>
+                  </div>
+                  <div class="strength-label" id="strengthLabel">Enter a password</div>
+                </div>
+
+                <!-- Requirements checklist -->
+                <div class="pw-requirements">
+                  <div class="pw-req-item" id="req-len">
+                    <i class="fas fa-circle"></i> At least 8 characters
+                  </div>
+                  <div class="pw-req-item" id="req-upper">
+                    <i class="fas fa-circle"></i> One uppercase letter
+                  </div>
+                  <div class="pw-req-item" id="req-num">
+                    <i class="fas fa-circle"></i> One number
+                  </div>
+                  <div class="pw-req-item" id="req-special">
+                    <i class="fas fa-circle"></i> One special character (!@#$…)
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="field-group">
+                <label class="field-label">
+                  Confirm Password <span class="field-required">*</span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-lock input-icon"></i>
+                  <input type="password" class="tunify-input" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password" style="padding-right: 4rem;"/>
+                  <div class="input-end-icon" style="right:.75rem;">
+                    <i class="fas fa-check field-status-icon" id="confirmStat" style="display:none;"></i>
+                    <button type="button" class="pw-toggle-btn" id="toggleConfirm">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="field-msg hint" id="confirmMsg"><i class="fas fa-info-circle"></i> Must match the password above</div>
+              </div>
+
+              <!-- Terms -->
+              <div class="terms-box" id="termsBox" onclick="toggleTerms()">
+                <div class="custom-checkbox" id="customCb">
+                  <i class="fas fa-check"></i>
+                </div>
+                <div class="terms-text">
+                  I agree to the Tunify <a href="#" onclick="return false;">Terms of Service</a> and <a href="#" onclick="return false;">Privacy Policy</a>. I understand my data will be used to provide services as described.
+                </div>
+              </div>
+              <input type="checkbox" id="terms" style="display:none;"/>
+
+              <div class="step-nav">
+                <button type="button" class="btn-prev" id="toStep1">
+                  <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="button" class="btn-next" id="toStep3">
+                  Review <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div class="step-panel" id="panel3">
+              <p style="font-size:.8rem; color:var(--text-dim); margin-bottom:1.25rem;">
+                <i class="fas fa-info-circle" style="color:var(--gold);"></i>
+                Please review your details before creating your account.
+              </p>
+
+              <!-- Avatar + Name summary -->
+              <div class="review-panel">
+                <div class="review-header">
+                  Account Identity
+                  <button type="button" class="review-edit-btn" onclick="goToStep(1)">
+                    <i class="fas fa-pen"></i> Edit
+                  </button>
+                </div>
+                <div class="review-avatar">
+                  <div class="review-avatar-circle" id="reviewAvatarCircle">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div>
+                    <div class="review-name" id="reviewName">—</div>
+                    <div class="review-email-sub" id="reviewEmail">—</div>
+                  </div>
+                </div>
+                <div class="review-row">
+                  <div class="review-icon"><i class="fas fa-calendar-alt"></i></div>
+                  <div>
+                    <span class="review-key">Birthdate</span>
+                    <span class="review-val" id="reviewBirthdate">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="review-panel">
+                <div class="review-header">
+                  Security
+                  <button type="button" class="review-edit-btn" onclick="goToStep(2)">
+                    <i class="fas fa-pen"></i> Edit
+                  </button>
+                </div>
+                <div class="review-row">
+                  <div class="review-icon"><i class="fas fa-lock"></i></div>
+                  <div>
+                    <span class="review-key">Password</span>
+                    <span class="review-val">••••••••</span>
+                  </div>
+                </div>
+                <div class="review-row">
+                  <div class="review-icon"><i class="fas fa-file-contract"></i></div>
+                  <div>
+                    <span class="review-key">Terms</span>
+                    <span class="review-val" style="color:#A3E635;"><i class="fas fa-check-circle"></i> Agreed</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-nav">
+                <button type="button" class="btn-prev" id="toStep2b">
+                  <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                  <i class="fas fa-user-plus"></i> Create Account
+                </button>
+              </div>
+            </div>
+
+          </form>
+
+          <!-- Success panel -->
+          <div class="success-panel" id="successPanel">
+            <div class="success-circle">
+              <i class="fas fa-check"></i>
+            </div>
+            <h2 style="font-family:var(--font-display); font-size:1.5rem; color:var(--text); margin-bottom:.5rem;">Welcome to Tunify!</h2>
+            <p style="font-size:.88rem; color:var(--silver); margin-bottom:1.5rem;">Your account has been created successfully. Redirecting you now…</p>
+            <div class="step-progress" style="max-width:200px; margin:0 auto;">
+              <div style="width:100%; height:3px; background:rgba(255,255,255,0.07); border-radius:2px; overflow:hidden;">
+                <div id="redirectBar" style="height:100%; width:0%; background:linear-gradient(90deg,#A3E635,#65A30D); transition:width 2s linear; border-radius:2px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer link -->
+          <p class="text-center mt-3 mb-0" style="font-size:.8rem; color:var(--silver);" id="footerLink">
+            Already have an account? <a href="login.html">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<!-- SweetAlert2 & Bootbox.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js?v=2026"></script>
+<script>
+  /* ── Floating music notes ── */
+  (function() {
+    const bg = document.getElementById('musicBg');
+    const icons = ['♩', '♪', '♫', '♬', '𝄞', '𝄢'];
+    for (let i = 0; i < 14; i++) {
+      const el = document.createElement('div');
+      el.className = 'music-note';
+      el.textContent = icons[Math.floor(Math.random() * icons.length)];
+      el.style.left = Math.random() * 100 + '%';
+      el.style.animationDuration = (12 + Math.random() * 14) + 's';
+      el.style.animationDelay = (Math.random() * 14) + 's';
+      el.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+      bg.appendChild(el);
+    }
+  })();
+
+  /* ── State ── */
+  let currentStep = 1;
+  let selectedAvatar = null;
+  let termsChecked = false;
+
+  /* ── Step Navigation ── */
+  function goToStep(step, back = false) {
+    const current = document.getElementById('panel' + currentStep);
+    const next = document.getElementById('panel' + step);
+    current.classList.remove('active');
+    next.classList.toggle('slide-back', back);
+    next.classList.add('active');
+
+    // Update step bubbles
+    for (let i = 1; i <= 3; i++) {
+      const item = document.getElementById('stepItem' + i);
+      const bubble = document.getElementById('stepBubble' + i);
+      item.classList.remove('active', 'done');
+      if (i < step) {
+        item.classList.add('done');
+        bubble.innerHTML = '<i class="fas fa-check"></i>';
+      } else if (i === step) {
+        item.classList.add('active');
+        bubble.textContent = i;
+      } else {
+        bubble.textContent = i;
+      }
+    }
+
+    // Update connector lines
+    document.getElementById('stepLine1').style.width = step >= 2 ? '100%' : '0%';
+    document.getElementById('stepLine2').style.width = step >= 3 ? '100%' : '0%';
+
+    currentStep = step;
+  }
+
+  /* ── Field Validation Helpers ── */
+  function setFieldState(inputId, statIconId, msgId, state, msg) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(statIconId);
+    const msgEl = document.getElementById(msgId);
+    input.classList.remove('is-valid', 'is-invalid');
+    icon.classList.remove('valid', 'invalid');
+    if (state === 'valid') {
+      input.classList.add('is-valid');
+      icon.classList.add('valid');
+      icon.className = 'fas fa-check field-status-icon valid';
+      icon.style.display = '';
+      if (msgEl) { msgEl.className = 'field-msg success'; msgEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg; }
+    } else if (state === 'invalid') {
+      input.classList.add('is-invalid');
+      icon.className = 'fas fa-times field-status-icon invalid';
+      icon.style.display = '';
+      if (msgEl) { msgEl.className = 'field-msg error'; msgEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg; }
+    } else {
+      icon.style.display = 'none';
+      if (msgEl) { msgEl.className = 'field-msg hint'; msgEl.innerHTML = msg || ''; }
+    }
+  }
+
+  /* ── Live Validation ── */
+  document.getElementById('fullname').addEventListener('input', function() {
+    const v = this.value.trim();
+    if (v.length === 0) setFieldState('fullname', 'nameStat', 'nameMsg', 'none', '<i class="fas fa-info-circle"></i> At least 2 characters');
+    else if (v.length < 2) setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Name is too short');
+    else setFieldState('fullname', 'nameStat', 'nameMsg', 'valid', 'Looks good!');
+  });
+
+  document.getElementById('email').addEventListener('input', function() {
+    const v = this.value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (v.length === 0) setFieldState('email', 'emailStat', 'emailMsg', 'none', '<i class="fas fa-info-circle"></i> We\'ll send a confirmation here');
+    else if (!ok) setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
+    else setFieldState('email', 'emailStat', 'emailMsg', 'valid', 'Valid email address');
+  });
+
+  /* ── Password Strength ── */
+  const requirements = [
+    { id: 'req-len',     test: v => v.length >= 8,         label: 'At least 8 characters' },
+    { id: 'req-upper',   test: v => /[A-Z]/.test(v),       label: 'One uppercase letter' },
+    { id: 'req-num',     test: v => /[0-9]/.test(v),       label: 'One number' },
+    { id: 'req-special', test: v => /[^A-Za-z0-9]/.test(v), label: 'One special character (!@#$…)' }
+  ];
+  const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const strengthColors = { 1: 'filled-1', 2: 'filled-2', 3: 'filled-3', 4: 'filled-4' };
+
+  document.getElementById('password').addEventListener('input', function() {
+    const v = this.value;
+    let score = 0;
+    requirements.forEach(req => {
+      const met = req.test(v);
+      const el = document.getElementById(req.id);
+      el.classList.toggle('met', met);
+      el.querySelector('i').className = met ? 'fas fa-check-circle' : 'fas fa-circle';
+      if (met) score++;
+    });
+
+    // Update segments
+    for (let i = 1; i <= 4; i++) {
+      const seg = document.getElementById('seg' + i);
+      seg.className = 'strength-segment';
+      if (i <= score && score > 0) seg.classList.add(strengthColors[score]);
+    }
+
+    // Label
+    const lbl = document.getElementById('strengthLabel');
+    lbl.textContent = v.length === 0 ? 'Enter a password' : strengthLabels[score] || 'Weak';
+    lbl.style.color = score >= 3 ? '#A3E635' : score >= 2 ? '#FBBF24' : '#F87171';
+
+    // Set field state
+    if (v.length === 0) {
+      setFieldState('password', 'passStat', null, 'none', null);
+    } else if (score < 2) {
+      setFieldState('password', 'passStat', null, 'invalid', null);
+    } else {
+      setFieldState('password', 'passStat', null, 'valid', null);
+    }
+
+    // Check confirm match
+    const conf = document.getElementById('confirmPassword').value;
+    if (conf.length > 0) {
+      if (conf === v) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
+      else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
+    }
+  });
+
+  document.getElementById('confirmPassword').addEventListener('input', function() {
+    const v = this.value;
+    const pass = document.getElementById('password').value;
+    if (v.length === 0) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'none', '<i class="fas fa-info-circle"></i> Must match the password above');
+    else if (v === pass) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
+    else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
+  });
+
+  /* ── Password Toggle ── */
+  document.getElementById('togglePass').addEventListener('click', function() {
+    const input = document.getElementById('password');
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    this.querySelector('i').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+  });
+  document.getElementById('toggleConfirm').addEventListener('click', function() {
+    const input = document.getElementById('confirmPassword');
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    this.querySelector('i').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+  });
+
+  /* ── Terms Toggle ── */
+  function toggleTerms() {
+    termsChecked = !termsChecked;
+    document.getElementById('terms').checked = termsChecked;
+    document.getElementById('customCb').classList.toggle('checked', termsChecked);
+    document.getElementById('termsBox').classList.toggle('checked', termsChecked);
+  }
+
+  /* ── Avatar Upload ── */
+  document.getElementById('profilePicture').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      Tunify.swal({ icon: 'error', title: 'Invalid File', text: 'Please select an image file' }); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      Tunify.swal({ icon: 'error', title: 'File Too Large', text: 'Image must be less than 2MB' }); return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      selectedAvatar = e.target.result;
+      document.getElementById('avatarPreviewCircle').innerHTML =
+        `<img src="${e.target.result}"/><div class="avatar-overlay"><i class="fas fa-camera"></i></div>`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Drag-and-drop for avatar zone
+  const avatarZone = document.getElementById('avatarZone');
+  avatarZone.addEventListener('dragover', (e) => { e.preventDefault(); avatarZone.classList.add('drag-over'); });
+  avatarZone.addEventListener('dragleave', () => avatarZone.classList.remove('drag-over'));
+  avatarZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    avatarZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('profilePicture').files = e.dataTransfer.files;
+      document.getElementById('profilePicture').dispatchEvent(new Event('change'));
+    }
+  });
+
+  /* ── Step 1 → 2 ── */
+  document.getElementById('toStep2').addEventListener('click', function() {
+    const name = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const birthdate = document.getElementById('birthdate').value.trim();
+
+    let ok = true;
+    if (name.length < 2) {
+      setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Please enter your full name');
+      ok = false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
+      ok = false;
+    }
+    if (!birthdate) {
+      document.getElementById('birthdate').classList.add('is-invalid');
+      document.getElementById('birthdateMsg').className = 'field-msg error';
+      document.getElementById('birthdateMsg').innerHTML = '<i class="fas fa-exclamation-circle"></i> Please select your birthdate';
+      ok = false;
+    }
+
+    if (!ok) {
+      Tunify.swal({ icon: 'error', title: 'Validation Failed', text: 'Please complete all required fields' });
+      return;
+    }
+    goToStep(2);
+  });
+
+  /* ── Step 2 → 3 ── */
+  document.getElementById('toStep3').addEventListener('click', function() {
+    const pass = document.getElementById('password').value;
+    const conf = document.getElementById('confirmPassword').value;
+
+    let ok = true;
+    const score = requirements.filter(r => r.test(pass)).length;
+    if (score < 2) {
+      setFieldState('password', 'passStat', null, 'invalid', null);
+      Tunify.swal({ icon: 'error', title: 'Weak Password', text: 'Please use a stronger password (must meet at least 2 requirements)' });
+      ok = false;
+    }
+    if (pass !== conf) {
+      setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
+      if (ok) Tunify.swal({ icon: 'error', title: 'Password Mismatch', text: 'Passwords do not match' });
+      ok = false;
+    }
+    if (!termsChecked) {
+      document.getElementById('termsBox').classList.add('shake');
+      setTimeout(() => document.getElementById('termsBox').classList.remove('shake'), 400);
+      if (ok) Tunify.swal({ icon: 'error', title: 'Terms of Service', text: 'Please agree to the Terms & Privacy Policy' });
+      ok = false;
+    }
+    if (!ok) return;
+
+    // Populate review
+    const name = document.getElementById('fullname').value.trim();
+    document.getElementById('reviewName').textContent = name;
+    document.getElementById('reviewEmail').textContent = document.getElementById('email').value.trim();
+    document.getElementById('reviewBirthdate').textContent = document.getElementById('birthdate').value || '—';
+    if (selectedAvatar) {
+      document.getElementById('reviewAvatarCircle').innerHTML = `<img src="${selectedAvatar}"/>`;
+    } else {
+      document.getElementById('reviewAvatarCircle').innerHTML = `<span style="font-size:1.3rem;font-weight:700;color:var(--gold);">${name.charAt(0).toUpperCase()}</span>`;
+    }
+
+    goToStep(3);
+  });
+
+  /* ── Back buttons ── */
+  document.getElementById('toStep1').addEventListener('click', () => goToStep(1, true));
+  document.getElementById('toStep2b').addEventListener('click', () => goToStep(2, true));
+
+  /* ── Submit ── */
+  document.getElementById('authForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating your account…';
+
+    setTimeout(() => {
+      const user = {
+        name: document.getElementById('fullname').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        joined: new Date().toISOString().slice(0, 10),
+        avatar: selectedAvatar,
+        role: 'customer'
+      };
+      sessionStorage.removeItem('tunify_admin');
+      Tunify.session.set(user);
+
+      // Show success state
+      document.getElementById('authForm').style.display = 'none';
+      document.getElementById('stepProgress').style.display = 'none';
+      document.querySelector('.register-header').style.display = 'none';
+      document.querySelector('.register-benefits').style.display = 'none';
+      document.getElementById('footerLink').style.display = 'none';
+      document.getElementById('successPanel').style.display = 'block';
+
+      // Redirect bar
+      setTimeout(() => {
+        document.getElementById('redirectBar').style.width = '100%';
+      }, 50);
+
+      Tunify.swal({
+        icon: 'success',
+        title: 'Account Created!',
+        text: 'Welcome to Tunify! 🎵',
+        showConfirmButton: false,
+        timer: 2000
+      });
+      setTimeout(() => window.location.href = 'profile.html', 2200);
+    }, 1000);
+  });
+
+  /* ── Init ── */
+  $(document).ready(function() {
+    document.body.dataset.page = 'register';
+    loadNav();
+    loadFooter();
+    if (Tunify.session.isLoggedIn()) {
+      window.location.href = 'profile.html';
+    }
+
+    // Datepicker
+    $('#birthdate').datepicker({
+      changeMonth: true,
+      changeYear: true,
+      yearRange: '-80:-13',
+      maxDate: '-13y',
+      dateFormat: 'yy-mm-dd',
+      onSelect: function(dateText) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        document.getElementById('birthdateMsg').className = 'field-msg success';
+        document.getElementById('birthdateMsg').innerHTML = '<i class="fas fa-check-circle"></i> Birthdate selected';
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Tunify Control Panel</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css"
+    integrity="sha512-fjO3Vy3QodX9c6G9AUmr6WuIaEPdGRxBjD7gjatG5gGylzYyrEq3U0q+smkG6CwIY0L8XALRFHh4KPHig0Q1ug=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* Admin-specific style refinements */
+    .admin-chart-card {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      margin-bottom: 2rem;
+    }
+
+    .admin-chart-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="tunifyNav"></div>
+
+  <div class="page-wrap">
+    <div class="container">
+      <div class="page-header fade-in-up">
+        <p class="section-eyebrow">Control Panel</p>
+        <h1 class="section-title">System Analytics</h1>
+        <p class="section-sub">Real-time charts, revenue metrics, and customer distribution stats.</p>
+      </div>
+
+      <!-- Stat Grid -->
+      <div class="stat-cards fade-in-up">
+        <div class="stat-card">
+          <div class="stat-card-label">Total Revenue</div>
+          <div class="stat-card-value" id="statRevenue">₱0</div>
+          <div class="stat-card-change" style="color:#10B981"><i class="fas fa-arrow-up"></i> +12% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Orders</div>
+          <div class="stat-card-value" id="statOrders">0</div>
+          <div class="stat-card-change">Total store orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Active Customers</div>
+          <div class="stat-card-value" id="statCustomers">0</div>
+          <div class="stat-card-change">Unique shopper profiles</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Out of Stock / Alert</div>
+          <div class="stat-card-value" id="statLowStock" style="color:var(--accent)">0</div>
+          <div class="stat-card-change">Requires restock priority</div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="row">
+        <!-- Monthly Sales Chart -->
+        <div class="col-lg-8 mb-4">
+          <div class="admin-chart-card fade-in-up" style="min-height: 380px;">
+            <h3><i class="fas fa-chart-line"></i> Monthly Sales &amp; Revenue Trends</h3>
+            <canvas id="monthlySalesChart" style="max-height: 280px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Items Sold Distribution (Pie) -->
+        <div class="col-lg-4 mb-4">
+          <div class="admin-chart-card fade-in-up" style="min-height: 380px;">
+            <h3><i class="fas fa-chart-pie"></i> Sales by Product Category</h3>
+            <canvas id="itemsSoldChart" style="max-height: 280px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Customer Address Distribution (Horizontal Bar) -->
+        <div class="col-lg-12 mb-4">
+          <div class="admin-chart-card fade-in-up">
+            <h3><i class="fas fa-map-marker-alt"></i> Customer Address Distribution</h3>
+            <canvas id="addressDistributionChart" style="max-height: 250px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="tunifyFooter"></div>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JS Dependencies -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"
+    integrity="sha512-LGHBR+kJ5jZSIzhhdfytPoEHzgaYuTRifq9g5l6ja6/k9NAOsAi5dQh4zQF6JIRB8cAYxTRedERUF+97/KuivQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="js/admin-dashboard.js?v=2026"></script>
+</body>
+
+</html>

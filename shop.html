@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shop — Tunify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<div id="tunifyNav"></div>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="page-header fade-in-up">
+      <p class="section-eyebrow">Browse</p>
+      <h1 class="section-title">Shop Instruments</h1>
+      <p class="section-sub">Filter by category, price, and brand — find your next gear.</p>
+    </div>
+
+    <div class="shop-layout">
+      <aside class="shop-sidebar fade-in-up">
+        <h3><i class="fas fa-sliders-h mr-1"></i> Filters</h3>
+
+        <div class="filter-group">
+          <h3 style="margin-bottom:.75rem">Category</h3>
+          <div id="categoryFilters">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3 style="margin-bottom:.75rem">Brand</h3>
+          <div id="brandFilters" class="filter-group-scroll"></div>
+        </div>
+
+        <div class="filter-group">
+          <h3 style="margin-bottom:.75rem">Price Range</h3>
+          <div id="priceSlider"></div>
+          <p id="priceRangeLabel">₱<span id="priceMin">0</span> — ₱<span id="priceMax">0</span></p>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-check"><input type="checkbox" id="saleOnly"/> Sale items only</label>
+        </div>
+
+        <button class="btn-outline-gold btn-block" id="clearFilters" style="font-size:.75rem;padding:.55rem">
+          <i class="fas fa-times"></i> Clear All
+        </button>
+      </aside>
+
+      <div class="shop-main">
+        <div class="shop-toolbar fade-in-up">
+          <span class="result-count" id="resultCount">0 products</span>
+          <div class="d-flex align-items-center" style="gap:.75rem">
+            <input type="text" class="form-control form-control-sm" id="shopSearch" placeholder="Search…" style="width:180px;background:var(--surface);border-color:var(--border);color:var(--text)"/>
+            <select class="form-control form-control-sm" id="sortSelect">
+              <option value="default">Sort: Default</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name A–Z</option>
+              <option value="rating">Top Rated</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" id="shopGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tunifyFooter"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/shop.js"></script>
+</body>
+</html>

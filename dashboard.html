@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Tunify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<div id="tunifyNav"></div>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="admin-banner fade-in-up">
+      <p><i class="fas fa-lock"></i> Admin area — not shown in main navigation.</p>
+      <a href="index.html" class="btn-outline-gold" style="font-size:.72rem;padding:.4rem 1rem">
+        <i class="fas fa-arrow-left"></i> Back to Store
+      </a>
+    </div>
+    <div class="page-header fade-in-up">
+      <p class="section-eyebrow">Admin</p>
+      <h1 class="section-title">Store Dashboard</h1>
+      <p class="section-sub">Sales overview, inventory alerts, and recent orders.</p>
+    </div>
+
+    <div class="stat-cards fade-in-up">
+      <div class="stat-card">
+        <div class="stat-card-label">Total Revenue</div>
+        <div class="stat-card-value" id="statRevenue">₱0</div>
+        <div class="stat-card-change"><i class="fas fa-arrow-up"></i> +12% this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Orders</div>
+        <div class="stat-card-value" id="statOrders">0</div>
+        <div class="stat-card-change">186 total fulfilled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Customers</div>
+        <div class="stat-card-value" id="statCustomers">0</div>
+        <div class="stat-card-change">Active members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Low Stock</div>
+        <div class="stat-card-value" id="statLowStock">0</div>
+        <div class="stat-card-change">Items need restock</div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-lg-7 mb-4 mb-lg-0">
+        <div class="panel-card fade-in-up">
+          <h3><i class="fas fa-chart-bar mr-1"></i> Sales by Category</h3>
+          <div id="categoryChart"></div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="panel-card fade-in-up">
+          <h3><i class="fas fa-exclamation-triangle mr-1"></i> Low Stock Alerts</h3>
+          <div id="stockBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card fade-in-up">
+      <h3><i class="fas fa-box mr-1"></i> Recent Orders</h3>
+      <div class="table-responsive">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="dashOrders"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tunifyFooter"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/layout.js?v=2026"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  $(document).ready(async () => {
+    await TunifyLayout.init('');
+  });
+</script>
+</body>
+</html>

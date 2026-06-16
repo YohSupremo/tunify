@@ -1,0 +1,1428 @@
+/* ══════════════════════════════════════════════════════
+   PAGE MODULES — shared layout & forms
+   ══════════════════════════════════════════════════════ */
+
+.page-wrap {
+  padding-top: 100px;
+  padding-bottom: 4rem;
+  min-height: 80vh;
+}
+
+.page-header {
+  margin-bottom: 2.5rem;
+}
+
+.page-header .section-sub {
+  margin-bottom: 0;
+}
+
+/* Auth pages */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 0 60px;
+  position: relative;
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 60% at 80% 40%, rgba(163, 230, 53, .07) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 50% at 10% 80%, rgba(163, 230, 53, .04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.auth-card {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .6);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card h1 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .35rem;
+}
+
+.auth-card .auth-sub {
+  color: var(--silver);
+  font-size: .88rem;
+  margin-bottom: 1.75rem;
+}
+
+/* Forms */
+.form-tunify .form-group label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: .4rem;
+}
+
+.form-tunify .form-control {
+  background: rgba(13, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: .88rem;
+  padding: .7rem .9rem;
+  transition: all .25s ease;
+}
+
+.form-tunify .form-control:focus {
+  background: rgba(13, 23, 42, 0.6);
+  border-color: var(--gold);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--gold-glow), 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.form-tunify .form-control::placeholder {
+  color: var(--text-dim);
+}
+
+.form-tunify .invalid-feedback,
+.form-tunify .valid-feedback {
+  font-size: .75rem;
+}
+
+.form-tunify .form-check-label {
+  font-size: .82rem;
+  color: var(--silver);
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: .75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0;
+  font-size: .85rem;
+}
+
+.password-toggle:hover {
+  color: var(--gold);
+}
+
+.strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin-top: .5rem;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 2px;
+  transition: width .3s, background .3s;
+}
+
+/* Shop layout */
+.shop-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.shop-sidebar {
+  flex: 0 0 260px;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  position: sticky;
+  top: 100px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.shop-sidebar h3 {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.shop-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.shop-toolbar .result-count {
+  font-size: .82rem;
+  color: var(--silver);
+}
+
+.shop-toolbar select.form-control {
+  width: auto;
+  min-width: 160px;
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  font-size: .82rem;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-check {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .45rem;
+  font-size: .82rem;
+  color: var(--silver);
+  cursor: pointer;
+}
+
+.filter-check input {
+  accent-color: var(--gold);
+}
+
+#priceRangeLabel {
+  font-size: .82rem;
+  color: var(--text);
+  font-family: var(--font-mono);
+  margin-top: .75rem;
+}
+
+/* Product detail */
+.product-detail-img {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.product-detail-img i {
+  font-size: 7rem;
+  color: var(--gold);
+  opacity: .75;
+}
+
+.prod-detail-img-file {
+  max-height: 280px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-detail-img:hover .prod-detail-img-file {
+  transform: scale(1.05) rotate(-1deg);
+}
+
+.product-detail-info h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .5rem;
+}
+
+.product-detail-meta {
+  font-size: .78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.product-detail-price {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.product-detail-price .original {
+  font-size: 1rem;
+  color: var(--text-dim);
+  text-decoration: line-through;
+  margin-right: .5rem;
+}
+
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.qty-row label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin: 0;
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .72rem;
+  color: var(--gold);
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-dim);
+  padding: .25rem .6rem;
+  border-radius: 20px;
+  margin-bottom: 1.25rem;
+}
+
+/* Bootstrap tabs override */
+.tunify-tabs.nav-tabs {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.tunify-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--silver);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: .65rem 1.1rem;
+  background: transparent;
+  border-radius: 0;
+  transition: color .2s, border-color .2s;
+}
+
+.tunify-tabs .nav-link:hover {
+  color: var(--text);
+  border-color: transparent;
+}
+
+.tunify-tabs .nav-link.active {
+  color: var(--gold);
+  background: transparent;
+  border-color: var(--gold);
+}
+
+.tab-pane-content {
+  color: var(--silver);
+  font-size: .9rem;
+  line-height: 1.75;
+}
+
+.spec-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.spec-list li {
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+  color: var(--silver);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.spec-list li i {
+  color: var(--gold);
+  font-size: .7rem;
+}
+
+/* Cart */
+.cart-table-wrap {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.cart-table {
+  width: 100%;
+  margin: 0;
+  color: var(--text);
+}
+
+.cart-table thead th {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 1.2rem 1.25rem;
+  border-top: none;
+}
+
+.cart-table tbody td {
+  padding: 1.15rem 1.25rem;
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.cart-item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cart-item-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.cart-item-img {
+  max-width: 85%;
+  max-height: 85%;
+  object-fit: contain;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: .15rem;
+}
+
+.cart-item-name a {
+  color: var(--text);
+}
+
+.cart-item-name a:hover {
+  color: var(--gold);
+}
+
+.cart-summary {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  position: sticky;
+  top: 100px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.cart-summary h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: .85rem;
+  color: var(--silver);
+  margin-bottom: .65rem;
+}
+
+.summary-row.total {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  border-top: 1px solid var(--border);
+  padding-top: .85rem;
+  margin-top: .85rem;
+}
+
+.summary-row.total span:last-child {
+  color: var(--gold);
+  font-family: var(--font-mono);
+}
+
+.promo-applied {
+  color: var(--gold);
+  font-size: .78rem;
+  margin-top: .5rem;
+}
+
+.cart-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--silver);
+}
+
+.cart-empty i {
+  font-size: 3rem;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Dashboard */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(245, 158, 11, 0.1), 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: .5rem;
+}
+
+.stat-card-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--gold);
+}
+
+.stat-card-change {
+  font-size: .72rem;
+  color: var(--silver);
+  margin-top: .35rem;
+}
+
+.panel-card {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.panel-card h3 {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.bar-chart-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .85rem;
+}
+
+.bar-chart-label {
+  flex: 0 0 90px;
+  font-size: .78rem;
+  color: var(--silver);
+}
+
+.bar-chart-track {
+  flex: 1;
+  height: 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-chart-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 4px;
+  transition: width .8s ease;
+}
+
+.bar-chart-pct {
+  flex: 0 0 36px;
+  font-size: .72rem;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.dash-table {
+  width: 100%;
+  color: var(--text);
+  font-size: .82rem;
+}
+
+.dash-table th {
+  font-size: .65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  padding: .65rem .5rem;
+}
+
+.dash-table td {
+  padding: .75rem .5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--silver);
+}
+
+.status-badge {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: .2rem .5rem;
+  border-radius: 3px;
+}
+
+.status-delivered {
+  background: var(--gold-glow);
+  color: var(--gold);
+}
+
+.status-shipped {
+  background: rgba(139, 180, 248, .15);
+  color: #818CF8;
+}
+
+.status-processing {
+  background: rgba(163, 230, 53, .12);
+  color: var(--gold);
+}
+
+/* Profile */
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--gold-glow);
+  border: 2px solid var(--gold-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.order-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: .75rem;
+  transition: border-color .2s;
+}
+
+.order-card:hover {
+  border-color: var(--gold-dim);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: .5rem;
+}
+
+.order-card-id {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  color: var(--gold);
+}
+
+.order-card-date {
+  font-size: .75rem;
+  color: var(--text-dim);
+}
+
+/* jQuery UI overrides */
+.ui-slider {
+  background: var(--border);
+  border: none;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.ui-slider .ui-slider-range {
+  background: var(--gold);
+  border-radius: 3px;
+}
+
+.ui-slider .ui-slider-handle {
+  width: 18px;
+  height: 18px;
+  background: var(--gold);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: grab;
+  outline: none;
+}
+
+.ui-spinner {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ui-spinner-input {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: none !important;
+  font-family: var(--font-mono);
+  font-size: .88rem;
+  text-align: center;
+  margin: 0 !important;
+}
+
+.ui-spinner a.ui-spinner-button {
+  background: var(--surface2);
+  border-left: 1px solid var(--border) !important;
+  color: var(--gold);
+}
+
+.ui-dialog.tunify-dialog {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .6);
+}
+
+.ui-dialog.tunify-dialog .ui-dialog-titlebar {
+  background: var(--surface);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+  color: var(--text);
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.ui-dialog.tunify-dialog .ui-dialog-content {
+  color: var(--silver);
+  font-size: .88rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.ui-dialog.tunify-dialog .ui-dialog-buttonpane {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  margin: 0;
+  padding: .75rem 1rem;
+}
+
+.ui-dialog.tunify-dialog .ui-dialog-buttonpane button {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: .45rem 1rem;
+  cursor: pointer;
+}
+
+.ui-dialog.tunify-dialog .ui-dialog-buttonpane button:first-child {
+  background: transparent;
+  color: var(--silver);
+  border: 1px solid var(--border);
+}
+
+.ui-accordion .ui-accordion-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: .85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-top: .5rem;
+  padding: .75rem 1rem;
+}
+
+.ui-accordion .ui-accordion-header-active {
+  background: var(--gold-glow);
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+
+.ui-accordion .ui-accordion-content {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top: none;
+  color: var(--silver);
+  font-size: .85rem;
+  line-height: 1.65;
+  border-radius: 0 0 8px 8px;
+  padding: 1rem 1.25rem;
+}
+
+.ui-widget-overlay {
+  background: rgba(0, 0, 0, .65);
+}
+
+/* Modal override */
+.modal-content.tunify-modal {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+}
+
+.modal-content.tunify-modal .modal-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-content.tunify-modal .modal-footer {
+  border-top: 1px solid var(--border);
+}
+
+.modal-content.tunify-modal .close {
+  color: var(--silver);
+  text-shadow: none;
+  opacity: .8;
+}
+
+.modal-content.tunify-modal .close:hover {
+  color: var(--text);
+  opacity: 1;
+}
+
+.nav-admin-link {
+  font-size: .78rem !important;
+  color: var(--text-dim) !important;
+}
+
+.nav-admin-link:hover {
+  color: var(--gold) !important;
+  background: var(--gold-glow) !important;
+}
+
+.admin-banner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 8px;
+  padding: .75rem 1.25rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.dropdown-menu-brands {}
+
+.filter-group-scroll {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+
+.admin-banner p {
+  margin: 0;
+  font-size: .82rem;
+  color: var(--silver);
+}
+
+.admin-banner i {
+  color: var(--gold-dim);
+  margin-right: .35rem;
+}
+
+.cart-bump {
+  animation: cart-bump .4s ease;
+}
+
+@keyframes cart-bump {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.wishlist-btn.active {
+  color: var(--gold) !important;
+}
+
+.wishlist-btn.active i {
+  font-weight: 900;
+}
+
+@media (max-width: 991px) {
+  .shop-layout {
+    flex-direction: column;
+  }
+
+  .shop-sidebar {
+    flex: none;
+    width: 100%;
+    position: static;
+  }
+
+  .cart-summary {
+    position: static;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-table thead {
+    display: none;
+  }
+
+  .cart-table tbody tr {
+    display: block;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+  }
+
+  .cart-table tbody td {
+    display: block;
+    border: none;
+    padding: .35rem 1.25rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   DATATABLE & MODAL VISUAL OVERHAULS
+   ══════════════════════════════════════════════════════ */
+/* High-contrast spacious table cell text */
+table.dataTable tbody tr td,
+table.dataTable tbody tr td.sorting_1,
+table.dataTable tbody tr td.sorting_2,
+table.dataTable tbody tr td.sorting_3 {
+  color: var(--text) !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+  padding: 1.15rem 1.25rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: transparent !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0.15px !important;
+}
+
+/* Row hover highlight for visual tracking */
+table.dataTable tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Bright gold uppercase spaced headers with safety padding for sorting icons */
+table.dataTable thead th {
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--gold) !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 1.2rem 1.25rem !important;
+  padding-right: 2.2rem !important;
+  /* Safety clearance for Datatable sorting indicator arrows */
+}
+
+/* Layout inputs and controls - using var(--silver) for enhanced legibility */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+  color: var(--silver) !important;
+  font-size: 0.85rem !important;
+  font-family: var(--font-body) !important;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 0.75rem !important;
+  outline: none;
+  font-size: 0.82rem !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 10px var(--gold-glow) !important;
+}
+
+/* Spaced premium pagination buttons with clean contrast */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--silver) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 0.45rem 0.9rem !important;
+  margin: 0 0.2rem !important;
+  transition: all 0.2s !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--gold) !important;
+  color: var(--bg) !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--gold) !important;
+  color: var(--bg) !important;
+  border: 1px solid var(--gold) !important;
+  font-weight: 700 !important;
+}
+
+/* Premium Export Buttons (Excel & PDF) */
+.dt-buttons .dt-button {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1.1rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  margin-right: 0.35rem !important;
+}
+
+.dt-buttons .dt-button:hover {
+  background: var(--gold) !important;
+  color: var(--bg) !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Premium Glassmorphic Modals */
+.modal-content {
+  background: rgba(10, 15, 30, 0.95) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 1.4rem 1.75rem !important;
+}
+
+.modal-title {
+  font-family: var(--font-body) !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  color: var(--gold) !important;
+  letter-spacing: 0.3px !important;
+}
+
+.modal-title .text-danger {
+  color: var(--accent) !important;
+  /* High-contrast coral-rose instead of bootstrap red */
+}
+
+.modal-body {
+  padding: 1.75rem 2rem !important;
+  font-family: var(--font-body) !important;
+  color: var(--text) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.7 !important;
+}
+
+/* Highlight important parameters inside modal dialog bodies */
+.modal-body strong {
+  color: var(--gold) !important;
+  font-weight: 600 !important;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 1.2rem 1.75rem !important;
+}
+
+/* Modal Form Inputs styling */
+.modal-body .form-group label {
+  font-size: 0.8rem !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--silver) !important;
+  margin-bottom: 0.45rem !important;
+  font-weight: 600 !important;
+}
+
+.modal-body .form-control,
+.modal-body select {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  padding: 0.55rem 0.9rem !important;
+  font-size: 0.88rem !important;
+  height: 42px !important;
+  /* Force explicit height to prevent text clipping */
+  line-height: 1.5 !important;
+  transition: all 0.25s ease !important;
+}
+
+/* Custom File Input Styling for Premium Dark Theme */
+.modal-body .custom-file {
+  height: 42px !important;
+}
+
+.modal-body .custom-file-label {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  height: 42px !important;
+  padding: 0.55rem 0.9rem !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: none !important;
+}
+
+.modal-body .custom-file-label::after {
+  background: var(--gold) !important;
+  color: var(--bg) !important;
+  content: "BROWSE" !important;
+  font-weight: 600 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 7px 7px 0 !important;
+  padding: 0 1.25rem !important;
+  height: 40px !important;
+  /* 42px minus borders */
+  display: flex !important;
+  align-items: center !important;
+}
+
+.modal-body .form-control:focus,
+.modal-body select:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Close button style for dialog headers */
+.modal-content .close {
+  color: #ffffff !important;
+  opacity: 0.8 !important;
+  text-shadow: none !important;
+}
+
+.modal-content .close:hover {
+  color: var(--accent) !important;
+  opacity: 1 !important;
+}
+
+/* Bootbox & Modal Buttons overrides */
+.bootbox .modal-footer .btn-primary,
+.modal-footer .btn-primary,
+.modal-footer .btn-danger {
+  background: var(--gold) !important;
+  border-color: var(--gold) !important;
+  color: var(--bg) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1.75rem !important;
+  font-size: 0.85rem !important;
+  transition: all 0.2s !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15) !important;
+}
+
+.bootbox .modal-footer .btn-primary:hover,
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-danger:hover {
+  background: #FFF !important;
+  border-color: #FFF !important;
+  color: var(--bg) !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
+}
+
+.bootbox .modal-footer .btn-outline-secondary,
+.modal-footer .btn-outline-secondary,
+.modal-footer .btn-secondary {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--silver) !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1.75rem !important;
+  font-size: 0.85rem !important;
+  transition: all 0.2s !important;
+}
+
+.bootbox .modal-footer .btn-outline-secondary:hover,
+.modal-footer .btn-outline-secondary:hover,
+.bootbox .modal-footer .btn-secondary:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: rgba(251, 113, 133, 0.05) !important;
+}
+
+/* Dynamic error states for forms */
+.modal-body .is-invalid {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 8px rgba(251, 113, 133, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   JQUERY UI SELECTMENU — Dark Admin Theme
+   ══════════════════════════════════════════════════════ */
+
+/* The visible button (closed state) */
+.ui-selectmenu-button.ui-button {
+  background: rgba(15, 23, 42, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  color: var(--text, #FFF5F5) !important;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  padding: 0.55rem 2.2rem 0.55rem 0.9rem !important;
+  width: 100% !important;
+  text-align: left !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  outline: none !important;
+  box-shadow: none !important;
+  min-height: 42px !important;
+}
+
+.ui-selectmenu-button.ui-button:hover,
+.ui-selectmenu-button.ui-button:focus {
+  border-color: var(--gold, #FBBF24) !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+}
+
+/* Arrow icon inside button */
+.ui-selectmenu-button .ui-selectmenu-icon {
+  color: var(--gold, #FBBF24) !important;
+  right: 0.7rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  position: absolute !important;
+}
+
+/* Selected text inside the button */
+.ui-selectmenu-button .ui-selectmenu-text {
+  color: var(--text, #FFF5F5) !important;
+  margin-right: 1.5rem !important;
+  line-height: 1.5 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 0.875rem !important;
+}
+
+/* The dropdown popup panel */
+.ui-selectmenu-menu {
+  z-index: 9999 !important;
+  padding: 0 !important;
+}
+
+.ui-selectmenu-menu .ui-menu {
+  background: rgba(15, 23, 42, 0.97) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(245, 158, 11, 0.08) !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  max-height: 260px !important;
+  overflow-y: auto !important;
+}
+
+/* Custom scrollbar inside dropdown */
+.ui-selectmenu-menu .ui-menu::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.ui-selectmenu-menu .ui-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-radius: 4px !important;
+}
+
+.ui-selectmenu-menu .ui-menu::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.4) !important;
+  border-radius: 4px !important;
+}
+
+/* Each option item */
+.ui-selectmenu-menu .ui-menu-item-wrapper {
+  color: var(--silver, #CBD5E1) !important;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  font-size: 0.875rem !important;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 8px !important;
+  transition: background 0.15s, color 0.15s !important;
+  cursor: pointer !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active,
+.ui-selectmenu-menu .ui-menu-item-wrapper:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: var(--gold, #FBBF24) !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+/* Selected/checked item highlight */
+.ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: var(--gold, #FBBF24) !important;
+  font-weight: 500 !important;
+}
+
+/* Group headers (if any) */
+.ui-selectmenu-menu .ui-menu .ui-menu-divider {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  margin: 4px 0 !important;
+}
+
+/* ── Icon Selectmenu — icon sizing & alignment ───────────────────── */
+
+/* Icon inside the closed button */
+.ui-selectmenu-button .sm-btn-icon {
+  display: inline-block;
+  width: 18px;
+  text-align: center;
+  margin-right: 8px;
+  color: var(--gold, #FBBF24);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* Row layout inside each dropdown item */
+.ui-selectmenu-menu .ui-menu-item-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+
+/* Icon inside each dropdown list item */
+.ui-selectmenu-menu .ui-menu-item-wrapper .sm-item-icon {
+  display: inline-block;
+  width: 22px;
+  text-align: center;
+  margin-right: 10px;
+  color: var(--gold, #FBBF24);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+/* Highlight icon on hover */
+.ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active .sm-item-icon,
+.ui-selectmenu-menu .ui-menu-item-wrapper:hover .sm-item-icon {
+  opacity: 1;
+  color: var(--gold, #FBBF24);
+}
+
+/* Text label next to icon */
+.ui-selectmenu-menu .ui-menu-item-wrapper span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Button text area — make room for the prepended icon */
+.ui-selectmenu-button .ui-selectmenu-text {
+  display: flex !important;
+  align-items: center !important;
+}

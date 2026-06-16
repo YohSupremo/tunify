@@ -1,0 +1,95 @@
+<nav class="navbar navbar-expand-lg tunify-nav" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <div class="brand-icon"><i class="fas fa-music"></i></div>
+      <div>
+        Tunify
+        <span class="brand-sub">Est. 2024</span>
+      </div>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html" data-page="home">Home</a></li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="shop.html" id="shopDrop" data-page="shop" data-toggle="dropdown">
+            Shop
+            <span class="ml-05" style="cursor: pointer;">
+              <i class="fas fa-chevron-right" style="font-size: 0.65em; transition: transform 0.2s ease;"></i>
+            </span>
+          </a>
+          <div class="dropdown-menu" id="navCategoryMenu">
+            <!-- Populated dynamically -->
+          </div>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="shop.html" id="brandDrop" data-page="brands" data-toggle="dropdown">
+            Brands
+            <span class="ml-05" style="cursor: pointer;">
+              <i class="fas fa-chevron-right" style="font-size: 0.65em; transition: transform 0.2s ease;"></i>
+            </span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-brands" id="navBrandMenu">
+            <!-- Populated by Tunify.renderBrandNavMenu() -->
+          </div>
+        </li>
+
+        <li class="nav-item"><a class="nav-link" href="shop.html?sale=1" data-page="deals">Deals</a></li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="about.html" id="aboutDrop" data-page="about" data-toggle="dropdown">
+            About
+            <span class="ml-05" style="cursor: pointer;">
+              <i class="fas fa-chevron-right" style="font-size: 0.65em; transition: transform 0.2s ease;"></i>
+            </span>
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="about.html"><i class="fas fa-info-circle"></i> Our Story</a>
+            <a class="dropdown-item" href="about.html#values"><i class="fas fa-heart"></i> Our Values</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="about.html#contact"><i class="fas fa-envelope"></i> Contact Us</a>
+            <a class="dropdown-item" href="profile.html"><i class="fas fa-headset"></i> Support</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="register.html"><i class="fas fa-users"></i> Join Our Team</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center" style="gap:.9rem">
+        <div class="nav-search-wrap d-none d-lg-block">
+          <i class="fas fa-search nav-search-icon"></i>
+          <input type="text" class="nav-search" id="navSearch" placeholder="Search instruments...">
+        </div>
+
+        <a href="cart.html" class="nav-cart" id="cartBtn" title="Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </a>
+
+        <div class="dropdown">
+          <span class="btn-outline-gold py-1 px-3 d-inline-block dropdown-toggle" style="font-size:.75rem;" data-toggle="dropdown">
+            <i class="fas fa-user"></i> Account 
+            <span class="ml-05" style="cursor: pointer;">
+              <i class="fas fa-chevron-right" style="font-size: 0.65em; transition: transform 0.2s ease;"></i>
+            </span>
+          </span>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">My Account</div>
+            <a class="dropdown-item" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a class="dropdown-item" href="register.html"><i class="fas fa-user-plus"></i> Register</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="profile.html"><i class="fas fa-user-cog"></i> Profile</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item nav-admin-link" href="admin/dashboard.html"><i class="fas fa-lock"></i> Admin</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
