@@ -1,6 +1,6 @@
 /* Tunify — shared utilities  (reference pattern: simple global functions) */
 
-const url = 'http://localhost:4000/';
+const url = 'http://localhost:5000/';
 
 /* ─── Auth helpers ─────────────────────────────────────────── */
 const getToken = () => {
@@ -15,7 +15,12 @@ const getToken = () => {
     });
     return null;
   }
-  return JSON.parse(token);
+  // Remove wrapping quotes if present
+  try {
+    return JSON.parse(token);
+  } catch (e) {
+    return token;
+  }
 };
 
 const getUserId = () => {
@@ -126,6 +131,26 @@ window.Tunify = {
   products: TunifyProducts,
   brands: TunifyBrands,
   categories: ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories'],
+  
+  session: {
+    isLoggedIn() {
+      return !!sessionStorage.getItem('token');
+    },
+    set(user) {
+      if (user.token) {
+        sessionStorage.setItem('token', JSON.stringify(user.token));
+      }
+      if (user.id) {
+        sessionStorage.setItem('userId', JSON.stringify(user.id));
+      }
+      if (user.email) {
+        sessionStorage.setItem('tunify_email', user.email);
+      }
+      if (user.name) {
+        sessionStorage.setItem('tunify_name', user.name);
+      }
+    }
+  },
   
   getProduct(id) {
     return TunifyProducts.find(p => p.id == id || p.id === parseInt(id));

@@ -837,7 +837,7 @@
     }
   </style>
 </head>
-<body>
+<body data-page="register">
 <div id="tunifyNav"></div>
 
 <!-- Floating music notes -->
@@ -912,7 +912,7 @@
               <!-- Full Name -->
               <div class="field-group">
                 <label class="field-label">
-                  Full Name <span class="field-required">*</span>
+                  <span>Full Name <span class="field-required">*</span></span>
                   <span class="field-hint">As it appears on your ID</span>
                 </label>
                 <div class="input-wrap">
@@ -928,7 +928,7 @@
               <!-- Email -->
               <div class="field-group">
                 <label class="field-label">
-                  Email Address <span class="field-required">*</span>
+                  <span>Email Address <span class="field-required">*</span></span>
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-envelope input-icon"></i>
@@ -943,7 +943,7 @@
               <!-- Birthdate -->
               <div class="field-group">
                 <label class="field-label">
-                  Birthdate <span class="field-required">*</span>
+                  <span>Birthdate <span class="field-required">*</span></span>
                   <span class="field-hint">Must be 13+</span>
                 </label>
                 <div class="input-wrap">
@@ -985,7 +985,7 @@
               <!-- Password -->
               <div class="field-group">
                 <label class="field-label">
-                  Password <span class="field-required">*</span>
+                  <span>Password <span class="field-required">*</span></span>
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-lock input-icon"></i>
@@ -1029,7 +1029,7 @@
               <!-- Confirm Password -->
               <div class="field-group">
                 <label class="field-label">
-                  Confirm Password <span class="field-required">*</span>
+                  <span>Confirm Password <span class="field-required">*</span></span>
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-lock input-icon"></i>
@@ -1166,353 +1166,9 @@
 <!-- SweetAlert2 & Bootbox.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
-<script src="js/auth.js?v=2026"></script>
-<script>
-  /* ── Floating music notes ── */
-  (function() {
-    const bg = document.getElementById('musicBg');
-    const icons = ['♩', '♪', '♫', '♬', '𝄞', '𝄢'];
-    for (let i = 0; i < 14; i++) {
-      const el = document.createElement('div');
-      el.className = 'music-note';
-      el.textContent = icons[Math.floor(Math.random() * icons.length)];
-      el.style.left = Math.random() * 100 + '%';
-      el.style.animationDuration = (12 + Math.random() * 14) + 's';
-      el.style.animationDelay = (Math.random() * 14) + 's';
-      el.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
-      bg.appendChild(el);
-    }
-  })();
-
-  /* ── State ── */
-  let currentStep = 1;
-  let selectedAvatar = null;
-  let termsChecked = false;
-
-  /* ── Step Navigation ── */
-  function goToStep(step, back = false) {
-    const current = document.getElementById('panel' + currentStep);
-    const next = document.getElementById('panel' + step);
-    current.classList.remove('active');
-    next.classList.toggle('slide-back', back);
-    next.classList.add('active');
-
-    // Update step bubbles
-    for (let i = 1; i <= 3; i++) {
-      const item = document.getElementById('stepItem' + i);
-      const bubble = document.getElementById('stepBubble' + i);
-      item.classList.remove('active', 'done');
-      if (i < step) {
-        item.classList.add('done');
-        bubble.innerHTML = '<i class="fas fa-check"></i>';
-      } else if (i === step) {
-        item.classList.add('active');
-        bubble.textContent = i;
-      } else {
-        bubble.textContent = i;
-      }
-    }
-
-    // Update connector lines
-    document.getElementById('stepLine1').style.width = step >= 2 ? '100%' : '0%';
-    document.getElementById('stepLine2').style.width = step >= 3 ? '100%' : '0%';
-
-    currentStep = step;
-  }
-
-  /* ── Field Validation Helpers ── */
-  function setFieldState(inputId, statIconId, msgId, state, msg) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(statIconId);
-    const msgEl = document.getElementById(msgId);
-    input.classList.remove('is-valid', 'is-invalid');
-    icon.classList.remove('valid', 'invalid');
-    if (state === 'valid') {
-      input.classList.add('is-valid');
-      icon.classList.add('valid');
-      icon.className = 'fas fa-check field-status-icon valid';
-      icon.style.display = '';
-      if (msgEl) { msgEl.className = 'field-msg success'; msgEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg; }
-    } else if (state === 'invalid') {
-      input.classList.add('is-invalid');
-      icon.className = 'fas fa-times field-status-icon invalid';
-      icon.style.display = '';
-      if (msgEl) { msgEl.className = 'field-msg error'; msgEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg; }
-    } else {
-      icon.style.display = 'none';
-      if (msgEl) { msgEl.className = 'field-msg hint'; msgEl.innerHTML = msg || ''; }
-    }
-  }
-
-  /* ── Live Validation ── */
-  document.getElementById('fullname').addEventListener('input', function() {
-    const v = this.value.trim();
-    if (v.length === 0) setFieldState('fullname', 'nameStat', 'nameMsg', 'none', '<i class="fas fa-info-circle"></i> At least 2 characters');
-    else if (v.length < 2) setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Name is too short');
-    else setFieldState('fullname', 'nameStat', 'nameMsg', 'valid', 'Looks good!');
-  });
-
-  document.getElementById('email').addEventListener('input', function() {
-    const v = this.value.trim();
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    if (v.length === 0) setFieldState('email', 'emailStat', 'emailMsg', 'none', '<i class="fas fa-info-circle"></i> We\'ll send a confirmation here');
-    else if (!ok) setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
-    else setFieldState('email', 'emailStat', 'emailMsg', 'valid', 'Valid email address');
-  });
-
-  /* ── Password Strength ── */
-  const requirements = [
-    { id: 'req-len',     test: v => v.length >= 8,         label: 'At least 8 characters' },
-    { id: 'req-upper',   test: v => /[A-Z]/.test(v),       label: 'One uppercase letter' },
-    { id: 'req-num',     test: v => /[0-9]/.test(v),       label: 'One number' },
-    { id: 'req-special', test: v => /[^A-Za-z0-9]/.test(v), label: 'One special character (!@#$…)' }
-  ];
-  const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
-  const strengthColors = { 1: 'filled-1', 2: 'filled-2', 3: 'filled-3', 4: 'filled-4' };
-
-  document.getElementById('password').addEventListener('input', function() {
-    const v = this.value;
-    let score = 0;
-    requirements.forEach(req => {
-      const met = req.test(v);
-      const el = document.getElementById(req.id);
-      el.classList.toggle('met', met);
-      el.querySelector('i').className = met ? 'fas fa-check-circle' : 'fas fa-circle';
-      if (met) score++;
-    });
-
-    // Update segments
-    for (let i = 1; i <= 4; i++) {
-      const seg = document.getElementById('seg' + i);
-      seg.className = 'strength-segment';
-      if (i <= score && score > 0) seg.classList.add(strengthColors[score]);
-    }
-
-    // Label
-    const lbl = document.getElementById('strengthLabel');
-    lbl.textContent = v.length === 0 ? 'Enter a password' : strengthLabels[score] || 'Weak';
-    lbl.style.color = score >= 3 ? '#A3E635' : score >= 2 ? '#FBBF24' : '#F87171';
-
-    // Set field state
-    if (v.length === 0) {
-      setFieldState('password', 'passStat', null, 'none', null);
-    } else if (score < 2) {
-      setFieldState('password', 'passStat', null, 'invalid', null);
-    } else {
-      setFieldState('password', 'passStat', null, 'valid', null);
-    }
-
-    // Check confirm match
-    const conf = document.getElementById('confirmPassword').value;
-    if (conf.length > 0) {
-      if (conf === v) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
-      else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
-    }
-  });
-
-  document.getElementById('confirmPassword').addEventListener('input', function() {
-    const v = this.value;
-    const pass = document.getElementById('password').value;
-    if (v.length === 0) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'none', '<i class="fas fa-info-circle"></i> Must match the password above');
-    else if (v === pass) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
-    else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
-  });
-
-  /* ── Password Toggle ── */
-  document.getElementById('togglePass').addEventListener('click', function() {
-    const input = document.getElementById('password');
-    const isPass = input.type === 'password';
-    input.type = isPass ? 'text' : 'password';
-    this.querySelector('i').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
-  });
-  document.getElementById('toggleConfirm').addEventListener('click', function() {
-    const input = document.getElementById('confirmPassword');
-    const isPass = input.type === 'password';
-    input.type = isPass ? 'text' : 'password';
-    this.querySelector('i').className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
-  });
-
-  /* ── Terms Toggle ── */
-  function toggleTerms() {
-    termsChecked = !termsChecked;
-    document.getElementById('terms').checked = termsChecked;
-    document.getElementById('customCb').classList.toggle('checked', termsChecked);
-    document.getElementById('termsBox').classList.toggle('checked', termsChecked);
-  }
-
-  /* ── Avatar Upload ── */
-  document.getElementById('profilePicture').addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      Tunify.swal({ icon: 'error', title: 'Invalid File', text: 'Please select an image file' }); return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      Tunify.swal({ icon: 'error', title: 'File Too Large', text: 'Image must be less than 2MB' }); return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      selectedAvatar = e.target.result;
-      document.getElementById('avatarPreviewCircle').innerHTML =
-        `<img src="${e.target.result}"/><div class="avatar-overlay"><i class="fas fa-camera"></i></div>`;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // Drag-and-drop for avatar zone
-  const avatarZone = document.getElementById('avatarZone');
-  avatarZone.addEventListener('dragover', (e) => { e.preventDefault(); avatarZone.classList.add('drag-over'); });
-  avatarZone.addEventListener('dragleave', () => avatarZone.classList.remove('drag-over'));
-  avatarZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    avatarZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      document.getElementById('profilePicture').files = e.dataTransfer.files;
-      document.getElementById('profilePicture').dispatchEvent(new Event('change'));
-    }
-  });
-
-  /* ── Step 1 → 2 ── */
-  document.getElementById('toStep2').addEventListener('click', function() {
-    const name = document.getElementById('fullname').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const birthdate = document.getElementById('birthdate').value.trim();
-
-    let ok = true;
-    if (name.length < 2) {
-      setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Please enter your full name');
-      ok = false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
-      ok = false;
-    }
-    if (!birthdate) {
-      document.getElementById('birthdate').classList.add('is-invalid');
-      document.getElementById('birthdateMsg').className = 'field-msg error';
-      document.getElementById('birthdateMsg').innerHTML = '<i class="fas fa-exclamation-circle"></i> Please select your birthdate';
-      ok = false;
-    }
-
-    if (!ok) {
-      Tunify.swal({ icon: 'error', title: 'Validation Failed', text: 'Please complete all required fields' });
-      return;
-    }
-    goToStep(2);
-  });
-
-  /* ── Step 2 → 3 ── */
-  document.getElementById('toStep3').addEventListener('click', function() {
-    const pass = document.getElementById('password').value;
-    const conf = document.getElementById('confirmPassword').value;
-
-    let ok = true;
-    const score = requirements.filter(r => r.test(pass)).length;
-    if (score < 2) {
-      setFieldState('password', 'passStat', null, 'invalid', null);
-      Tunify.swal({ icon: 'error', title: 'Weak Password', text: 'Please use a stronger password (must meet at least 2 requirements)' });
-      ok = false;
-    }
-    if (pass !== conf) {
-      setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
-      if (ok) Tunify.swal({ icon: 'error', title: 'Password Mismatch', text: 'Passwords do not match' });
-      ok = false;
-    }
-    if (!termsChecked) {
-      document.getElementById('termsBox').classList.add('shake');
-      setTimeout(() => document.getElementById('termsBox').classList.remove('shake'), 400);
-      if (ok) Tunify.swal({ icon: 'error', title: 'Terms of Service', text: 'Please agree to the Terms & Privacy Policy' });
-      ok = false;
-    }
-    if (!ok) return;
-
-    // Populate review
-    const name = document.getElementById('fullname').value.trim();
-    document.getElementById('reviewName').textContent = name;
-    document.getElementById('reviewEmail').textContent = document.getElementById('email').value.trim();
-    document.getElementById('reviewBirthdate').textContent = document.getElementById('birthdate').value || '—';
-    if (selectedAvatar) {
-      document.getElementById('reviewAvatarCircle').innerHTML = `<img src="${selectedAvatar}"/>`;
-    } else {
-      document.getElementById('reviewAvatarCircle').innerHTML = `<span style="font-size:1.3rem;font-weight:700;color:var(--gold);">${name.charAt(0).toUpperCase()}</span>`;
-    }
-
-    goToStep(3);
-  });
-
-  /* ── Back buttons ── */
-  document.getElementById('toStep1').addEventListener('click', () => goToStep(1, true));
-  document.getElementById('toStep2b').addEventListener('click', () => goToStep(2, true));
-
-  /* ── Submit ── */
-  document.getElementById('authForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating your account…';
-
-    setTimeout(() => {
-      const user = {
-        name: document.getElementById('fullname').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        joined: new Date().toISOString().slice(0, 10),
-        avatar: selectedAvatar,
-        role: 'customer'
-      };
-      sessionStorage.removeItem('tunify_admin');
-      Tunify.session.set(user);
-
-      // Show success state
-      document.getElementById('authForm').style.display = 'none';
-      document.getElementById('stepProgress').style.display = 'none';
-      document.querySelector('.register-header').style.display = 'none';
-      document.querySelector('.register-benefits').style.display = 'none';
-      document.getElementById('footerLink').style.display = 'none';
-      document.getElementById('successPanel').style.display = 'block';
-
-      // Redirect bar
-      setTimeout(() => {
-        document.getElementById('redirectBar').style.width = '100%';
-      }, 50);
-
-      Tunify.swal({
-        icon: 'success',
-        title: 'Account Created!',
-        text: 'Welcome to Tunify! 🎵',
-        showConfirmButton: false,
-        timer: 2000
-      });
-      setTimeout(() => window.location.href = 'profile.html', 2200);
-    }, 1000);
-  });
-
-  /* ── Init ── */
-  $(document).ready(function() {
-    document.body.dataset.page = 'register';
-    loadNav();
-    loadFooter();
-    if (Tunify.session.isLoggedIn()) {
-      window.location.href = 'profile.html';
-    }
-
-    // Datepicker
-    $('#birthdate').datepicker({
-      changeMonth: true,
-      changeYear: true,
-      yearRange: '-80:-13',
-      maxDate: '-13y',
-      dateFormat: 'yy-mm-dd',
-      onSelect: function(dateText) {
-        this.classList.remove('is-invalid');
-        this.classList.add('is-valid');
-        document.getElementById('birthdateMsg').className = 'field-msg success';
-        document.getElementById('birthdateMsg').innerHTML = '<i class="fas fa-check-circle"></i> Birthdate selected';
-      }
-    });
-  });
-</script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/user.js?v=2026"></script>
+<!-- Registration form logic is loaded from js/user.js -->
 </body>
 </html>
