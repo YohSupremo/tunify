@@ -299,4 +299,4 @@ $(document).ready(function () {
 
     // Initialize Page
     loadDataFromDB();
-})
+    })
