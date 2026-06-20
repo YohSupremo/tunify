@@ -8,15 +8,43 @@ $(document).ready(function () {
     loadNav();
     loadFooter();
 
-    /* ── Data helpers ───────────────────────────────────────────── */
-    function getProducts() {
-        var s = localStorage.getItem('tunify_products');
-        return s ? JSON.parse(s) : TunifyProducts.slice();
+    const url = 'http://localhost:5000/api/v1/';
+
+    const getToken = () => {
+        const token = sessionStorage.getItem('token')
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                text: 'You must be logged in to access this page.',
+                showConfirmButton: true
+            }).then(() => {
+                window.location.href = '../login.html'
+            })
+            return null;
+        }
+        return JSON.parse(token)
     }
 
-    function saveProducts(list) {
-        localStorage.setItem('tunify_products', JSON.stringify(list));
+    let stocksList = [];
+
+    // 1. Fetch stocks from Database
+    const loadStocksFromDB = () => {
+        $.ajax({
+            method: "GET",
+            url: `${url}stocks`,
+            dataType: "json",
+            success: function (data) {
+                stocksList = data; // Store full objects [{id, name, category, stock}]
+                initTable();
+            },
+            error: function (err) {
+                console.error("Failed to load stocks:", err);
+                Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch stock levels from server.' });
+            }
+        });
     }
+
+    const getProducts = () => stocksList;
 
     function stockStatus(qty) {
         if (qty === 0) return '<span class="badge badge-danger">Out of Stock</span>';
@@ -25,7 +53,7 @@ $(document).ready(function () {
     }
 
     /* ── DataTable init ─────────────────────────────────────────── */
-    var table = initTable();
+    var table = null;
 
     function initTable() {
         if ($.fn.DataTable.isDataTable('#stockTable')) {
@@ -43,7 +71,7 @@ $(document).ready(function () {
             ];
         });
 
-        return $('#stockTable').DataTable({
+        table = $('#stockTable').DataTable({
             data: data,
             pageLength: 15,
             order: [[3, 'asc']],
@@ -78,17 +106,41 @@ $(document).ready(function () {
 
         var id = parseInt($('#stockItemId').val());
         var newQty = parseInt($('#stockQty').val());
-        var products = getProducts();
-        var idx = products.findIndex(function (p) { return p.id === id; });
 
-        if (idx !== -1) {
-            products[idx].stock = newQty;
-            saveProducts(products);
-            swalToast('success', 'Stock updated for "' + products[idx].name + '"');
-        }
-
-        $('#stockModal').modal('hide');
-        table = initTable();
+        $.ajax({
+            method: "PUT",
+            url: `${url}stocks`,
+            data: JSON.stringify({ 
+                itemId: id, 
+                quantity: newQty 
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            },
+            success: function (res) {
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Stock updated successfully!',
+                    showConfirmButton: false,
+                    position: 'bottom-right',
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+                $('#stockModal').modal('hide');
+                loadStocksFromDB();
+            },
+            error: function (err) {
+                console.error(err);
+                var errMsg = err.responseJSON && err.responseJSON.error 
+                    ? err.responseJSON.error 
+                    : "Failed to update stock level.";
+                Swal.fire({ icon: 'warning', text: errMsg, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+            }
+        });
     });
 
+    // Initialize Page
+    loadStocksFromDB();
 });

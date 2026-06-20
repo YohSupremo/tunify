@@ -8,7 +8,7 @@ $(document).ready(function () {
     loadNav();
     loadFooter();
 
-    const url = 'http://localhost:4000/'
+    const url = 'http://localhost:5000/api/v1/'
 
     const getToken = () => {
         const token = sessionStorage.getItem('token')
@@ -25,36 +25,83 @@ $(document).ready(function () {
         return JSON.parse(token)
     }
 
-    const getCategories = () => {
-        const s = localStorage.getItem('tunify_categories')
-        if (s) {
-            const parsed = JSON.parse(s)
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
-        return ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories']
+    // Now categoriesList and productsList will store database objects
+    let categoriesList = [];
+    let productsList = [];
+
+    // 1. Fetch categories and products from the database API
+    const loadDataFromDB = () => {
+        $.ajax({
+            method: "GET",
+            url: `${url}items`,
+            dataType: "json",
+            success: function (products) {
+                productsList = products;
+                
+                // Fetch categories after products load
+                $.ajax({
+                    method: "GET",
+                    url: `${url}categories`,
+                    dataType: "json",
+                    success: function (data) {
+                        categoriesList = data; 
+                        reloadTable();
+                    },
+                    error: function (err) {
+                        console.error("Failed to load categories:", err);
+                        Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch categories.' });
+                    }
+                });
+            },
+            error: function (err) {
+                console.error("Failed to load products:", err);
+                Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch products.' });
+            }
+        });
     }
 
-    const saveCategories = (list) => {
-        localStorage.setItem('tunify_categories', JSON.stringify(list))
+    // Return products fetched from the database
+    const getProducts = () => productsList;
+
+    // 2. Render Checkboxes of Products inside the edit/add modal
+    const renderProductChecklist = (categoryId) => {
+        const $checklist = $('#productChecklist');
+        $checklist.empty();
+
+        const products = getProducts();
+        const categoryObj = categoriesList.find(c => c.id == categoryId);
+        const catName = categoryObj ? categoryObj.name.toLowerCase() : '';
+
+        products.forEach(p => {
+            // Check if this product belongs to the current category (by ID or fallback to name string)
+            const isChecked = categoryId !== 0 && (
+                p.category_id == categoryId || 
+                (p.category && p.category.toLowerCase() === catName)
+            );
+
+            $checklist.append(`
+                <label class="d-block text-white" style="font-size:0.8rem; margin-bottom:0.4rem; cursor:pointer;">
+                    <input type="checkbox" class="prod-assign-cb" value="${p.id}" ${isChecked ? 'checked' : ''} /> 
+                    ${p.name} <span style="font-size:0.7rem; color:var(--text-dim);">(${p.brand})</span>
+                </label>
+            `);
+        });
     }
 
-    const getProducts = () => {
-        const s = localStorage.getItem('tunify_products')
-        return s ? JSON.parse(s) : TunifyProducts.slice()
-    }
-
-    const saveProducts = (list) => {
-        localStorage.setItem('tunify_products', JSON.stringify(list))
-    }
-
-    const buildRows = () => getCategories().map(c => {
-        const slug = c.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-        const display = c.charAt(0).toUpperCase() + c.slice(1)
-        const count = getProducts().filter(p => p.category.toLowerCase() === c.toLowerCase()).length
+    // 3. Build Table Rows (Columns: ID, Name, Associated Products Count, Description, Actions)
+    const buildRows = () => categoriesList.map(c => {
+        const display = c.name.charAt(0).toUpperCase() + c.name.slice(1)
+        const count = getProducts().filter(p => 
+            p.category_id == c.id || 
+            (p.category && p.category.toLowerCase() === c.name.toLowerCase())
+        ).length // Count by DB ID or Name string!
         return [
-            display, slug, count + ' product(s)',
-            `<a href='#' class='editBtn' data-cat='${c}'><i class='fas fa-edit' style='font-size:20px'></i></a>  ` +
-            `<a href='#' class='deletebtn' data-cat='${c}'><i class='fas fa-trash-alt' style='font-size:20px;color:red'></i></a>`
+            c.id, // Column 0: ID
+            display, // Column 1: Name
+            count + ' product(s)', // Column 2: Associated Products
+            c.description || '—', // Column 3: Description
+            `<a href='#' class='editBtn' data-id='${c.id}' data-cat='${c.name}'><i class='fas fa-edit' style='font-size:20px'></i></a>  ` +
+            `<a href='#' class='deletebtn' data-cat='${c.name}'><i class='fas fa-trash-alt' style='font-size:20px;color:red'></i></a>`
         ]
     })
 
@@ -67,39 +114,56 @@ $(document).ready(function () {
 
     const reloadTable = () => {
         table.destroy()
-        table = $('#catsTable').DataTable({ data: buildRows(), pageLength: 10, order: [[0, 'asc']], language: { searchPlaceholder: 'Search categories…', search: '' } })
+        table = $('#catsTable').DataTable({ 
+            data: buildRows(), 
+            pageLength: 10, 
+            order: [[0, 'asc']], 
+            language: { searchPlaceholder: 'Search categories…', search: '' } 
+        })
     }
 
+    // Clicking Add Category (We now show and render the checklist for new categories)
     $('#btnAddNewCat').on('click', function () {
         $('#catForm')[0].reset()
         $('#catOldName').val('')
+        $('#catId').val('')
         $('#modalTitle').text('Add Category')
+        
+        // Render checklist and show checklist container
+        renderProductChecklist(0)
+        $('#prodChecklistGroup').show()
+
         $('#catForm').removeClass('was-validated')
         $('#catModal').modal('show')
     })
 
+    // Clicking Edit Category (We populate inputs and show the products checklist)
     $('#catsTable tbody').on('click', 'a.editBtn', function (e) {
         e.preventDefault()
         const catName = $(this).data('cat')
-        $('#catOldName').val(catName)
-        $('#catName').val(catName.charAt(0).toUpperCase() + catName.slice(1))
+        const catId = $(this).data('id')
+
+        const categoryObj = categoriesList.find(c => c.id == catId);
+        if (!categoryObj) return;
+
+        $('#catOldName').val(categoryObj.name)
+        $('#catId').val(categoryObj.id)
+        $('#catName').val(categoryObj.name.charAt(0).toUpperCase() + categoryObj.name.slice(1))
+        $('#catDesc').val(categoryObj.description || '')
+
+        // Render product checklist for this specific category ID
+        renderProductChecklist(categoryObj.id)
+        $('#prodChecklistGroup').show() // Show checklist for editing
+
         $('#modalTitle').text('Edit Category')
         $('#catForm').removeClass('was-validated')
         $('#catModal').modal('show')
     })
 
+    // DELETE Category via API
     $('#catsTable tbody').on('click', 'a.deletebtn', function (e) {
         e.preventDefault()
         const catName = $(this).data('cat')
-        const count = getProducts().filter(p => p.category.toLowerCase() === catName.toLowerCase()).length
-
-        if (count > 0) {
-            bootbox.alert({
-                title: "<span class='text-danger'><i class='fas fa-exclamation-circle'></i> Constraint Violation</span>",
-                message: `Cannot delete category <strong>"${catName}"</strong> — it contains <strong>${count} product(s)</strong>.`
-            })
-            return
-        }
 
         bootbox.confirm({
             message: `Do you want to delete the category <strong>"${catName}"</strong>?`,
@@ -109,47 +173,106 @@ $(document).ready(function () {
             },
             callback: function (result) {
                 if (result) {
-                    saveCategories(getCategories().filter(c => c.toLowerCase() !== catName.toLowerCase()))
-                    Swal.fire({ icon: 'success', text: `Category "${catName}" deleted`, showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
-                    reloadTable()
+                    $.ajax({
+                        method: "DELETE",
+                        url: `${url}categories`,
+                        data: JSON.stringify({ name: catName }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                            "Authorization": "Bearer " + getToken()
+                        },
+                        success: function (res) {
+                            Swal.fire({ icon: 'success', text: `Category "${catName}" deleted`, showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
+                            loadDataFromDB();
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            const errMsg = err.responseJSON && err.responseJSON.error 
+                                ? err.responseJSON.error 
+                                : "Failed to delete category.";
+                            Swal.fire({ icon: 'error', title: 'Constraint Violation', text: errMsg });
+                        }
+                    });
                 }
             }
         })
     })
 
+    // CREATE / UPDATE Category via API
     $('#catForm').on('submit', function (e) {
         e.preventDefault()
         if (!this.checkValidity()) { $(this).addClass('was-validated'); return }
 
         const oldName = $('#catOldName').val()
         const newName = $('#catName').val().trim().toLowerCase()
-        const cats = getCategories()
+        const description = $('#catDesc').val().trim()
 
-        const isDuplicate = cats.some(c => c.toLowerCase() === newName && c.toLowerCase() !== oldName.toLowerCase())
-        if (isDuplicate) {
-            Swal.fire({ icon: 'warning', text: 'A category with this name already exists!', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            $('#catName').addClass('is-invalid')
-            return
-        }
-        $('#catName').removeClass('is-invalid')
+        // Gather all checked product IDs from the checklist
+        const checkedProductIds = $('.prod-assign-cb:checked').map(function() {
+            return parseInt($(this).val());
+        }).get();
 
         if (oldName) {
-            const idx = cats.findIndex(c => c.toLowerCase() === oldName.toLowerCase())
-            if (idx !== -1) {
-                cats[idx] = newName
-                saveProducts(getProducts().map(p =>
-                    p.category.toLowerCase() === oldName.toLowerCase() ? { ...p, category: newName } : p
-                ))
-                Swal.fire({ icon: 'success', text: 'Category updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
-            }
+            // Edit Mode (PUT request)
+            $.ajax({
+                method: "PUT",
+                url: `${url}categories`,
+                data: JSON.stringify({ 
+                    oldName, 
+                    newName, 
+                    description,
+                    productIds: checkedProductIds // Send product associations
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                },
+                success: function (res) {
+                    Swal.fire({ icon: 'success', text: 'Category updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true });
+                    $('#catModal').modal('hide');
+                    loadDataFromDB();
+                },
+                error: function (err) {
+                    console.error(err);
+                    const errMsg = err.responseJSON && err.responseJSON.error 
+                        ? err.responseJSON.error 
+                        : "Failed to update category.";
+                    Swal.fire({ icon: 'warning', text: errMsg, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+                }
+            });
         } else {
-            cats.push(newName)
-            Swal.fire({ icon: 'success', text: 'Category added!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
+            // Add Mode (POST request)
+            $.ajax({
+                method: "POST",
+                url: `${url}categories`,
+                data: JSON.stringify({ 
+                    name: newName,
+                    description,
+                    productIds: checkedProductIds // Send product associations
+                }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                },
+                success: function (res) {
+                    Swal.fire({ icon: 'success', text: 'Category added!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true });
+                    $('#catModal').modal('hide');
+                    loadDataFromDB();
+                },
+                error: function (err) {
+                    console.error(err);
+                    const errMsg = err.responseJSON && err.responseJSON.error 
+                        ? err.responseJSON.error 
+                        : "Failed to add category.";
+                    Swal.fire({ icon: 'warning', text: errMsg, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+                }
+            });
         }
-
-        saveCategories(cats)
-        $('#catModal').modal('hide')
-        reloadTable()
     })
 
+    // Initialize Page
+    loadDataFromDB();
 })

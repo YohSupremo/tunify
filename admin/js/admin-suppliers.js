@@ -8,39 +8,69 @@ $(document).ready(function () {
     loadNav();
     loadFooter();
 
-    /* ── Data helpers ───────────────────────────────────────────── */
-    var SUPPLIERS_KEY = 'tunify_suppliers';
+    // API Config pointing to backend
+    const url = 'http://localhost:5000/api/v1/'
 
-    var defaultSuppliers = [
-        { id: 1, name: 'Fender Asia Pacific', contact_name: 'Juan dela Cruz', email: 'fender@example.com', phone: '+63 912 000 0001', address_line: 'Makati City, Metro Manila' },
-        { id: 2, name: 'Yamaha Music PH', contact_name: 'Maria Santos', email: 'yamaha@example.com', phone: '+63 912 000 0002', address_line: 'BGC, Taguig City' },
-        { id: 3, name: 'Roland Philippines', contact_name: 'Pedro Reyes', email: 'roland@example.com', phone: '+63 912 000 0003', address_line: 'Mandaluyong City' },
-        { id: 4, name: 'Meinl Percussion GmbH', contact_name: 'Klaus Müller', email: 'meinl@example.com', phone: '+49 123 456 789', address_line: 'Gutenstetten, Germany' }
-    ];
-
-    function getSuppliers() {
-        var s = localStorage.getItem(SUPPLIERS_KEY);
-        return s ? JSON.parse(s) : defaultSuppliers.slice();
+    const getToken = () => {
+        const token = sessionStorage.getItem('token')
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                text: 'You must be logged in to access this page.',
+                showConfirmButton: true
+            }).then(() => {
+                window.location.href = '../login.html'
+            })
+            return
+        }
+        return JSON.parse(token)
     }
 
-    function saveSuppliers(list) {
-        localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(list));
+    let suppliersList = [];
+    let productsList = [];
+
+    // Fetch suppliers from Database (after loading products)
+    function loadSuppliersFromDB() {
+        $.ajax({
+            method: "GET",
+            url: `${url}items`,
+            dataType: "json",
+            success: function (items) {
+                productsList = items;
+                $.ajax({
+                    method: "GET",
+                    url: `${url}suppliers`,
+                    dataType: "json",
+                    success: function (data) {
+                        suppliersList = data; // DB returns array of supplier objects
+                        initTable(); // Redraw DataTable
+                    },
+                    error: function (err) {
+                        console.error("Failed to load suppliers:", err);
+                        Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch suppliers from server.' });
+                    }
+                });
+            },
+            error: function (err) {
+                console.error("Failed to load items:", err);
+                Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch products from server.' });
+            }
+        });
     }
 
     function getProducts() {
-        var s = localStorage.getItem('tunify_products');
-        return s ? JSON.parse(s) : TunifyProducts.slice();
+        return productsList;
     }
 
     /* ── DataTable init ─────────────────────────────────────────── */
-    var table = initTable();
+    var table;
 
     function initTable() {
         if ($.fn.DataTable.isDataTable('#suppliersTable')) {
             $('#suppliersTable').DataTable().destroy();
         }
 
-        var data = getSuppliers().map(function (s) {
+        var data = suppliersList.map(function (s) {
             var count = getProducts().filter(function (p) {
                 return p.supplier_id == s.id;
             }).length;
@@ -56,7 +86,7 @@ $(document).ready(function () {
             ];
         });
 
-        return $('#suppliersTable').DataTable({
+        table = $('#suppliersTable').DataTable({
             data: data,
             pageLength: 10,
             order: [[0, 'asc']],
@@ -76,15 +106,15 @@ $(document).ready(function () {
     /* ── Edit button (delegated) ────────────────────────────────── */
     $('#suppliersTable').on('click', '.edit-btn', function () {
         var id = parseInt($(this).data('id'));
-        var s = getSuppliers().find(function (x) { return x.id === id; });
+        var s = suppliersList.find(function (x) { return x.id === id; });
         if (!s) return;
 
         $('#supplierId').val(s.id);
         $('#supplierName').val(s.name);
-        $('#supplierContact').val(s.contact_name);
-        $('#supplierEmail').val(s.email);
-        $('#supplierPhone').val(s.phone);
-        $('#supplierAddress').val(s.address_line);
+        $('#supplierContact').val(s.contact_name || '');
+        $('#supplierEmail').val(s.email || '');
+        $('#supplierPhone').val(s.phone || '');
+        $('#supplierAddress').val(s.address_line || '');
 
         $('#modalTitle').text('Edit Supplier');
         $('#supplierForm').removeClass('was-validated');
@@ -94,39 +124,41 @@ $(document).ready(function () {
     /* ── Delete button (delegated) — FK check ───────────────────── */
     $('#suppliersTable').on('click', '.delete-btn', function () {
         var id = parseInt($(this).data('id'));
-        var s = getSuppliers().find(function (x) { return x.id === id; });
+        var s = suppliersList.find(function (x) { return x.id === id; });
         if (!s) return;
 
-        var count = getProducts().filter(function (p) {
-            return p.supplier_id == id;
-        }).length;
-
-        if (count > 0) {
-            bootbox.alert({
-                title: "<span class='text-danger'><i class='fas fa-exclamation-circle'></i> Constraint Violation</span>",
-                message: 'Cannot delete <strong>"' + s.name + '"</strong> — it has <strong>' + count + ' linked item(s)</strong>.'
-            });
-            return;
-        }
-
         bootbox.confirm({
-            title: 'Delete Supplier?',
-            message: 'Are you sure you want to permanently delete <strong>"' + s.name + '"</strong>?',
+            message: 'Are you sure you want to delete supplier <strong>' + s.name + '</strong>?',
             buttons: {
-                cancel: { label: '<i class="fa fa-times"></i> Cancel', className: 'btn-outline-secondary' },
-                confirm: { label: '<i class="fa fa-trash"></i> Delete', className: 'btn-gold' }
+                confirm: { label: 'Yes', className: 'btn-success' },
+                cancel: { label: 'No', className: 'btn-danger' }
             },
             callback: function (result) {
                 if (result) {
-                    saveSuppliers(getSuppliers().filter(function (x) { return x.id !== id; }));
-                    swalToast('success', 'Supplier "' + s.name + '" deleted');
-                    table = initTable();
+                    $.ajax({
+                        method: "DELETE",
+                        url: `${url}suppliers/${id}`, // Send ID in URL path
+                        headers: {
+                            "Authorization": "Bearer " + getToken()
+                        },
+                        success: function (res) {
+                            Swal.fire({ icon: 'success', text: 'Supplier deleted', showConfirmButton: false, position: 'bottom-right', timer: 1500 });
+                            loadSuppliersFromDB(); // Refresh table
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            const errMsg = err.responseJSON && err.responseJSON.error 
+                                ? err.responseJSON.error 
+                                : "Failed to delete supplier.";
+                            Swal.fire({ icon: 'error', title: 'Constraint Violation', text: errMsg });
+                        }
+                    });
                 }
             }
         });
     });
 
-    /* ── Form submit (Add / Edit) ───────────────────────────────── */
+    /* ── Form Submit (Create & Update) ──────────────────────────── */
     $('#supplierForm').on('submit', function (e) {
         e.preventDefault();
         if (!this.checkValidity()) {
@@ -134,39 +166,66 @@ $(document).ready(function () {
             return;
         }
 
-        var idVal = $('#supplierId').val();
-        var name = $('#supplierName').val().trim();
-        var contact = $('#supplierContact').val().trim();
-        var email = $('#supplierEmail').val().trim();
-        var phone = $('#supplierPhone').val().trim();
-        var address = $('#supplierAddress').val().trim();
-        var list = getSuppliers();
+        var id = $('#supplierId').val();
+        var payload = {
+            name: $('#supplierName').val().trim(),
+            contact_name: $('#supplierContact').val().trim(),
+            email: $('#supplierEmail').val().trim(),
+            phone: $('#supplierPhone').val().trim(),
+            address_line: $('#supplierAddress').val().trim()
+        };
 
-        var isDuplicate = list.some(function (x) {
-            return x.name.toLowerCase() === name.toLowerCase() && x.id != idVal;
-        });
-        if (isDuplicate) {
-            swalToast('warning', 'A supplier with this name already exists!');
-            $('#supplierName').addClass('is-invalid');
-            return;
-        }
-        $('#supplierName').removeClass('is-invalid');
-
-        if (idVal) {
-            var idx = list.findIndex(function (x) { return x.id == idVal; });
-            if (idx !== -1) {
-                list[idx] = { id: parseInt(idVal), name: name, contact_name: contact, email: email, phone: phone, address_line: address };
-                swalToast('success', 'Supplier updated!');
-            }
+        if (id) {
+            // Edit Mode (PUT request)
+            $.ajax({
+                method: "PUT",
+                url: `${url}suppliers/${id}`, // Send ID in URL path
+                data: JSON.stringify(payload),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                },
+                success: function (res) {
+                    Swal.fire({ icon: 'success', text: 'Supplier updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500 });
+                    $('#supplierModal').modal('hide');
+                    loadSuppliersFromDB();
+                },
+                error: function (err) {
+                    console.error(err);
+                    const errMsg = err.responseJSON && err.responseJSON.error 
+                        ? err.responseJSON.error 
+                        : "Failed to update supplier.";
+                    Swal.fire({ icon: 'warning', text: errMsg });
+                }
+            });
         } else {
-            var newId = list.length ? Math.max.apply(null, list.map(function (x) { return x.id; })) + 1 : 1;
-            list.push({ id: newId, name: name, contact_name: contact, email: email, phone: phone, address_line: address });
-            swalToast('success', 'Supplier added!');
+            // Add Mode (POST request)
+            $.ajax({
+                method: "POST",
+                url: `${url}suppliers`,
+                data: JSON.stringify(payload),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                },
+                success: function (res) {
+                    Swal.fire({ icon: 'success', text: 'Supplier added!', showConfirmButton: false, position: 'bottom-right', timer: 1500 });
+                    $('#supplierModal').modal('hide');
+                    loadSuppliersFromDB();
+                },
+                error: function (err) {
+                    console.error(err);
+                    const errMsg = err.responseJSON && err.responseJSON.error 
+                        ? err.responseJSON.error 
+                        : "Failed to add supplier.";
+                    Swal.fire({ icon: 'warning', text: errMsg });
+                }
+            });
         }
-
-        saveSuppliers(list);
-        $('#supplierModal').modal('hide');
-        table = initTable();
     });
 
+    // Initialize Suppliers Page
+    loadSuppliersFromDB();
 });

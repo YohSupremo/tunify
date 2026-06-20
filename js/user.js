@@ -651,19 +651,38 @@ $(document).ready(function () {
             $avatar.html('<i class="fas fa-user"></i>');
         }
 
-        // Render orders from TunifyOrders (data.js)
+        // Render orders from the database
         if ($('#orderList').length) {
-            $('#orderList').html(TunifyOrders.map(function (o) {
-                return `
-                    <div class="order-card">
-                      <div class="order-card-header">
-                        <span class="order-card-id">${o.id}</span>
-                        <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
-                      </div>
-                      <div class="order-card-date">${o.date} · ₱${o.total.toLocaleString()}</div>
-                      <div style="font-size:.78rem;color:var(--text-dim);margin-top:.35rem">${o.items.join(', ')}</div>
-                    </div>`;
-            }).join(''));
+            const token = sessionStorage.getItem('token');
+            if (token) {
+                $.ajax({
+                    method: "GET",
+                    url: `${apiBaseUrl}api/v1/orders`,
+                    dataType: "json",
+                    headers: {
+                        "Authorization": "Bearer " + JSON.parse(token)
+                    },
+                    success: function (dbOrders) {
+                        $('#orderList').html(dbOrders.map(function (o) {
+                            return `
+                                <div class="order-card">
+                                  <div class="order-card-header">
+                                    <span class="order-card-id">${o.id}</span>
+                                    <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
+                                  </div>
+                                  <div class="order-card-date">${o.date} · ₱${o.total.toLocaleString()}</div>
+                                  <div style="font-size:.78rem;color:var(--text-dim);margin-top:.35rem">${o.items.join(', ')}</div>
+                                </div>`;
+                        }).join(''));
+                    },
+                    error: function (err) {
+                        console.error("Failed to load user orders:", err);
+                        $('#orderList').html('<div class="text-white text-center py-3">Could not load orders</div>');
+                    }
+                });
+            } else {
+                $('#orderList').html('<div class="text-white text-center py-3">Please log in to view orders</div>');
+            }
         }
     }
 

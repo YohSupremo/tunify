@@ -6,18 +6,32 @@ $(document).ready(function () {
     }
     document.body.dataset.page = 'admin-orders';
     loadNav();
-    loadFooter();
+    const url = 'http://localhost:5000/api/v1/';
 
     /* ── Data helpers ───────────────────────────────────────────── */
-    var ORDERS_KEY = 'tunify_orders';
+    let ordersList = [];
 
     function getOrders() {
-        var s = localStorage.getItem(ORDERS_KEY);
-        return s ? JSON.parse(s) : TunifyOrders.slice();
+        return ordersList;
     }
 
-    function saveOrders(list) {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(list));
+    function loadOrdersFromDB() {
+        $.ajax({
+            method: "GET",
+            url: `${url}orders`,
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            },
+            success: function (data) {
+                ordersList = data;
+                table = initTable();
+            },
+            error: function (err) {
+                console.error("Failed to load orders:", err);
+                Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Could not fetch orders from server.' });
+            }
+        });
     }
 
     function statusBadge(status) {
@@ -31,7 +45,7 @@ $(document).ready(function () {
     }
 
     /* ── DataTable init ─────────────────────────────────────────── */
-    var table = initTable();
+    var table = null;
     var currentOrder = null;
 
     function initTable() {
@@ -97,19 +111,28 @@ $(document).ready(function () {
             },
             callback: function (result) {
                 if (result) {
-                    var orders = getOrders();
-                    var idx = orders.findIndex(function (x) { return x.id === o.id; });
-                    if (idx !== -1) {
-                        orders[idx].status = 'Shipped';
-                        orders[idx].date_shipped = new Date().toISOString().slice(0, 10);
-                        saveOrders(orders);
-                        swalToast('success', 'Order ' + o.id + ' marked as Shipped!');
-                        $('#orderModal').modal('hide');
-                        table = initTable();
-                    }
+                    $.ajax({
+                        method: "PUT",
+                        url: `${url}orders/${o.id}/ship`,
+                        dataType: "json",
+                        headers: {
+                            "Authorization": "Bearer " + getToken()
+                        },
+                        success: function (res) {
+                            swalToast('success', 'Order ' + o.id + ' marked as Shipped!');
+                            $('#orderModal').modal('hide');
+                            loadOrdersFromDB();
+                        },
+                        error: function (err) {
+                            console.error("Failed to ship order:", err);
+                            Swal.fire({ icon: 'error', title: 'Action Failed', text: 'Could not ship order.' });
+                        }
+                    });
                 }
             }
         });
     });
 
+    // Initialize Page
+    loadOrdersFromDB();
 });

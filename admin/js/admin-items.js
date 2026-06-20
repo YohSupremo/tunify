@@ -8,60 +8,85 @@ $(document).ready(function () {
     loadNav();
     loadFooter();
 
-    const url = 'http://localhost:4000/'
+    const url = 'http://localhost:5000/api/v1/'
 
     const getToken = () => {
         const token = sessionStorage.getItem('token')
         if (!token) {
             Swal.fire({ icon: 'warning', text: 'You must be logged in to access this page.', showConfirmButton: true })
                 .then(() => { window.location.href = '../login.html' })
-            return
+            return null;
         }
         return JSON.parse(token)
     }
 
-    const getProducts = () => {
-        const s = localStorage.getItem('tunify_products')
-        return s ? JSON.parse(s) : TunifyProducts.slice()
-    }
+    let productsList = [];
+    let brandsList = [];
+    let categoriesList = [];
 
-    const saveProducts = (list) => {
-        localStorage.setItem('tunify_products', JSON.stringify(list))
+    const CAT_ICONS = { 
+        string: 'fa-guitar', 
+        percussion: 'fa-drum', 
+        keys: 'fa-keyboard', 
+        wind: 'fa-wind', 
+        vocals: 'fa-microphone', 
+        accessories: 'fa-plug' 
     }
-
-    const getBrands = () => {
-        const s = localStorage.getItem('tunify_brands')
-        return s ? JSON.parse(s) : TunifyBrands.slice()
-    }
-
-    const getCategories = () => {
-        const s = localStorage.getItem('tunify_categories')
-        if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length) return p }
-        return ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories']
-    }
-
-    const CAT_ICONS = { string: 'fa-guitar', percussion: 'fa-drum', keys: 'fa-keyboard', wind: 'fa-wind', vocals: 'fa-microphone', accessories: 'fa-plug' }
 
     let selectedImage = null
 
-    // ── Populate brand & category dropdowns ──────────────────────
-    getBrands().forEach(b => $('#itemBrand').append(`<option value="${b.name}">${b.name}</option>`))
-    getCategories().forEach(c => $('#itemCategory').append(`<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`))
+    // ── Load Dropdowns and Data from DB ─────────────────────────
+    const loadDataFromDB = () => {
+        // 1. Fetch Brands
+        $.ajax({
+            method: "GET",
+            url: `${url}brands`,
+            dataType: "json",
+            success: function (brands) {
+                brandsList = brands;
+                $('#itemBrand').empty().append('<option value="" disabled selected>Select Brand</option>');
+                brandsList.forEach(b => $('#itemBrand').append(`<option value="${b.name}">${b.name}</option>`));
+
+                // 2. Fetch Categories
+                $.ajax({
+                    method: "GET",
+                    url: `${url}categories`,
+                    dataType: "json",
+                    success: function (categories) {
+                        categoriesList = categories;
+                        $('#itemCategory').empty().append('<option value="" disabled selected>Select Category</option>');
+                        categoriesList.forEach(c => $('#itemCategory').append(`<option value="${c.name}">${c.name.charAt(0).toUpperCase() + c.name.slice(1)}</option>`));
+
+                        // 3. Fetch Items
+                        $.ajax({
+                            method: "GET",
+                            url: `${url}items`,
+                            dataType: "json",
+                            success: function (items) {
+                                productsList = items;
+                                reloadTable();
+                            },
+                            error: function (err) {
+                                console.error("Failed to load items:", err);
+                            }
+                        });
+                    },
+                    error: function (err) {
+                        console.error("Failed to load categories:", err);
+                    }
+                });
+            },
+            error: function (err) {
+                console.error("Failed to load brands:", err);
+            }
+        });
+    }
+
+    const getProducts = () => productsList;
 
     // ── DataTable ────────────────────────────────────────────────
     let table = $('#itable').DataTable({
-        data: getProducts().map(p => [
-            p.id,
-            p.image ? `<img src="../${p.image}" width="50" height="60" onerror="this.style.display='none'">` : `<i class="fas ${CAT_ICONS[p.category] || 'fa-music'}" style="font-size:1.4rem;color:var(--gold)"></i>`,
-            p.name,
-            p.brand,
-            p.category.charAt(0).toUpperCase() + p.category.slice(1),
-            '₱' + Math.round(p.price * 0.6).toLocaleString(),
-            '₱' + p.price.toLocaleString(),
-            p.stock,
-            `<a href='#' class='editBtn' data-id='${p.id}'><i class='fas fa-edit' style='font-size:20px'></i></a>  ` +
-            `<a href='#' class='deletebtn' data-id='${p.id}'><i class='fas fa-trash-alt' style='font-size:20px;color:red'></i></a>`
-        ]),
+        data: [],
         dom: 'Bfrtip',
         buttons: [
             { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } },
@@ -87,10 +112,12 @@ $(document).ready(function () {
             data: getProducts().map(p => [
                 p.id,
                 p.image ? `<img src="../${p.image}" width="50" height="60" onerror="this.style.display='none'">` : `<i class="fas ${CAT_ICONS[p.category] || 'fa-music'}" style="font-size:1.4rem;color:var(--gold)"></i>`,
-                p.name, p.brand,
+                p.name, 
+                p.brand,
                 p.category.charAt(0).toUpperCase() + p.category.slice(1),
                 '₱' + Math.round(p.price * 0.6).toLocaleString(),
-                '₱' + p.price.toLocaleString(), p.stock,
+                '₱' + p.price.toLocaleString(), 
+                p.stock,
                 `<a href='#' class='editBtn' data-id='${p.id}'><i class='fas fa-edit' style='font-size:20px'></i></a>  ` +
                 `<a href='#' class='deletebtn' data-id='${p.id}'><i class='fas fa-trash-alt' style='font-size:20px;color:red'></i></a>`
             ]),
@@ -99,7 +126,8 @@ $(document).ready(function () {
                 { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } },
                 { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } }
             ],
-            pageLength: 8, order: [[0, 'desc']],
+            pageLength: 8, 
+            order: [[0, 'desc']],
             language: { searchPlaceholder: 'Search inventory…', search: '' }
         })
     }
@@ -123,31 +151,46 @@ $(document).ready(function () {
         reader.readAsDataURL(file)
     })
 
-    // ── Add item submit ──────────────────────────────────────────
+    // ── Add item submit (POST to Backend DB) ─────────────────────
     $('#itemSubmit').on('click', function (e) {
         e.preventDefault()
         if (!$('#itemForm')[0].checkValidity()) { $('#itemForm').addClass('was-validated'); return }
 
-        const list = getProducts()
-        const newId = list.length ? Math.max(...list.map(p => p.id)) + 1 : 1
-        list.push({
-            id: newId,
-            name: $('#itemName').val().trim(),
-            brand: $('#itemBrand').val(),
-            category: $('#itemCategory').val(),
-            price: Number($('#itemPrice').val()),
-            stock: Number($('#itemStock').val()),
-            badge: $('#itemBadge').val(),
-            desc: $('#itemDesc').val().trim(),
-            specs: $('#itemSpecs').val().trim().split('\n').map(s => s.trim()).filter(Boolean),
-            stars: 5, reviews: 1,
-            image: selectedImage,
-            icon: CAT_ICONS[$('#itemCategory').val()] || 'fa-music'
-        })
-        saveProducts(list)
-        $('#itemModal').modal('hide')
-        Swal.fire({ icon: 'success', text: 'Instrument added!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
-        reloadTable()
+        const name = $('#itemName').val().trim()
+        const brandName = $('#itemBrand').val()
+        const categoryName = $('#itemCategory').val()
+        const price = Number($('#itemPrice').val())
+        const stock = Number($('#itemStock').val())
+
+        $.ajax({
+            method: "POST",
+            url: `${url}items`,
+            data: JSON.stringify({ 
+                name,
+                brandName,
+                categoryName,
+                price,
+                stock,
+                image: selectedImage
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            },
+            success: function (res) {
+                $('#itemModal').modal('hide')
+                Swal.fire({ icon: 'success', text: 'Instrument added!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
+                loadDataFromDB();
+            },
+            error: function (err) {
+                console.error(err);
+                const errMsg = err.responseJSON && err.responseJSON.error 
+                    ? err.responseJSON.error 
+                    : "Failed to add instrument.";
+                Swal.fire({ icon: 'warning', text: errMsg, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+            }
+        });
     })
 
     // ── Edit button ──────────────────────────────────────────────
@@ -169,36 +212,51 @@ $(document).ready(function () {
         $('#itemModal').modal('show')
     })
 
-    // ── Update item submit ───────────────────────────────────────
+    // ── Update item submit (PUT to Backend DB) ───────────────────
     $('#itemUpdate').on('click', function (e) {
         e.preventDefault()
         if (!$('#itemForm')[0].checkValidity()) { $('#itemForm').addClass('was-validated'); return }
 
         const id = parseInt($('#itemId').val())
-        const list = getProducts()
-        const idx = list.findIndex(p => p.id === id)
-        if (idx !== -1) {
-            list[idx] = {
-                ...list[idx],
-                name: $('#itemName').val().trim(),
-                brand: $('#itemBrand').val(),
-                category: $('#itemCategory').val(),
-                price: Number($('#itemPrice').val()),
-                stock: Number($('#itemStock').val()),
-                badge: $('#itemBadge').val(),
-                desc: $('#itemDesc').val().trim(),
-                specs: $('#itemSpecs').val().trim().split('\n').map(s => s.trim()).filter(Boolean),
-                image: selectedImage,
-                icon: CAT_ICONS[$('#itemCategory').val()] || 'fa-music'
+        const name = $('#itemName').val().trim()
+        const brandName = $('#itemBrand').val()
+        const categoryName = $('#itemCategory').val()
+        const price = Number($('#itemPrice').val())
+        const stock = Number($('#itemStock').val())
+
+        $.ajax({
+            method: "PUT",
+            url: `${url}items`,
+            data: JSON.stringify({ 
+                id,
+                name,
+                brandName,
+                categoryName,
+                price,
+                stock,
+                image: selectedImage
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            },
+            success: function (res) {
+                $('#itemModal').modal('hide')
+                Swal.fire({ icon: 'success', text: 'Instrument updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
+                loadDataFromDB();
+            },
+            error: function (err) {
+                console.error(err);
+                const errMsg = err.responseJSON && err.responseJSON.error 
+                    ? err.responseJSON.error 
+                    : "Failed to update instrument.";
+                Swal.fire({ icon: 'warning', text: errMsg, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
             }
-        }
-        saveProducts(list)
-        $('#itemModal').modal('hide')
-        Swal.fire({ icon: 'success', text: 'Instrument updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
-        reloadTable()
+        });
     })
 
-    // ── Delete button ────────────────────────────────────────────
+    // ── Delete button (DELETE to Backend DB) ─────────────────────
     $('#itable tbody').on('click', 'a.deletebtn', function (e) {
         e.preventDefault()
         const id = parseInt($(this).data('id'))
@@ -213,12 +271,32 @@ $(document).ready(function () {
             },
             callback: function (result) {
                 if (result) {
-                    saveProducts(getProducts().filter(x => x.id !== id))
-                    Swal.fire({ icon: 'success', text: `"${p.name}" deleted`, showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
-                    reloadTable()
+                    $.ajax({
+                        method: "DELETE",
+                        url: `${url}items`,
+                        data: JSON.stringify({ id }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                            "Authorization": "Bearer " + getToken()
+                        },
+                        success: function (res) {
+                            Swal.fire({ icon: 'success', text: `"${p.name}" deleted`, showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })
+                            loadDataFromDB();
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            const errMsg = err.responseJSON && err.responseJSON.error 
+                                ? err.responseJSON.error 
+                                : "Failed to delete instrument.";
+                            Swal.fire({ icon: 'error', title: 'Delete Failed', text: errMsg });
+                        }
+                    });
                 }
             }
         })
     })
 
+    // Initialize Page
+    loadDataFromDB();
 })

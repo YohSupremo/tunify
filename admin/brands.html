@@ -41,9 +41,10 @@
           <table id="brandsTable" class="display nowrap" style="width:100%">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Brand Name</th>
-                <th>Slug / Reference</th>
                 <th>Associated Products</th>
+                <th>Description</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -69,15 +70,31 @@
             </button>
           </div>
           <div class="modal-body">
-            <input type="hidden" id="brandOldName" value="" />
-            <div class="form-group">
-              <label for="brandName">Brand Name</label>
-              <input type="text" class="form-control" id="brandName" placeholder="e.g. Fender" required />
-              <div class="invalid-feedback">Please enter brand name.</div>
-              <small class="form-text text-muted" style="font-size:0.75rem;">Brands must match the products'
-                manufacturer names.</small>
+              <input type="hidden" id="brandOldName" value="" />
+              <input type="hidden" id="brandId" value="" />
+
+              <!-- Brand Name Input -->
+              <div class="form-group">
+                <label for="brandName">Brand Name</label>
+                <input type="text" class="form-control" id="brandName" placeholder="e.g. Fender" required />
+                <div class="invalid-feedback">Please enter brand name.</div>
+              </div>
+
+              <!-- Brand Description Input -->
+              <div class="form-group">
+                <label for="brandDesc">Description</label>
+                <textarea class="form-control" id="brandDesc" placeholder="Describe this brand..." rows="3"></textarea>
+              </div>
+
+              <!-- Associated Products Checklist -->
+              <div class="form-group" id="prodChecklistGroup">
+                <label>Associate Products</label>
+                <div id="productChecklist" style="max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.25);">
+                  <!-- JavaScript will inject checkboxes here -->
+                </div>
+                <small class="form-text text-muted" style="font-size:0.7rem;">Check the products that belong to this brand.</small>
+              </div>
             </div>
-          </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
             <button type="submit" class="btn-gold" id="btnSaveBrand"><i class="fas fa-save mr-1"></i> Save

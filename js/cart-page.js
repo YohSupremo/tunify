@@ -80,33 +80,38 @@ $(document).ready(function () {
             return;
         }
 
-        // Build a new order and save to TunifyOrders in localStorage
-        const orderId = 'TN-' + Math.floor(1000 + Math.random() * 9000);
-        const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-        const order = {
-            id: orderId,
-            date: new Date().toISOString().slice(0, 10),
-            status: 'Processing',
-            total,
-            items: cart.map(i => i.description)
-        };
+        const token = getToken();
+        if (!token) return;
 
-        const stored = localStorage.getItem('tunify_orders');
-        const orders = stored ? JSON.parse(stored) : [...TunifyOrders];
-        orders.unshift(order);
-        localStorage.setItem('tunify_orders', JSON.stringify(orders));
-
-        saveCart([]);
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Order Placed!',
-            text: `Order ${orderId} has been created. Redirecting to your profile…`,
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        }).then(function () {
-            window.location.href = 'profile.html';
+        $.ajax({
+            method: "POST",
+            url: `${url}api/v1/orders`,
+            data: JSON.stringify({ cart }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            success: function (res) {
+                saveCart([]);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Placed!',
+                    text: `Order ${res.orderId} has been created. Redirecting to your profile…`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(function () {
+                    window.location.href = 'profile.html';
+                });
+            },
+            error: function (err) {
+                console.error("Checkout failed:", err);
+                const errMsg = err.responseJSON && err.responseJSON.error 
+                    ? err.responseJSON.error 
+                    : "Failed to place order.";
+                Swal.fire({ icon: 'error', title: 'Checkout Failed', text: errMsg });
+            }
         });
     });
 

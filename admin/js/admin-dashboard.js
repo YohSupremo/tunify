@@ -36,28 +36,24 @@ $(document).ready(function () {
         return JSON.parse(token)
     }
 
-    const getProducts = () => {
-        const s = localStorage.getItem('tunify_products')
-        return s ? JSON.parse(s) : TunifyProducts.slice()
-    }
-
-    const saveProducts = (list) => {
-        localStorage.setItem('tunify_products', JSON.stringify(list))
-    }
-
-    const getOrders = () => {
-        const s = localStorage.getItem('tunify_orders')
-        return s ? JSON.parse(s) : TunifyOrders.slice()
-    }
-
     // ── Stats ────────────────────────────────────────────────────
-    const orders = getOrders()
-    const products = getProducts()
-
-    $('#statRevenue').text('₱' + (orders.reduce((sum, o) => sum + (o.total || 0), 0) + 2847500).toLocaleString())
-    $('#statOrders').text(orders.length + 183)
-    $('#statCustomers').text(1240)
-    $('#statLowStock').text(products.filter(p => p.stock <= 5).length)
+    $.ajax({
+        method: "GET",
+        url: `${url}dashboard-stats`,
+        dataType: "json",
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        },
+        success: function (data) {
+            $('#statRevenue').text('₱' + Math.round(data.revenue).toLocaleString());
+            $('#statOrders').text(data.orders);
+            $('#statCustomers').text(data.customers);
+            $('#statLowStock').text(data.lowStock);
+        },
+        error: function (err) {
+            console.error("Failed to load dashboard stats:", err);
+        }
+    });
 
     // ── Monthly Sales Chart (Line) ──────────────────────────────
     $.ajax({
