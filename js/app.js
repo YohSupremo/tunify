@@ -147,6 +147,18 @@ const loadNav = () => {
       }
       $('#navDivider').show();
       $('#logout-link').show();
+
+      // Silent session verification - check if the logged in user has been deactivated in DB
+      $.ajax({
+        method: 'GET',
+        url: `${url}api/v1/addresses`,
+        headers: {
+          'Authorization': 'Bearer ' + getToken()
+        },
+        error: function (jqXHR) {
+          console.warn('Session validation failed:', jqXHR.status);
+        }
+      });
     } else {
       $('#navLogin').show();
       $('#navRegister').show();
@@ -346,3 +358,28 @@ $(document).on('click', '#logoutBtn, #logout, #logout-link', function (e) {
   });
 });
 
+// ── Global 401 Interceptor ────────────────────────────────────────────────────
+// If the backend returns 401 (e.g. account was deactivated mid-session),
+// clear the session and redirect to login with an explanation.
+$(document).ajaxError(function (event, jqXHR) {
+  if (jqXHR.status === 401) {
+    const msg = jqXHR.responseJSON && jqXHR.responseJSON.message
+      ? jqXHR.responseJSON.message
+      : 'Your session has expired. Please log in again.';
+
+    // Only act if we actually had a token (avoid redirect loops on login page)
+    if (sessionStorage.getItem('token')) {
+      sessionStorage.clear();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Session Ended',
+        text: msg,
+        showConfirmButton: true,
+        confirmButtonText: 'Go to Login'
+      }).then(function () {
+        const isAdminPage = window.location.pathname.includes('/admin/');
+        window.location.href = isAdminPage ? '../login.html' : 'login.html';
+      });
+    }
+  }
+});

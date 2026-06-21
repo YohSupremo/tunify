@@ -50,8 +50,8 @@ $(document).ready(function () {
             sessionStorage.setItem('tunify_last_name', '');
         }
 
-        const isAdmin = user.role === 'admin' || user.email.includes('admin');
-        if (isAdmin) {
+        // Role comes directly from the login API response — no email guessing
+        if (user.role === 'admin') {
             sessionStorage.setItem('tunify_admin', 'true');
         } else {
             sessionStorage.removeItem('tunify_admin');
@@ -556,11 +556,13 @@ $(document).ready(function () {
         $('#editEmail').val(userData.email).prop('disabled', true);
         $('#editPhone').val(userData.phone);
 
-        const $avatar = $('#profileAvatar');
-        if (userData.avatar) {
-            $avatar.html(`<img src="${userData.avatar}" style="width:100%;height:100%;object-fit:cover;"/>`);
-        } else {
-            $avatar.html('<i class="fas fa-user"></i>');
+        const $avatarContainer = $('#profileAvatarContainer');
+        if ($avatarContainer.length) {
+            if (userData.avatar) {
+                $avatarContainer.html(`<img src="${userData.avatar}" style="width:100%;height:100%;object-fit:cover;"/>`);
+            } else {
+                $avatarContainer.html('<i class="fas fa-user"></i>');
+            }
         }
 
         // Render orders from the database
@@ -891,8 +893,13 @@ $(document).ready(function () {
     });
 
     /* ── Avatar change ──────────────────────────────────────────── */
-    $(document).on('click', '#profileAvatar', function () {
+    $(document).on('click', '#profileAvatar', function (e) {
+        if (e.target.id === 'editProfilePicture') return;
         $('#editProfilePicture').click();
+    });
+
+    $(document).on('click', '#editProfilePicture', function (e) {
+        e.stopPropagation();
     });
 
     $(document).on('change', '#editProfilePicture', function (e) {

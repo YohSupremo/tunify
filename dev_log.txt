@@ -1,0 +1,173 @@
+============================================================
+  TUNIFY PROJECT — DEVELOPMENT LOG
+============================================================
+
+------------------------------------------------------------
+DATE: 2026-06-21 (Saturday)
+TASK: Customer CRUD — Admin Panel Module
+STATUS: DONE
+------------------------------------------------------------
+
+BACKEND (tunify_backend)
+  [DONE] controllers/customer.js — Created (NEW FILE)
+         - getCustomers()       — GET all customers with JOIN (users + customer)
+                                   includes order_count & address_count aggregates
+         - getCustomerById()    — GET single customer detail + addresses list
+         - updateCustomer()     — PUT update name, email, phone (admin-side)
+         - deactivateCustomer() — DELETE soft-delete via deleted_at, with admin-guard
+
+  [DONE] routes/customer.js — Created (NEW FILE)
+         - GET    /api/v1/customers        — list all (auth-protected)
+         - GET    /api/v1/customers/:id    — single detail (auth-protected)
+         - PUT    /api/v1/customers/:id    — update customer (auth-protected)
+         - DELETE /api/v1/customers/:id    — deactivate customer (auth-protected)
+
+  [DONE] app.js — Modified
+         - Imported customerRoutes
+         - Mounted at /api/v1
+
+FRONTEND (tunify/admin)
+  [DONE] admin/customers.html — Created (NEW FILE)
+         - Page header (eyebrow, title, subtitle)
+         - DataTable panel-card (#customersTable)
+           Columns: ID, Name, Email, Phone, Orders, Addresses, Joined, Actions
+         - Bootstrap modal (#customerModal) for editing
+           Fields: First Name, Last Name, Email, Phone (per DB schema)
+           Read-only Addresses sub-panel (loaded dynamically)
+         - Full JS dependency stack (jQuery, Bootstrap, DataTables,
+           SweetAlert2, Bootbox) — same as all other admin pages
+
+  [DONE] admin/js/admin-customers.js — Created (NEW FILE)
+         - Auth guard (sessionStorage tunify_admin check)
+         - loadCustomersFromDB() — fetches GET /api/v1/customers
+         - initTable()          — DataTable init/destroy cycle
+         - Edit button handler  — populates modal from customersList state
+         - fetchCustomerAddresses(userId) — loads addresses into modal (read-only)
+         - Deactivate handler   — bootbox confirm → DELETE /api/v1/customers/:id
+         - Form submit handler  — validates → PUT /api/v1/customers/:id
+         - SweetAlert2 toasts for all success/error feedback
+
+  [DONE] components/admin-navbar.html — Modified
+         - Added Customers nav link (href=customers.html, data-page=admin-customers)
+
+DOCUMENTATION
+  [DONE] added_functions.txt — Created (NEW FILE)
+         - 9 entries justifying all new/enhanced functions
+         - Covers: JOIN SQL rationale, auth decisions, no Add-button decision,
+           soft-delete vs hard-delete, read-only address panel enhancement
+
+CRUD COVERAGE SUMMARY
+  Create  — INTENTIONALLY via register.html (FK-safe, not admin panel)
+  Read    — DONE (list all + single detail with addresses)
+  Update  — DONE (name, email, phone editable by admin)
+  Delete  — DONE (soft-delete, preserves order history)
+
+HOW TO VERIFY / TEST
+  STEP 1 — Start the backend server
+           > Open a terminal inside tunify_backend/
+           > Run: node app.js
+           > Expected: "Connected Successfully 5000" printed in console
+
+  STEP 2 — Log in as admin via the frontend
+           > Open browser: http://localhost/tunify/login.html
+           > Credentials: admin@tunify.com / password123
+           > Expected: Redirected to dashboard, token saved in sessionStorage
+
+  STEP 3 — Navigate to Customers page
+           > Click "Customers" in the admin navbar
+             OR go to: http://localhost/tunify/admin/customers.html
+           > Expected: DataTable loads with registered customer rows
+                       Columns visible: ID, Name, Email, Phone,
+                       Orders, Addresses, Joined, Actions
+
+  STEP 4 — Test READ (GET /api/v1/customers)
+           > Open browser DevTools > Network tab
+           > Refresh the Customers page
+           > Expected: XHR request to /api/v1/customers returns 200 with JSON array
+                       Each row has: user_id, email, first_name, last_name,
+                       phone, order_count, address_count, created_at
+
+  STEP 5 — Test UPDATE (PUT /api/v1/customers/:id)
+           > Click the Edit (pencil) icon on any customer row
+           > Expected: Modal opens with correct pre-filled values
+                       Address sub-panel shows customer's saved addresses
+           > Change First Name or Phone > click Save Customer
+           > Expected: SweetAlert2 "Customer updated!" toast appears
+                       Table reloads with updated values
+           > Verify in DB: SELECT * FROM customer WHERE user_id = <id>;
+                           SELECT * FROM users WHERE id = <id>;
+
+  STEP 6 — Test DEACTIVATE (DELETE /api/v1/customers/:id)
+           > Click the Deactivate (user-slash) icon on a customer row
+           > Expected: Bootbox confirm dialog appears
+           > Click "Yes, Deactivate"
+           > Expected: SweetAlert2 success toast, customer disappears from table
+           > Verify in DB: SELECT deleted_at FROM users WHERE id = <id>;
+                           Should show a timestamp (NOT NULL)
+           > Verify guard: Try deactivating user_id=1 (admin) via Postman:
+                           DELETE http://localhost:5000/api/v1/customers/1
+                           Header: Authorization: Bearer <token>
+                           Expected: 403 "Cannot deactivate an admin account"
+
+  STEP 7 — Test AUTH PROTECTION
+           > Open Postman (or browser DevTools)
+           > Call GET http://localhost:5000/api/v1/customers WITHOUT a token
+           > Expected: 401 "Login first to access this resource"
+
+  STEP 8 — Test NAVBAR active state
+           > On the Customers page, check the navbar
+           > Expected: "Customers" link is highlighted/active
+                       All other links are not active
+
+  COMMON ISSUES / TROUBLESHOOTING
+           - Table shows empty  → Check backend is running on port 5000
+                                  Check DevTools console for CORS or 401 errors
+           - Modal shows blank  → Confirm token is in sessionStorage (login again)
+           - Addresses not loading in modal → Check GET /api/v1/customers/:id
+                                              returns { customer, addresses } shape
+           - 500 error on GET customers → Check DB is running (XAMPP MySQL)
+                                          Verify tunify_db exists with seed data
+
+
+  STEP 9 — Test STATUS FILTERING & DEACTIVATED VIEW
+           > Change the "Status" filter dropdown in the header to "Deactivated"
+           > Expected: Table lists only customers with `deleted_at IS NOT NULL`
+                       Their role column displays a red "Deactivated" badge next to their role
+                       The action buttons column displays a green "Reactivate" (user-check) icon instead of the red "Deactivate" icon
+           > Change the "Status" filter dropdown to "All Statuses"
+           > Expected: Table lists both active and deactivated users side-by-side with appropriate badges
+
+  STEP 10 — Test REACTIVATION FLOW (PATCH /api/v1/customers/:id/reactivate)
+           > Filter by "Deactivated"
+           > Click the Reactivate (user-check) icon on any deactivated customer row
+           > Expected: Bootbox confirmation dialog appears
+           > Click "Yes, Reactivate"
+           > Expected: SweetAlert2 success toast, customer disappears from deactivated view
+           > Filter by "Active" (or "All")
+           > Expected: Reactivated customer is listed, red "Deactivated" badge is gone, action icon is back to red "Deactivate"
+           > Verify in DB: SELECT deleted_at FROM users WHERE id = <id>;
+                           Should show NULL
+
+  STEP 11 — Test IMMEDIATE SESSION DISMISSAL ON DEACTIVATION
+           > Log in as a customer on the client storefront page (e.g. shop.html)
+           > In a separate browser tab/window, log in as admin, navigate to Customers
+           > Deactivate the customer account that is currently logged in
+           > Switch back to the customer's browser tab and click any protected action (e.g., place order or view profile)
+           > Expected: Customer is immediately blocked by backend (401 code with message: "Your account has been deactivated...")
+           > Expected: Frontend global interceptor catches the 401, shows a SweetAlert2 warning "Session Ended", clears sessionStorage, and redirects them to the login page
+
+  STEP 12 — Test ROLE FILTERING (dropdown filter)
+           > Change the "Role" filter dropdown in the header to "Admin"
+           > Expected: Table lists only admin accounts (e.g. admin@tunify.com)
+           > Change the "Role" filter dropdown to "Customer"
+           > Expected: Table lists only customer accounts
+           > Combine filters: set Status filter to "Deactivated" and Role filter to "Admin"
+           > Expected: Table shows no deactivated admins (since admins cannot be deactivated)
+           > Change Status filter to "All" and Role filter to "Customer"
+           > Expected: Table shows all customer accounts, active and deactivated
+
+  STEP 13 — Test ITEMS & CATEGORIES LOAD
+           > Navigate to Categories page (admin/categories.html) and Instruments page (admin/items.html)
+           > Expected: No error alerts pop up, and data lists correctly.
+
+------------------------------------------------------------

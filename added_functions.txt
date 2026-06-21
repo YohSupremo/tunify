@@ -1,0 +1,141 @@
+TUNIFY — ADDED FUNCTIONS & ENHANCEMENT NOTES
+Customer CRUD Module (Admin Panel)
+============================================================
+
+Reference modules studied: admin-brands.js, admin-categories.js, admin-suppliers.js,
+                            controllers/supplier.js, controllers/user.js, routes/supplier.js
+
+All predefined project functions/patterns have been strictly followed. The items below
+are either genuinely new functions (not in any reference module) or enhancements to
+standard patterns.
+
+─────────────────────────────────────────────────────────────────────────────────────
+BACKEND — controllers/customer.js
+─────────────────────────────────────────────────────────────────────────────────────
+
+1. FUNCTION: exports.getCustomers  (GET /api/v1/customers)
+   JUSTIFICATION:
+   No reference module fetches customers at the admin level. The existing user.js
+   controller only exposes a raw users list without JOIN data. This function joins
+   the "users" and "customer" tables and uses SQL sub-queries to include order_count
+   (from orderinfo) and address_count (from customer_addresses) in a single request.
+   This avoids multiple round-trips and gives the admin table all the columns it needs.
+
+   ENHANCEMENT:
+   The reference pattern (e.g., getSuppliers) does simple Sequelize ORM findAll().
+   getCustomers uses sequelize.query() with a hand-written JOIN SQL because Sequelize
+   associations between User/Customer are not set up for eager-loading in the
+   existing models/index.js, and to avoid altering the established model associations.
+
+2. FUNCTION: exports.getCustomerById  (GET /api/v1/customers/:id)
+   JUSTIFICATION:
+   No reference module fetches a single record with its related addresses in one call.
+   Needed so the admin edit modal can display the customer's saved addresses as a
+   read-only reference panel without the admin having to navigate away.
+   Returns { customer: {...}, addresses: [...] }.
+
+3. FUNCTION: exports.updateCustomer  (PUT /api/v1/customers/:id)
+   JUSTIFICATION:
+   The existing updateProfile in user.js handles profile updates for the LOGGED-IN
+   user only (uses req.body.user.id from the JWT). This new function lets an ADMIN
+   update ANY customer by user_id passed in the URL path — the same ID-in-path
+   pattern used by updateSupplier and deleteSupplier.
+
+   ENHANCEMENT:
+   updateCustomer also allows the admin to change the customer's email address
+   (stored in the users table) in the same request as the profile fields (stored in
+   the customer table). The reference updateProfile does not touch the email field.
+   A SequelizeUniqueConstraintError is caught and returned as a 409 if the email
+   is already in use by another account.
+
+4. FUNCTION: exports.deactivateCustomer  (DELETE /api/v1/customers/:id)
+   JUSTIFICATION:
+   The existing deactivateUser in user.js accepts an email in the request body.
+   This new function accepts user_id via URL path, which is consistent with the
+   admin-side pattern (deleteSupplier uses /suppliers/:id). It also adds a guard
+   to prevent accidentally deactivating an admin account via this endpoint, which
+   the original deactivateUser lacks.
+
+─────────────────────────────────────────────────────────────────────────────────────
+BACKEND — routes/customer.js
+─────────────────────────────────────────────────────────────────────────────────────
+
+5. NEW FILE: routes/customer.js
+   JUSTIFICATION:
+   New resource requires its own router file, consistent with how every other entity
+   (supplier.js, brand.js, category.js, etc.) has a dedicated routes file.
+   All write operations (PUT, DELETE) are protected with the isAuthenticatedUser
+   middleware, same as all other admin-write routes in the project.
+
+   NOTE: GET /customers is also protected (isAuthenticatedUser) unlike GET /suppliers
+   which is public. Customer PII (email, phone, order history) should be restricted
+   to authenticated admin access only.
+
+─────────────────────────────────────────────────────────────────────────────────────
+FRONTEND — admin/js/admin-customers.js
+─────────────────────────────────────────────────────────────────────────────────────
+
+6. FUNCTION: fetchCustomerAddresses(userId)
+   JUSTIFICATION:
+   No reference module loads related sub-data inside an edit modal. The brands and
+   categories modules show a product checklist inside their modals, but those
+   checkboxes are action-oriented (user can re-assign products). For customers,
+   addresses are managed by the customer themselves, so showing them read-only in
+   the admin edit modal is appropriate context without allowing admin to create or
+   delete them (which is reserved for the customer's own account management).
+
+   ENHANCEMENT:
+   Calls GET /api/v1/customers/:id asynchronously when the admin opens the edit
+   modal. Renders a styled, scrollable list of the customer's addresses including
+   a "Default" badge on the primary address. If no addresses exist, shows a
+   graceful "No addresses saved yet." message.
+
+─────────────────────────────────────────────────────────────────────────────────────
+FRONTEND — admin/customers.html
+─────────────────────────────────────────────────────────────────────────────────────
+
+7. DESIGN DECISION: No "Add Customer" button
+   JUSTIFICATION:
+   Customers are created through the public registration flow (register.html →
+   POST /api/v1/register). The database also requires a corresponding users row
+   before a customer row can be inserted (FK constraint). Allowing an admin to
+   "add" a customer from the admin panel would bypass the registration flow and
+   is not listed as a functional requirement. The admin module provides Read +
+   Update + Deactivate (soft-delete) — the "Create" in this CRUD is handled by
+   the registration module.
+
+8. DESIGN DECISION: Deactivate instead of Hard Delete
+   JUSTIFICATION:
+   The users table has a deleted_at column (soft delete). The customer table also
+   has a deleted_at column. Hard-deleting a customer would cascade-delete their
+   orders (via FK), which is a destructive operation not suitable for an admin
+   panel. Soft-delete (setting deleted_at = NOW()) preserves historical order data,
+   consistent with the deactivateUser function already in user.js.
+
+─────────────────────────────────────────────────────────────────────────────────────
+COMPONENT — components/admin-navbar.html
+─────────────────────────────────────────────────────────────────────────────────────
+
+9. ADDED: <li> nav-item for customers.html with data-page="admin-customers"
+   JUSTIFICATION:
+   Every admin page is accessible from the shared admin-navbar.html component.
+   The new Customers link follows the exact same HTML structure, href pattern,
+   and data-page attribute convention as all existing nav items.
+
+─────────────────────────────────────────────────────────────────────────────────────
+ENHANCEMENTS — CUSTOMER FILTERING & REACTIVATION
+─────────────────────────────────────────────────────────────────────────────────────
+
+10. FUNCTION: exports.reactivateCustomer (PATCH /api/v1/customers/:id/reactivate)
+    JUSTIFICATION:
+    Provides an admin-side mechanism to clear deleted_at on user records, permitting
+    reactivation of soft-deleted accounts without needing direct database access.
+
+11. ENHANCEMENT: Status Filtering (?status=active|deactivated|all)
+    JUSTIFICATION:
+    getCustomers query updated to accept a status query parameter, dynamically altering
+    the SQL WHERE clause to support viewing Active, Deactivated, or All accounts.
+    Frontend updated with a premium, theme-harmonized slider tab interface to toggle
+    between filters and render appropriate action icons (Reactivate/Deactivate) depending
+    on user state.
+
