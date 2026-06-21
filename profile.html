@@ -47,6 +47,7 @@
         <div class="col-lg-8">
           <ul class="nav nav-tabs tunify-tabs fade-in-up" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabEdit">Edit Profile</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabAddresses">My Addresses</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabOrders">My Orders</a></li>
           </ul>
           <div class="tab-content panel-card fade-in-up">
@@ -69,15 +70,46 @@
                 <label>Phone</label>
                 <input type="text" class="form-control" id="editPhone" />
               </div>
-              <div class="form-group">
-                <label>Address Line</label>
-                <input type="text" class="form-control" id="editAddressLine" />
-              </div>
-              <div class="form-group">
-                <label>Zip Code</label>
-                <input type="text" class="form-control" id="editZipCode" />
-              </div>
               <button class="btn-gold" id="saveProfile"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+            <div class="tab-pane fade" id="tabAddresses">
+              <h3 style="font-family:var(--font-display);font-size:1.1rem;color:var(--gold);margin-top:.5rem;margin-bottom:1rem;">Manage Saved Addresses</h3>
+              <div id="addressList" class="mb-4"></div>
+              
+              <hr style="border-color:rgba(255,255,255,0.08); margin:1.5rem 0;" />
+              
+              <h4 style="font-family:var(--font-display);font-size:0.95rem;color:var(--text);margin-bottom:0.75rem;">Add New Address</h4>
+              <form id="addAddressForm" class="form-tunify">
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label>Label (e.g. Home, Office)</label>
+                    <input type="text" class="form-control" id="newAddressLabel" placeholder="Home" required />
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <label>Street Address</label>
+                    <input type="text" class="form-control" id="newAddressStreet" placeholder="123 Music Ave" required />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label>City</label>
+                    <input type="text" class="form-control" id="newAddressCity" placeholder="Quezon City" required />
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <label>Province</label>
+                    <input type="text" class="form-control" id="newAddressProvince" placeholder="Metro Manila" required />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label>Zip Code</label>
+                    <input type="text" class="form-control" id="newAddressZip" placeholder="1100" required />
+                  </div>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" id="newAddressDefault" />
+                  <label class="form-check-label" for="newAddressDefault" style="font-size: .85rem; color: var(--silver); cursor: pointer;">Set as default address</label>
+                </div>
+                <button type="submit" class="btn-gold" id="saveNewAddressBtn"><i class="fas fa-plus"></i> Add Address</button>
+              </form>
             </div>
             <div class="tab-pane fade" id="tabOrders">
               <div class="mt-2" id="orderList"></div>

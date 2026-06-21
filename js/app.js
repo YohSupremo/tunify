@@ -78,7 +78,7 @@ const loadNav = () => {
   const isAdmin = window.location.pathname.includes('/admin/');
   const prefix = isAdmin ? '../' : '';
   const navFile = isAdmin ? 'components/admin-navbar.html' : 'components/navbar.html';
-  $('#tunifyNav').load(prefix + navFile, () => {
+  $('#tunifyNav').load(prefix + navFile + '?v=' + Date.now(), () => {
     updateCartCount();
     $(window).on('scroll', function () {
       if ($(this).scrollTop() > 40) $('#mainNav').addClass('scrolled');
@@ -87,6 +87,93 @@ const loadNav = () => {
     // Active nav link
     const page = document.body.dataset.page || '';
     if (page) $(`.nav-link[data-page="${page}"]`).addClass('active');
+
+    // Populate Category Menu dynamically
+    const $catMenu = $('#navCategoryMenu');
+    if ($catMenu.length) {
+      $catMenu.empty();
+      const categories = ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories'];
+      const CAT_ICONS = {
+        string: 'fa-guitar', percussion: 'fa-drum', keys: 'fa-keyboard',
+        wind: 'fa-wind', vocals: 'fa-microphone', accessories: 'fa-plug'
+      };
+      categories.forEach(function (c) {
+        const display = c.charAt(0).toUpperCase() + c.slice(1);
+        const icon = CAT_ICONS[c] || 'fa-music';
+        $catMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?cat=${c}"><i class="fas ${icon} mr-2"></i> ${display}</a>`);
+      });
+    }
+
+    // Populate Brand Menu dynamically
+    const $brandMenu = $('#navBrandMenu');
+    if ($brandMenu.length) {
+      $brandMenu.empty();
+      const brands = [
+        { name: 'Fender', slug: 'fender' },
+        { name: 'Gibson', slug: 'gibson' },
+        { name: 'Yamaha', slug: 'yamaha' },
+        { name: 'Roland', slug: 'roland' },
+        { name: 'Shure', slug: 'shure' },
+        { name: 'Ibanez', slug: 'ibanez' },
+        { name: 'Marshall', slug: 'marshall' }
+      ];
+      const BRAND_ICONS = {
+        fender: 'fa-guitar',
+        gibson: 'fa-guitar',
+        yamaha: 'fa-keyboard',
+        roland: 'fa-drum',
+        shure: 'fa-microphone',
+        ibanez: 'fa-guitar',
+        marshall: 'fa-volume-up'
+      };
+      brands.forEach(function (b) {
+        const icon = BRAND_ICONS[b.slug] || 'fa-tag';
+        $brandMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?brand=${b.slug}"><i class="fas ${icon} mr-2"></i> ${b.name}</a>`);
+      });
+    }
+
+    // Toggle dropdown items based on login and admin status
+    const token = sessionStorage.getItem('token');
+    const isUserAdmin = sessionStorage.getItem('tunify_admin') === 'true';
+
+    if (token) {
+      $('#navLogin').hide();
+      $('#navRegister').hide();
+      $('#navProfile').show();
+      if (isUserAdmin) {
+        $('#navAdmin').show();
+      } else {
+        $('#navAdmin').hide();
+      }
+      $('#navDivider').show();
+      $('#logout-link').show();
+    } else {
+      $('#navLogin').show();
+      $('#navRegister').show();
+      $('#navProfile').hide();
+      $('#navAdmin').hide();
+      $('#navDivider').hide();
+      $('#logout-link').hide();
+    }
+
+    // Setup Split Click navigation for navbar dropdowns
+    $('#tunifyNav').on('click', '.dropdown-toggle', function (e) {
+      const isChevronClick = $(e.target).closest('.ml-05').length > 0;
+      if (!isChevronClick) {
+        // Direct click on the menu text -> Navigate to href
+        const href = $(this).attr('href');
+        if (href && href !== '#') {
+          window.location.href = href;
+        }
+      } else {
+        // Click on the chevron -> Toggle dropdown
+        e.preventDefault();
+        e.stopPropagation();
+        const $parent = $(this).parent();
+        $parent.toggleClass('show');
+        $parent.find('.dropdown-menu').toggleClass('show');
+      }
+    });
 
     // Trigger fade-in animations once nav is loaded
     $('.fade-in-up').addClass('visible');
@@ -97,7 +184,7 @@ const loadFooter = () => {
   const isAdmin = window.location.pathname.includes('/admin/');
   const prefix = isAdmin ? '../' : '';
   const footerFile = isAdmin ? 'components/admin-footer.html' : 'components/footer.html';
-  $('#tunifyFooter').load(prefix + footerFile);
+  $('#tunifyFooter').load(prefix + footerFile + '?v=' + Date.now());
 };
 
 /* ─── SweetAlert2 themed helper ────────────────────────────── */
@@ -222,6 +309,40 @@ window.Tunify = {
   
   triggerFadeIn() {
     $('.fade-in-up').addClass('visible');
+  },
+  
+  initCommon(page) {
+    try {
+      if (typeof updateCartCount === 'function') updateCartCount();
+      if (page) {
+        $('.navbar-nav .nav-link').removeClass('active');
+        $(`.navbar-nav .nav-link[data-page="${page}"]`).addClass('active');
+      }
+      this.triggerFadeIn();
+      console.log('Tunify.initCommon completed successfully');
+    } catch (err) {
+      console.error('Error in Tunify.initCommon:', err);
+    }
   }
 };
+
+// Global Event Handler for Logout Actions
+$(document).on('click', '#logoutBtn, #logout, #logout-link', function (e) {
+  e.preventDefault();
+  confirmDialog('Are you sure you want to log out?', function (result) {
+    if (result) {
+      sessionStorage.clear();
+      Swal.fire({
+        text: 'Logged out',
+        showConfirmButton: false,
+        position: 'bottom-right',
+        timer: 1000,
+        timerProgressBar: true
+      }).then(function () {
+        const isAdminPage = window.location.pathname.includes('/admin/');
+        window.location.href = isAdminPage ? '../login.html' : 'login.html';
+      });
+    }
+  });
+});
 
