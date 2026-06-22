@@ -262,14 +262,15 @@
 
             <div class="form-row">
               <div class="form-group col-md-12">
-                <label for="itemImageFile">Instrument Photo</label>
-                <div class="custom-file">
+                <label for="itemImageFile">Instrument Photos (Select one or more)</label>
+                <div class="custom-file mb-3">
                   <input type="file" class="custom-file-input" id="itemImageFile"
-                    accept="image/png, image/jpeg, image/jpg" />
-                  <label class="custom-file-label" for="itemImageFile" id="fileLabel">Choose image file...</label>
+                    accept="image/png, image/jpeg, image/jpg" multiple />
+                  <label class="custom-file-label" for="itemImageFile" id="fileLabel">Choose image files...</label>
                 </div>
+                <div id="imagePreviewContainer" class="d-flex flex-wrap mt-2" style="gap: 15px; margin-bottom: 15px;"></div>
                 <small class="form-text text-muted" style="font-size:0.7rem;">Only .jpg, .jpeg, and .png allowed. Max
-                  size 2MB.</small>
+                  size 2MB per image.</small>
               </div>
             </div>
 

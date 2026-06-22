@@ -894,7 +894,29 @@
   gap: .75rem;
 }
 
-.dropdown-menu-brands {}
+.dropdown-menu-brands {
+  max-height: 350px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.dropdown-menu-brands::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu-brands::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.dropdown-menu-brands::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+.dropdown-menu-brands::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
 
 .filter-group-scroll {
   max-height: 220px;

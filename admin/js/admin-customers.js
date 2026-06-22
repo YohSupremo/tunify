@@ -111,6 +111,34 @@ $(document).ready(function () {
         });
     }
 
+    // ── Add Customer Button ──────────────────────────────────────────────
+    $('#btnAddNewCustomer').on('click', function () {
+        $('#customerForm')[0].reset();
+        $('#customerId').val('');
+        selectedAvatarFile = null;
+        $('#customerAvatarFile').val('');
+        
+        // Reset modal avatar preview
+        $('#modalCustomerAvatar').html('<i class="fas fa-user" style="font-size: 2rem; color: var(--gold);"></i>' + 
+        '<div class="avatar-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.6rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.2s; cursor: pointer;">Change</div>');
+        
+        // Show profile image upload section for creation
+        $('#modalCustomerAvatar').closest('.form-row').show();
+        
+        // Hide addresses section
+        $('#customerAddressesGroup').hide();
+        
+        // Show password field and set as required
+        $('#customerPasswordRow').show();
+        $('#customerPasswordHelp').hide();
+        $('#customerPassword').prop('required', true).attr('placeholder', 'Enter password (min 6 characters)');
+        
+        $('#customerModalTitle').text('Add New Customer');
+        $('#customerForm').removeClass('was-validated');
+        $('#customerForm').find('.form-control').removeClass('is-valid is-invalid');
+        $('#customerModal').modal('show');
+    });
+
     // ── Edit Button (delegated) ──────────────────────────────────────────────
     let selectedAvatarFile = null;
 
@@ -122,6 +150,15 @@ $(document).ready(function () {
         // Reset file selection
         selectedAvatarFile = null;
         $('#customerAvatarFile').val('');
+
+        // Show profile image upload and addresses sections
+        $('#modalCustomerAvatar').closest('.form-row').show();
+        $('#customerAddressesGroup').show();
+
+        // Show password field as optional edit
+        $('#customerPasswordRow').show();
+        $('#customerPasswordHelp').show();
+        $('#customerPassword').prop('required', false).attr('placeholder', 'Enter new password to change (optional)').val('');
 
         // Populate form fields
         $('#customerId').val(c.user_id);
@@ -144,6 +181,7 @@ $(document).ready(function () {
         $('#customerModalTitle').text('Edit Customer — ' + ((c.first_name || '') + ' ' + (c.last_name || '')).trim());
         $('#customerAddressList').html('<p class="text-muted" style="font-size:0.8rem; margin:0;">Loading addresses…</p>');
         $('#customerForm').removeClass('was-validated');
+        $('#customerForm').find('.form-control').removeClass('is-valid is-invalid');
         $('#customerModal').modal('show');
 
         // Fetch customer addresses for display inside the modal (read-only reference)
@@ -340,59 +378,170 @@ $(document).ready(function () {
         }
 
         var userId = $('#customerId').val();
-        var formData = new FormData();
-        formData.append('email', $('#customerEmail').val().trim());
-        formData.append('first_name', $('#customerFirstName').val().trim());
-        formData.append('last_name', $('#customerLastName').val().trim());
-        formData.append('phone', $('#customerPhone').val().trim());
-        formData.append('role', $('#customerRole').val());
-
-        if (selectedAvatarFile) {
-            formData.append('image', selectedAvatarFile);
-        }
-
         var $btn = $('#btnSaveCustomer');
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Saving…');
 
-        $.ajax({
-            method: 'PUT',
-            url: `${url}customers/${userId}`,
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            headers: {
-                'Authorization': 'Bearer ' + getToken()
-            },
-            success: function (res) {
-                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
-                Swal.fire({
-                    icon: 'success',
-                    text: 'Customer updated!',
-                    showConfirmButton: false,
-                    position: 'bottom-right',
-                    timer: 1500,
-                    timerProgressBar: true
-                });
-                $('#customerModal').modal('hide');
-                loadCustomersFromDB();
-            },
-            error: function (err) {
-                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
-                console.error(err);
-                var errMsg = err.responseJSON && err.responseJSON.error
-                    ? err.responseJSON.error
-                    : 'Failed to update customer.';
-                Swal.fire({
-                    icon: 'warning',
-                    text: errMsg,
-                    showConfirmButton: false,
-                    position: 'bottom-right',
-                    timer: 2000,
-                    timerProgressBar: true
-                });
+        if (!userId) {
+            // CREATE customer
+            var formData = new FormData();
+            formData.append('email', $('#customerEmail').val().trim());
+            formData.append('password', $('#customerPassword').val());
+            formData.append('first_name', $('#customerFirstName').val().trim());
+            formData.append('last_name', $('#customerLastName').val().trim());
+            formData.append('phone', $('#customerPhone').val().trim());
+            formData.append('role', $('#customerRole').val());
+
+            if (selectedAvatarFile) {
+                formData.append('image', selectedAvatarFile);
             }
-        });
+
+            $.ajax({
+                method: 'POST',
+                url: `${url}customers`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                success: function (res) {
+                    $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
+                    Swal.fire({
+                        icon: 'success',
+                        text: 'Customer created successfully!',
+                        showConfirmButton: false,
+                        position: 'bottom-right',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    $('#customerModal').modal('hide');
+                    loadCustomersFromDB();
+                },
+                error: function (err) {
+                    $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
+                    console.error(err);
+                    var errMsg = err.responseJSON && err.responseJSON.error
+                        ? err.responseJSON.error
+                        : 'Failed to create customer.';
+                    Swal.fire({
+                        icon: 'warning',
+                        text: errMsg,
+                        showConfirmButton: false,
+                        position: 'bottom-right',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }
+            });
+        } else {
+            // UPDATE customer
+            var formData = new FormData();
+            formData.append('email', $('#customerEmail').val().trim());
+            formData.append('first_name', $('#customerFirstName').val().trim());
+            formData.append('last_name', $('#customerLastName').val().trim());
+            formData.append('phone', $('#customerPhone').val().trim());
+            formData.append('role', $('#customerRole').val());
+
+            var passwordVal = $('#customerPassword').val();
+            if (passwordVal && passwordVal.trim() !== '') {
+                formData.append('password', passwordVal.trim());
+            }
+
+            if (selectedAvatarFile) {
+                formData.append('image', selectedAvatarFile);
+            }
+
+            $.ajax({
+                method: 'PUT',
+                url: `${url}customers/${userId}`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                success: function (res) {
+                    $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
+                    Swal.fire({
+                        icon: 'success',
+                        text: 'Customer updated!',
+                        showConfirmButton: false,
+                        position: 'bottom-right',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    $('#customerModal').modal('hide');
+                    loadCustomersFromDB();
+                },
+                error: function (err) {
+                    $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Customer');
+                    console.error(err);
+                    var errMsg = err.responseJSON && err.responseJSON.error
+                        ? err.responseJSON.error
+                        : 'Failed to update customer.';
+                    Swal.fire({
+                        icon: 'warning',
+                        text: errMsg,
+                        showConfirmButton: false,
+                        position: 'bottom-right',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }
+            });
+        }
+    });
+
+    // ── Phone Input Sanitization ─────────────────────────────────────────────
+    $('#customerPhone').on('input', function () {
+        var val = $(this).val();
+        var cleanVal = val.replace(/[^\d\s+-]/g, '');
+        if (cleanVal.startsWith('-')) {
+            cleanVal = cleanVal.slice(1);
+        }
+        if (cleanVal.indexOf('+') > 0) {
+            cleanVal = cleanVal.charAt(0) + cleanVal.slice(1).replace(/\+/g, '');
+        }
+        if (val !== cleanVal) {
+            $(this).val(cleanVal);
+        }
+    });
+
+    // ── Real-Time Form Field Validation ──────────────────────────────────────
+    function validateInput(el) {
+        var $el = $(el);
+        var id = $el.attr('id');
+        var val = $el.val();
+        var isValid = false;
+
+        if (id === 'customerFirstName' || id === 'customerLastName') {
+            isValid = val.trim().length >= 2;
+        } else if (id === 'customerEmail') {
+            isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+        } else if (id === 'customerPhone') {
+            var phoneVal = val.trim();
+            isValid = phoneVal === "" || /^\+?[0-9][0-9\s-]{6,14}$/.test(phoneVal);
+        } else if (id === 'customerPassword') {
+            var isEdit = $('#customerId').val() !== '';
+            if (isEdit && val === '') {
+                $el.removeClass('is-invalid is-valid');
+                return;
+            } else {
+                isValid = val.length >= 6;
+            }
+        }
+
+        if (isValid) {
+            $el.removeClass('is-invalid').addClass('is-valid');
+        } else {
+            $el.removeClass('is-valid').addClass('is-invalid');
+        }
+    }
+
+    $('#customerFirstName, #customerLastName, #customerEmail, #customerPhone, #customerPassword').on('input change', function () {
+        validateInput(this);
     });
 
     // ── Initialize Page ──────────────────────────────────────────────────────

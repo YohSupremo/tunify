@@ -99,7 +99,7 @@ $(document).ready(function () {
                     timerProgressBar: true,
                     position: 'bottom-right'
                 }).then(function () {
-                    window.location.href = isAdmin ? 'admin/dashboard.html' : 'profile.html';
+                    window.location.href = isAdmin ? 'admin/dashboard.html' : 'index.html';
                 });
             },
             error: function (error) {
@@ -668,11 +668,11 @@ $(document).ready(function () {
                     addresses.forEach(function (addr) {
                         const isDefault = addr.is_default === 1 || addr.is_default === true || addr.is_default === "1";
                         const defaultBadge = isDefault ? '<span class="address-badge ml-2"><i class="fas fa-check"></i> Default</span>' : '';
-                        const defaultBtn = !isDefault 
-                            ? `<button class="btn-make-default make-default-addr" data-id="${addr.id}"><i class="fas fa-star mr-1"></i> Make Default</button>` 
+                        const defaultBtn = !isDefault
+                            ? `<button class="btn-make-default make-default-addr" data-id="${addr.id}"><i class="fas fa-star mr-1"></i> Make Default</button>`
                             : '';
                         const deleteBtn = `<button class="btn-delete-addr delete-addr" data-id="${addr.id}"><i class="fas fa-trash-alt mr-1"></i> Delete</button>`;
-                        
+
                         const cardHtml = `
                             <div class="address-card ${isDefault ? 'default-addr' : ''}">
                                 <div class="address-details">
@@ -832,14 +832,20 @@ $(document).ready(function () {
     /* ── Save profile ───────────────────────────────────────────── */
     $('#saveProfile, #updateBtn').on('click', function (e) {
         e.preventDefault();
+
+        // Run validation check on all fields
+        $('#editFirstName, #editLastName, #editPhone').each(function() {
+            validateProfileInput(this);
+        });
+
+        if ($('#tabEdit .is-invalid').length > 0) {
+            Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Please fix the errors in the form before saving.' });
+            return;
+        }
+
         const first_name = $('#editFirstName').val().trim();
         const last_name = $('#editLastName').val().trim();
         const phone = $('#editPhone').val().trim();
-
-        if (!first_name) {
-            Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'First name is required.' });
-            return;
-        }
 
         const formData = new FormData();
         formData.append('user_id', userId);
@@ -978,6 +984,46 @@ $(document).ready(function () {
                 });
             }
         });
+    });
+
+    // ── Profile Phone Input Sanitization ─────────────────────────────────────
+    $('#editPhone').on('input', function () {
+        var val = $(this).val();
+        var cleanVal = val.replace(/[^\d\s+-]/g, '');
+        if (cleanVal.startsWith('-')) {
+            cleanVal = cleanVal.slice(1);
+        }
+        if (cleanVal.indexOf('+') > 0) {
+            cleanVal = cleanVal.charAt(0) + cleanVal.slice(1).replace(/\+/g, '');
+        }
+        if (val !== cleanVal) {
+            $(this).val(cleanVal);
+        }
+    });
+
+    // ── Profile Real-Time Form Field Validation ──────────────────────────────
+    function validateProfileInput(el) {
+        var $el = $(el);
+        var id = $el.attr('id');
+        var val = $el.val();
+        var isValid = false;
+
+        if (id === 'editFirstName' || id === 'editLastName') {
+            isValid = val.trim().length >= 2;
+        } else if (id === 'editPhone') {
+            var phoneVal = val.trim();
+            isValid = phoneVal === "" || /^\+?[0-9][0-9\s-]{6,14}$/.test(phoneVal);
+        }
+
+        if (isValid) {
+            $el.removeClass('is-invalid').addClass('is-valid');
+        } else {
+            $el.removeClass('is-valid').addClass('is-invalid');
+        }
+    }
+
+    $('#editFirstName, #editLastName, #editPhone').on('input change', function () {
+        validateProfileInput(this);
     });
 
 });

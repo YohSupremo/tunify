@@ -1,28 +1,75 @@
-/* Shop page — filters, slider, sort */
+/* Shop page — filters, slider, sort. Fetches live data from API.
+   Reference: itcp237-js-ns-2026/js/home.js ($.ajax GET pattern) */
 $(document).ready(function () {
 
   document.body.dataset.page = 'shop';
   loadNav();
   loadFooter();
 
-  let filters = { categories: [], brands: [], minPrice: 0, maxPrice: 200000, search: '', saleOnly: false };
+  let filters = { categories: [], brands: [], minPrice: 0, maxPrice: 999999, search: '', saleOnly: false };
 
-  function parseURL() {
+  /* ── Fetch items, brands, and categories from API then boot page ─
+     Pattern: nested $.ajax GET calls, same as admin-brands.js loadDataFromDB
+     and itcp237-js-ns-2026/js/home.js                                        */
+  $.ajax({
+    method: 'GET',
+    url: `${url}api/v1/items`,
+    dataType: 'json',
+    success: function (data) {
+      const products = Array.isArray(data) ? data : (data.rows || []);
+
+      $.ajax({
+        method: 'GET',
+        url: `${url}api/v1/brands`,
+        dataType: 'json',
+        success: function (brands) {
+
+          $.ajax({
+            method: 'GET',
+            url: `${url}api/v1/categories`,
+            dataType: 'json',
+            success: function (categories) {
+              init(products, brands, categories);
+            },
+            error: function (err) {
+              console.error('Shop: failed to load categories', err);
+              init(products, brands, []);
+            }
+          });
+
+        },
+        error: function (err) {
+          console.error('Shop: failed to load brands', err);
+          init(products, [], []);
+        }
+      });
+
+    },
+    error: function (err) {
+      console.error('Shop: failed to load items', err);
+    }
+  });
+
+  /* ── Parse URL params ───────────────────────────────────────── */
+  function parseURL(brands) {
     const params = new URLSearchParams(window.location.search);
     if (params.get('cat')) filters.categories = [params.get('cat')];
     if (params.get('brand')) {
-      const brand = Tunify.brandFromSlug(params.get('brand'));
-      if (brand) filters.brands = [brand];
+      // Match brand slug to actual brand name from API
+      const slug = params.get('brand');
+      const found = brands.find(b => b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug);
+      if (found) filters.brands = [found.name];
     }
     if (params.get('q')) filters.search = params.get('q');
     if (params.get('sale')) filters.saleOnly = true;
   }
 
-  function renderBrandFilters() {
+  /* ── Render brand filter checkboxes ────────────────────────── */
+  function renderBrandFilters(brands) {
     const $group = $('#brandFilters');
     if (!$group.length) return;
     $group.empty();
-    TunifyBrands.forEach(b => {
+    brands.forEach(function (b) {
       $group.append(`
         <label class="filter-check">
           <input type="checkbox" class="brand-filter" value="${b.name}"/> ${b.name}
@@ -31,36 +78,38 @@ $(document).ready(function () {
     });
   }
 
-  function renderCategoryFilters() {
+  /* ── Render category filter checkboxes ─────────────────────── */
+  function renderCategoryFilters(categories) {
     const $group = $('#categoryFilters');
     if (!$group.length) return;
     $group.empty();
-    const cats = Tunify.categories || ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories'];
-    cats.forEach(c => {
-      const display = c.charAt(0).toUpperCase() + c.slice(1);
+    categories.forEach(function (c) {
+      const slug = c.name.toLowerCase();
+      const display = slug.charAt(0).toUpperCase() + slug.slice(1);
       $group.append(`
         <label class="filter-check">
-          <input type="checkbox" class="cat-filter" value="${c.toLowerCase()}"/> ${display}
+          <input type="checkbox" class="cat-filter" value="${slug}"/> ${display}
         </label>
       `);
     });
   }
 
-  function buildSidebar() {
-    const max = Math.max(...Tunify.products.map(p => p.price));
+  /* ── Build price slider ─────────────────────────────────────── */
+  function buildSidebar(products) {
+    const max = products.length ? Math.max(...products.map(p => Number(p.price))) : 999999;
     $('#priceSlider').slider({
       range: true,
       min: 0,
       max: max,
       values: [0, max],
-      slide: (e, ui) => {
+      slide: function (e, ui) {
         $('#priceMin').text(ui.values[0].toLocaleString());
         $('#priceMax').text(ui.values[1].toLocaleString());
       },
-      stop: (e, ui) => {
+      stop: function (e, ui) {
         filters.minPrice = ui.values[0];
         filters.maxPrice = ui.values[1];
-        applyFilters();
+        applyFilters(products);
       }
     });
     filters.maxPrice = max;
@@ -69,12 +118,12 @@ $(document).ready(function () {
     $('#priceMax').text(max.toLocaleString());
 
     if (filters.categories.length) {
-      filters.categories.forEach(c => {
+      filters.categories.forEach(function (c) {
         $(`.cat-filter[value="${c}"]`).prop('checked', true);
       });
     }
     if (filters.brands.length) {
-      filters.brands.forEach(b => {
+      filters.brands.forEach(function (b) {
         $(`.brand-filter[value="${b}"]`).prop('checked', true);
       });
     }
@@ -82,83 +131,79 @@ $(document).ready(function () {
     if (filters.search) $('#shopSearch').val(filters.search);
   }
 
-  function bindEvents() {
+  /* ── Bind filter events ─────────────────────────────────────── */
+  function bindEvents(products, brands) {
     $(document).on('change', '.cat-filter', function () {
-      filters.categories = $('.cat-filter:checked').map(function () {
-        return this.value;
-      }).get();
-      applyFilters();
+      filters.categories = $('.cat-filter:checked').map(function () { return this.value; }).get();
+      applyFilters(products);
     });
 
     $(document).on('change', '.brand-filter', function () {
-      filters.brands = $('.brand-filter:checked').map(function () {
-        return this.value;
-      }).get();
-      applyFilters();
+      filters.brands = $('.brand-filter:checked').map(function () { return this.value; }).get();
+      applyFilters(products);
     });
 
     $('#saleOnly').on('change', function () {
       filters.saleOnly = this.checked;
-      applyFilters();
+      applyFilters(products);
     });
 
     $('#shopSearch').on('input', debounce(function () {
       filters.search = $(this).val().trim().toLowerCase();
-      applyFilters();
+      applyFilters(products);
     }, 300));
 
+    // Build search suggestions from live product names + brand names
+    const suggestions = products.map(p => p.name).concat(brands.map(b => b.name));
     $('#shopSearch').autocomplete({
-      source: TunifySearchSuggestions,
+      source: suggestions,
       minLength: 1,
       classes: { 'ui-autocomplete': 'tunify-autocomplete' },
-      select(e, ui) {
+      select: function (e, ui) {
         $('#shopSearch').val(ui.item.value);
         filters.search = ui.item.value.toLowerCase();
-        applyFilters();
+        applyFilters(products);
       }
     });
 
-    $('#sortSelect').on('change', () => applyFilters());
+    $('#sortSelect').on('change', function () { applyFilters(products); });
 
-    $('#clearFilters').on('click', () => {
-      const max = Math.max(...Tunify.products.map(p => p.price));
+    $('#clearFilters').on('click', function () {
+      const max = products.length ? Math.max(...products.map(p => Number(p.price))) : 999999;
       filters = { categories: [], brands: [], minPrice: 0, maxPrice: max, search: '', saleOnly: false };
       $('.cat-filter, .brand-filter, #saleOnly').prop('checked', false);
       $('#shopSearch').val('');
       $('#priceSlider').slider('values', [0, max]);
       $('#priceMin').text('0');
       $('#priceMax').text(max.toLocaleString());
-      applyFilters();
+      applyFilters(products);
     });
   }
 
-  function getFiltered() {
-    let list = [...Tunify.products];
-    if (filters.categories.length) {
-      list = list.filter(p => filters.categories.includes(p.category));
-    }
-    if (filters.brands.length) {
-      list = list.filter(p => filters.brands.includes(p.brand));
-    }
+  /* ── Filter + sort products ─────────────────────────────────── */
+  function getFiltered(products) {
+    let list = [...products];
+    if (filters.categories.length) list = list.filter(p => filters.categories.includes(p.category));
+    if (filters.brands.length) list = list.filter(p => filters.brands.includes(p.brand));
     if (filters.saleOnly) list = list.filter(p => p.badge === 'sale');
     if (filters.search) {
       list = list.filter(p =>
         p.name.toLowerCase().includes(filters.search) ||
-        p.brand.toLowerCase().includes(filters.search)
+        (p.brand && p.brand.toLowerCase().includes(filters.search))
       );
     }
-    list = list.filter(p => p.price >= filters.minPrice && p.price <= filters.maxPrice);
+    list = list.filter(p => Number(p.price) >= filters.minPrice && Number(p.price) <= filters.maxPrice);
 
     const sort = $('#sortSelect').val();
-    if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
-    else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+    if (sort === 'price-asc') list.sort((a, b) => Number(a.price) - Number(b.price));
+    else if (sort === 'price-desc') list.sort((a, b) => Number(b.price) - Number(a.price));
     else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
-    else if (sort === 'rating') list.sort((a, b) => b.stars - a.stars);
     return list;
   }
 
-  function applyFilters() {
-    const list = getFiltered();
+  /* ── Render product grid ────────────────────────────────────── */
+  function applyFilters(products) {
+    const list = getFiltered(products);
     const $grid = $('#shopGrid');
     $grid.empty();
     if (!list.length) {
@@ -168,23 +213,56 @@ $(document).ready(function () {
           <p style="color:var(--silver)">No instruments match your filters.</p>
           <button class="btn-outline-gold mt-2" id="clearFiltersInline">Clear Filters</button>
         </div>`);
-      $('#clearFiltersInline').on('click', () => $('#clearFilters').click());
+      $('#clearFiltersInline').on('click', function () { $('#clearFilters').click(); });
       return;
     }
-    list.forEach(p => $grid.append(Tunify.productCardHTML(p)));
+    list.forEach(function (p) {
+      $grid.append(`
+        <div class="col-6 col-md-4 col-lg-3 mb-4">
+          <a class="prod-card h-100 d-block text-decoration-none" href="product.html?id=${p.id}">
+            <div class="prod-img-area">
+              ${p.badge ? `<span class="prod-badge badge-${p.badge}">${p.badge}</span>` : ''}
+              ${p.image ? `<img src="${p.image}" class="prod-card-img img-fluid" alt="${p.name}">` : `<i class="fas fa-music"></i>`}
+            </div>
+            <div class="prod-body">
+              <p class="prod-category">${p.category}</p>
+              <p class="prod-name">${p.name}</p>
+              <p class="prod-brand">${p.brand}</p>
+              <div class="prod-footer">
+                <div class="prod-price">₱${Number(p.price).toLocaleString()}</div>
+                <button type="button" class="btn-add-cart"
+                  data-id="${p.id}" data-desc="${p.name}"
+                  data-price="${p.price}" data-image="${p.image || ''}"
+                  data-stock="${p.stock}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </a>
+        </div>`);
+    });
     $('#resultCount').text(`${list.length} product${list.length !== 1 ? 's' : ''}`);
     Tunify.triggerFadeIn();
+
+    // Add to cart from shop grid
+    $(document).off('click.shopCart').on('click.shopCart', '.btn-add-cart', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const $btn = $(this);
+      addToCart($btn.data('id'), 1, $btn.data('desc'), $btn.data('price'), $btn.data('image'), $btn.data('stock'));
+    });
   }
 
-  function init() {
+  /* ── Init: runs after all 3 API calls succeed ───────────────── */
+  function init(products, brands, categories) {
     try {
       console.log('ShopPage init starting');
-      parseURL();
-      renderBrandFilters();
-      renderCategoryFilters();
-      buildSidebar();
-      bindEvents();
-      applyFilters();
+      parseURL(brands);
+      renderBrandFilters(brands);
+      renderCategoryFilters(categories);
+      buildSidebar(products);
+      bindEvents(products, brands);
+      applyFilters(products);
       Tunify.triggerFadeIn();
       console.log('ShopPage init completed successfully');
     } catch (err) {
@@ -192,8 +270,6 @@ $(document).ready(function () {
     }
   }
 
-  // Auto-run init
-  init();
 });
 
 function debounce(fn, ms) {

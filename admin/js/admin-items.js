@@ -33,7 +33,9 @@ $(document).ready(function () {
         accessories: 'fa-plug' 
     }
 
-    let selectedImage = null
+    let newFiles = [];
+    let existingImages = [];
+    let primarySelection = null;
 
     // ── Populate filter dropdowns (brand & category) ─────────────
     const populateFilterDropdowns = () => {
@@ -205,12 +207,107 @@ $(document).ready(function () {
         reloadTable()
     })
 
+    // ── Preview & Manage Uploaded Images ───────────────────────
+    const renderPreviews = () => {
+        const $container = $('#imagePreviewContainer');
+        $container.empty();
+
+        // 1. Existing images
+        existingImages.forEach(img => {
+            const isPrimary = primarySelection === `existing_${img.id}`;
+            const imgSrc = img.image_path.startsWith('http') ? img.image_path : `http://localhost:5000/${img.image_path}`;
+            const $card = $(`
+                <div class="position-relative mr-2 mb-2 p-1 border rounded" style="width: 100px; text-align: center; background: #2D2D39; border-color: #3F3F51;">
+                    <img src="${imgSrc}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;" />
+                    <button type="button" class="btn btn-danger btn-sm position-absolute btn-remove-existing" data-id="${img.id}" style="top: -5px; right: -5px; padding: 0px 5px; border-radius: 50%; font-size: 0.8rem; line-height: 1;">&times;</button>
+                    <div class="mt-1" style="font-size: 0.7rem;">
+                        <input type="radio" name="primaryImageRadio" value="existing_${img.id}" ${isPrimary ? 'checked' : ''} />
+                        <span class="ml-1" style="color: var(--gold)">Primary</span>
+                    </div>
+                </div>
+            `);
+            $container.append($card);
+        });
+
+        // 2. New selected files
+        newFiles.forEach((file, index) => {
+            const isPrimary = primarySelection === `new_${index}`;
+            const reader = new FileReader();
+            const $card = $(`
+                <div class="position-relative mr-2 mb-2 p-1 border rounded" style="width: 100px; text-align: center; background: #2D2D39; border-color: #3F3F51;">
+                    <img src="" class="rounded preview-new-img" style="width: 80px; height: 80px; object-fit: cover;" />
+                    <button type="button" class="btn btn-danger btn-sm position-absolute btn-remove-new" data-index="${index}" style="top: -5px; right: -5px; padding: 0px 5px; border-radius: 50%; font-size: 0.8rem; line-height: 1;">&times;</button>
+                    <div class="mt-1" style="font-size: 0.7rem;">
+                        <input type="radio" name="primaryImageRadio" value="new_${index}" ${isPrimary ? 'checked' : ''} />
+                        <span class="ml-1" style="color: var(--gold)">Primary</span>
+                    </div>
+                </div>
+            `);
+            
+            reader.onload = e => {
+                $card.find('.preview-new-img').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+            $container.append($card);
+        });
+        
+        const totalCount = existingImages.length + newFiles.length;
+        $('#fileLabel').text(totalCount > 0 ? `${totalCount} image(s) set` : 'Choose image files…');
+    };
+
+    // Remove existing image handler
+    $(document).on('click', '.btn-remove-existing', function (e) {
+        e.preventDefault();
+        const imgId = parseInt($(this).data('id'));
+        existingImages = existingImages.filter(img => img.id !== imgId);
+        if (primarySelection === `existing_${imgId}`) {
+            if (existingImages.length > 0) {
+                primarySelection = `existing_${existingImages[0].id}`;
+            } else if (newFiles.length > 0) {
+                primarySelection = `new_0`;
+            } else {
+                primarySelection = null;
+            }
+        }
+        renderPreviews();
+    });
+
+    // Remove new image handler
+    $(document).on('click', '.btn-remove-new', function (e) {
+        e.preventDefault();
+        const idx = parseInt($(this).data('index'));
+        newFiles.splice(idx, 1);
+        if (primarySelection === `new_${idx}`) {
+            if (existingImages.length > 0) {
+                primarySelection = `existing_${existingImages[0].id}`;
+            } else if (newFiles.length > 0) {
+                primarySelection = `new_0`;
+            } else {
+                primarySelection = null;
+            }
+        } else if (primarySelection && primarySelection.startsWith('new_')) {
+            const oldIdx = parseInt(primarySelection.split('_')[1]);
+            if (oldIdx > idx) {
+                primarySelection = `new_${oldIdx - 1}`;
+            }
+        }
+        renderPreviews();
+    });
+
+    // Primary selection handler
+    $(document).on('change', 'input[name="primaryImageRadio"]', function () {
+        primarySelection = $(this).val();
+    });
+
     // ── Add Instrument Button ───────────────────────────────────
     $('#btnAddNewItem').on('click', function () {
         $('#itemForm')[0].reset();
         $('#itemId').val('');
-        selectedImage = null;
-        $('#fileLabel').text('Choose image file…');
+        newFiles = [];
+        existingImages = [];
+        primarySelection = null;
+        $('#imagePreviewContainer').empty();
+        $('#fileLabel').text('Choose image files…');
         $('#modalTitle').text('Add Instrument');
         $('#itemForm').removeClass('was-validated');
         $('#itemModal').modal('show');
@@ -230,22 +327,34 @@ $(document).ready(function () {
 
     // ── Image file input ─────────────────────────────────────────
     $('#itemImageFile').on('change', function (e) {
-        const file = e.target.files[0]
-        if (!file) return
-        if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
-            Swal.fire({ icon: 'error', text: 'Only JPG, JPEG, and PNG allowed!', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            $(this).val('')
-            return
+        const files = Array.from(e.target.files);
+        let validFiles = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                Swal.fire({ icon: 'error', text: `"${file.name}" is not a supported type (Only JPG, JPEG, PNG)!`, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+                continue;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire({ icon: 'warning', text: `"${file.name}" exceeds 2MB limit!`, showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true });
+                continue;
+            }
+            validFiles.push(file);
         }
-        if (file.size > 2 * 1024 * 1024) {
-            Swal.fire({ icon: 'warning', text: 'Image must be smaller than 2MB!', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
+
+        newFiles = newFiles.concat(validFiles);
+
+        if (!primarySelection) {
+            if (existingImages.length > 0) {
+                primarySelection = `existing_${existingImages[0].id}`;
+            } else if (newFiles.length > 0) {
+                primarySelection = `new_0`;
+            }
         }
-        $('#fileLabel').text(file.name)
-        const reader = new FileReader()
-        reader.onload = e => { selectedImage = e.target.result }
-        reader.readAsDataURL(file)
-    })
+
+        renderPreviews();
+        $(this).val(''); // Reset so the same file selection can be triggered again
+    });
 
     // ── Add item submit (POST to Backend DB) ─────────────────────
     $('#itemSubmit').on('click', function (e) {
@@ -283,20 +392,30 @@ $(document).ready(function () {
         const token = getToken()
         if (!token) return
 
+        let formData = new FormData();
+        formData.append("name", name);
+        formData.append("brandName", brandName);
+        formData.append("categoryName", categoryName);
+        formData.append("price", price);
+        if (cost_price !== '') formData.append("cost_price", Number(cost_price));
+        formData.append("stock", Number(stock));
+        formData.append("desc", desc);
+        
+        newFiles.forEach(file => {
+            formData.append("images", file);
+        });
+
+        if (primarySelection && primarySelection.startsWith("new_")) {
+            const primaryIndex = primarySelection.split("_")[1];
+            formData.append("primaryImageIndex", primaryIndex);
+        }
+
         $.ajax({
             method: "POST",
             url: `${url}items`,
-            data: JSON.stringify({ 
-                name,
-                brandName,
-                categoryName,
-                price,
-                cost_price: cost_price !== '' ? Number(cost_price) : undefined,
-                stock: Number(stock),
-                image: selectedImage,
-                desc
-            }),
-            contentType: "application/json; charset=utf-8",
+            data: formData,
+            contentType: false,
+            processData: false,
             dataType: "json",
             headers: { "Authorization": "Bearer " + token },
             success: function (res) {
@@ -325,8 +444,22 @@ $(document).ready(function () {
         $('#itemCategory').val(p.category); $('#itemPrice').val(p.price)
         $('#itemCostPrice').val(p.cost_price ? Math.round(p.cost_price) : Math.round(p.price * 0.6)); $('#itemStock').val(p.stock)
         $('#itemDesc').val(p.desc || '')
-        $('#fileLabel').text(p.image ? 'Image set' : 'Choose image file…')
-        selectedImage = p.image || null
+        
+        // Reset image states
+        newFiles = [];
+        existingImages = p.images || [];
+        
+        const primaryImg = existingImages.find(img => img.is_primary);
+        if (primaryImg) {
+            primarySelection = `existing_${primaryImg.id}`;
+        } else if (existingImages.length > 0) {
+            primarySelection = `existing_${existingImages[0].id}`;
+        } else {
+            primarySelection = null;
+        }
+
+        renderPreviews();
+
         $('#modalTitle').text('Edit Instrument'); $('#itemForm').removeClass('was-validated')
         $('#itemSubmit').hide(); $('#itemUpdate').show()
         $('#itemModal').modal('show')
@@ -357,23 +490,38 @@ $(document).ready(function () {
         const token = getToken()
         if (!token) return
 
+        let formData = new FormData();
+        formData.append("id", id);
+        formData.append("name", name);
+        if (brandName) formData.append("brandName", brandName);
+        if (categoryName) formData.append("categoryName", categoryName);
+        formData.append("price", price);
+        if (cost_price !== '') formData.append("cost_price", Number(cost_price));
+        formData.append("stock", stock);
+        formData.append("desc", desc);
+
+        // Send existing images kept
+        const keptIds = existingImages.map(img => img.id);
+        formData.append("existingImages", JSON.stringify(keptIds));
+
+        // Send primary selection
+        if (primarySelection) {
+            formData.append("primaryImage", primarySelection);
+        }
+
+        // Send new files
+        newFiles.forEach(file => {
+            formData.append("images", file);
+        });
+
         $.ajax({
             method: "PUT",
             url: `${url}items`,
-            data: JSON.stringify({ 
-                id,
-                name,
-                brandName,
-                categoryName,
-                price,
-                cost_price: cost_price !== '' ? Number(cost_price) : undefined,
-                stock,
-                image: selectedImage,
-                desc
-            }),
-            contentType: "application/json; charset=utf-8",
+            data: formData,
+            contentType: false,
+            processData: false,
             dataType: "json",
-            headers: { "Authorization": "Bearer " + getToken() },
+            headers: { "Authorization": "Bearer " + token },
             success: function (res) {
                 $('#itemModal').modal('hide')
                 Swal.fire({ icon: 'success', text: 'Instrument updated!', showConfirmButton: false, position: 'bottom-right', timer: 1500, timerProgressBar: true })

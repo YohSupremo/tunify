@@ -41,12 +41,18 @@ BACKEND — controllers/customer.js
    update ANY customer by user_id passed in the URL path — the same ID-in-path
    pattern used by updateSupplier and deleteSupplier.
 
-   ENHANCEMENT:
-   updateCustomer also allows the admin to change the customer's email address
-   (stored in the users table) in the same request as the profile fields (stored in
-   the customer table). The reference updateProfile does not touch the email field.
-   A SequelizeUniqueConstraintError is caught and returned as a 409 if the email
-   is already in use by another account.
+    ENHANCEMENT:
+    updateCustomer allows the admin to change the customer's email address (stored in the
+    users table) and optionally update the customer's password (hashed via bcrypt) in the same
+    request. The reference updateProfile does not support email or password updates.
+    A SequelizeUniqueConstraintError is caught and returned as a 409 if the email is already in
+    use by another account.
+
+    HOW TO TEST PASSWORD EDIT:
+    1. Open the Admin Panel customers page (admin/customers.html).
+    2. Click the "Edit" button on a customer.
+    3. Enter a new password in the optional Password field (at least 6 characters) and save.
+    4. Verify that you can log in on the customer panel using the customer's email and the new password.
 
 4. FUNCTION: exports.deactivateCustomer  (DELETE /api/v1/customers/:id)
    JUSTIFICATION:
@@ -94,15 +100,24 @@ FRONTEND — admin/js/admin-customers.js
 FRONTEND — admin/customers.html
 ─────────────────────────────────────────────────────────────────────────────────────
 
-7. DESIGN DECISION: No "Add Customer" button
+7. FUNCTION: exports.createCustomer (POST /api/v1/customers)
    JUSTIFICATION:
-   Customers are created through the public registration flow (register.html →
-   POST /api/v1/register). The database also requires a corresponding users row
-   before a customer row can be inserted (FK constraint). Allowing an admin to
-   "add" a customer from the admin panel would bypass the registration flow and
-   is not listed as a functional requirement. The admin module provides Read +
-   Update + Deactivate (soft-delete) — the "Create" in this CRUD is handled by
-   the registration module.
+   Admins need a way to register new customers directly from the Admin Panel.
+   This creates a new user account (with hashed password) in the `users` table
+   and a corresponding entry in the `customer` table.
+
+   ENHANCEMENT:
+   Supports uploading a profile photo during customer creation. The uploaded image is handled via
+   multer middleware, copied to the frontend images directory, and saved as a relative path in
+   the database.
+
+   HOW TO TEST:
+   1. Open the Admin Panel customers page (admin/customers.html).
+   2. Click the "+ Add Customer" button. A modal opens with a password input field and a profile photo placeholder with a "Change" overlay (Addresses fields are hidden since it's a new account).
+   3. Enter Email, Password, First Name, Last Name, Phone, and Role.
+   4. Click the profile photo placeholder to upload a customer photo.
+   5. Click "Save Customer".
+   6. Verify that the table updates and displays the new customer, and that they can log in on the customer panel.
 
 8. DESIGN DECISION: Deactivate instead of Hard Delete
    JUSTIFICATION:
@@ -138,4 +153,173 @@ ENHANCEMENTS — CUSTOMER FILTERING & REACTIVATION
     Frontend updated with a premium, theme-harmonized slider tab interface to toggle
     between filters and render appropriate action icons (Reactivate/Deactivate) depending
     on user state.
+
+─────────────────────────────────────────────────────────────────────────────────────
+FIX — CUSTOMER PANEL: LIVE API FETCH FOR PRODUCTS, BRANDS & CATEGORIES
+References: itcp237-js-ns-2026/js/home.js, node-ns-2026/controllers/item.js
+─────────────────────────────────────────────────────────────────────────────────────
+
+12. FIX: js/home.js — Products fetched from GET /api/v1/items
+    PROBLEM:
+    home.js used hardcoded TunifyProducts and TunifyBrands from data.js.
+    Items created/updated via admin panel were never reflected on the home page.
+
+    REFERENCE PATTERN FOLLOWED:
+    itcp237-js-ns-2026/js/home.js lines 16-95: $.ajax GET to api/v1/items,
+    success callback receives data, renders product cards.
+
+    ADAPTATION:
+    The reference NS backend returns { rows: items }. Tunify's backend
+    (controllers/item.js getItems) returns a plain array. Normalised with:
+      const products = Array.isArray(data) ? data : (data.rows || []);
+
+    ENHANCEMENT:
+    All render functions (renderHeroCarousel, renderCategoryStrip,
+    renderFilterTabs, renderProducts, bindEvents) are called only inside the
+    $.ajax success callback — page never renders with stale/empty data.
+
+13. FIX: js/shop.js — Products, brands, categories fetched from API
+    PROBLEM:
+    shop.js used TunifyProducts, TunifyBrands, and hardcoded category arrays.
+    Filters and product grid showed static data only.
+
+    REFERENCE PATTERN FOLLOWED:
+    itcp237-js-ns-2026/js/home.js ($.ajax GET) and admin-brands.js
+    loadDataFromDB pattern (nested $.ajax: items first, then brands, then
+    categories in each successive success callback).
+
+    ENHANCEMENT:
+    Search autocomplete suggestions are built from live product names + brand
+    names from API. Brand URL param (?brand=fender) now resolves against
+    actual brand names by slug instead of relying on static data.
+
+14. FIX: js/product.js — Single product fetched from GET /api/v1/items
+    PROBLEM:
+    product.js used Tunify.getProduct(id) which looked up static TunifyProducts.
+    Product detail pages showed hardcoded data unrelated to the live database.
+
+    REFERENCE PATTERN FOLLOWED:
+    itcp237-js-ns-2026/js/home.js ($.ajax GET to /api/v1/items, find matching
+    item in success callback). Tunify backend has no single-item GET route so
+    the full list is fetched then filtered client-side by id.
+
+    ENHANCEMENT:
+    renderRelated() also uses live data from the same API call, so related
+    products are also live. No separate request needed.
+
+15. FIX: js/app.js — Navbar category and brand menus fetched from API
+    PROBLEM:
+    loadNav() used hardcoded category slugs and brand arrays. New brands and
+    categories created in the admin panel never appeared in the navbar.
+
+    REFERENCE PATTERN FOLLOWED:
+    Same $.ajax GET pattern from itcp237-js-ns-2026/js/home.js.
+    Calls GET /api/v1/categories and GET /api/v1/brands independently
+    (non-chained so one failure does not block the other).
+
+    ENHANCEMENT:
+    Brand slug is generated dynamically:
+      b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    so any admin-created brand gets a valid URL slug automatically.
+
+
+─────────────────────────────────────────────────────────────────────────────────────
+ENHANCEMENTS — MULTIPLE IMAGE UPLOAD FOR ITEMS
+References: itcp237-js-ns-2026/js/item.js, node-ns-2026/utils/multer.js
+─────────────────────────────────────────────────────────────────────────────────────
+
+16. MULTIPLE PHOTO UPLOADS (item_images Table)
+    JUSTIFICATION:
+    The legacy item table only had a single `image_path` string column. The database
+    was upgraded to support multiple photos via a new `item_images` table, removing
+    `image_path` from `item`.
+
+    REFERENCE PATTERN FOLLOWED:
+    itcp237-js-ns-2026/js/item.js (uses FormData, multipart/form-data POST/PUT
+    submits, with contentType: false, processData: false).
+    node-ns-2026/utils/multer.js (uses diskStorage for handling uploads).
+
+    ADAPTATION:
+    Instead of `upload.single('image')` in the routes, we use `upload.array('images', 10)`
+    to handle multiple photos. The uploaded files are saved in `item_images` with their
+    primary flag (`is_primary`), and sort order (`sort_order`).
+
+    ENHANCEMENT:
+    1. Interactive image preview container (#imagePreviewContainer) in the admin
+       modal that allows the user to preview both existing images and newly selected
+       images before saving.
+    2. Interactive "Remove" button on each image preview thumbnail to delete individual
+       existing or newly selected photos.
+    3. Interactive "Primary" radio button under each preview thumbnail to let the user
+       define which image is the primary/default image shown in the list.
+    4. Auto-copying uploaded files from the backend `images` directory to the frontend
+       `tunify/images` directory so they are immediately accessible without proxying.
+    5. Clean fallback mechanism in `getItems`: if no image is marked primary, fallback to
+       the first image, mapping it to the legacy `image` field so existing customer/admin pages
+       don't break.
+    6. Product detail carousel (js/product.js) dynamically renders all images associated
+       with the product (p.images) and renders an interactive thumbnail strip below.
+       Clicking the `+N` thumbnail cycles sequentially through all remaining hidden images.
+
+    HOW TO TEST:
+    1. Open the Admin Panel items page (admin/items.html).
+    2. Click "Add Instrument", select multiple images (e.g. 5 images), select one as "Primary" via its radio button, and save.
+    3. Verify that the table updates and correctly shows the selected primary image.
+    4. Click "Edit" on the item. Verify that existing images appear in the preview list with the correct primary item selected.
+    5. Try removing an existing image, selecting a different image as primary, or adding a new file, then update the item and verify the updates.
+    6. Go to the customer panel product page (product.html?id=<id>). Verify the carousel dynamically cycles through all uploaded images of the item. Verify that clicking the `+N` thumbnail cycles sequentially through the remaining hidden images.
+
+17. FIX: Profile Picture Uploads Absolute Path issue
+    PROBLEM:
+    Profile pictures were saving absolute system paths (e.g. `c:/xampp/...`) in the database,
+    which caused them to break when loaded via the frontend web server.
+
+    SOLUTION:
+    Updated both `updateCustomer` and `updateProfile` controllers to save relative image paths
+    (e.g., `images/filename.jpg`) in the database, and added logic to copy the uploaded files
+    from the backend to the frontend `tunify/images` folder so they are immediately accessible.
+
+18. ENHANCEMENT: Input Validation on Admin Add/Edit Customer (admin/customers.html, admin-customers.js)
+    PROBLEM:
+    Admins could input alphabetical characters in the Phone (cellphone) number field, and passwords
+    shorter than 6 characters were allowed by the HTML validation, potentially causing weak credentials.
+
+    SOLUTION:
+    1. Added `minlength="6"` to the password input field.
+    2. Added `pattern="^\+?[0-9\s-]{7,15}$"` validation and matching `invalid-feedback` to the phone field.
+    3. Implemented a keypress/input event sanitizer in `admin-customers.js` to automatically filter and strip out non-phone characters (letters, symbols except leading +, -, and space) in real-time as the admin types.
+
+    HOW TO TEST:
+    1. Open the Admin Panel customers page (admin/customers.html).
+    2. Click "+ Add Customer".
+    3. Try to type letters into the Phone field — verify that they are immediately filtered out.
+    4. Try to enter a 3-character password and click Save — verify that the form fails validation and shows a feedback message.
+
+19. ENHANCEMENT: Scrollable Brand Dropdown Menu (css/pages.css)
+    PROBLEM:
+    The "BRANDS" dropdown menu in the header navbar was extremely tall (containing 17 items) and overflowed the screen height, making it difficult to read and select items.
+
+    SOLUTION:
+    Added a scrollable container style (`max-height: 350px`, `overflow-y: auto`, custom thin themed scrollbar) for `.dropdown-menu-brands`.
+
+    HOW TO TEST:
+    1. Go to http://localhost/tunify/index.html.
+    2. Hover/Click on the "BRANDS" link in the navbar.
+    3. Verify that the dropdown list has a scrollbar and fits cleanly on the screen without overflowing.
+
+20. ENHANCEMENT: Input Validation on Front-end Profile Page (profile.html, js/user.js)
+    PROBLEM:
+    Admins and customers could enter invalid details (like alphabetical characters in Phone, empty name fields) on the front-end profile page (profile.html) because it lacked the input validation/sanitization rules implemented on the admin panel page.
+
+    SOLUTION:
+    1. Added `required` to first name, last name, and email fields in profile.html.
+    2. Added `pattern="^\+?[0-9][0-9\s-]{6,14}$"` and invalid-feedback support for the phone input in profile.html.
+    3. Implemented a keypress/input event sanitizer in js/user.js for the `#editPhone` field to strip letters and restrict starts-with hyphen symbols in real-time.
+    4. Added real-time input event validation handlers in js/user.js to highlight fields dynamically and prevent saving profile updates if any fields are invalid.
+
+    HOW TO TEST:
+    1. Log in to the customer storefront and go to the profile page (profile.html).
+    2. Try to type letters or a starting hyphen into the Phone field — verify they are blocked in real-time.
+    3. Clear the first name field and click Save Changes — verify it shows a red validation border and blocks saving.
+
 

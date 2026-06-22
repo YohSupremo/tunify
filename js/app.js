@@ -88,47 +88,55 @@ const loadNav = () => {
     const page = document.body.dataset.page || '';
     if (page) $(`.nav-link[data-page="${page}"]`).addClass('active');
 
-    // Populate Category Menu dynamically
+    // Populate Category Menu dynamically from API
     const $catMenu = $('#navCategoryMenu');
     if ($catMenu.length) {
-      $catMenu.empty();
-      const categories = ['string', 'percussion', 'keys', 'wind', 'vocals', 'accessories'];
       const CAT_ICONS = {
         string: 'fa-guitar', percussion: 'fa-drum', keys: 'fa-keyboard',
         wind: 'fa-wind', vocals: 'fa-microphone', accessories: 'fa-plug'
       };
-      categories.forEach(function (c) {
-        const display = c.charAt(0).toUpperCase() + c.slice(1);
-        const icon = CAT_ICONS[c] || 'fa-music';
-        $catMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?cat=${c}"><i class="fas ${icon} mr-2"></i> ${display}</a>`);
+      $.ajax({
+        method: 'GET',
+        url: `${url}api/v1/categories`,
+        dataType: 'json',
+        success: function (categories) {
+          $catMenu.empty();
+          categories.forEach(function (c) {
+            const slug = c.name.toLowerCase();
+            const display = slug.charAt(0).toUpperCase() + slug.slice(1);
+            const icon = CAT_ICONS[slug] || 'fa-music';
+            $catMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?cat=${slug}"><i class="fas ${icon} mr-2"></i> ${display}</a>`);
+          });
+        },
+        error: function () {
+          console.warn('Nav: could not load categories from API.');
+        }
       });
     }
 
-    // Populate Brand Menu dynamically
+    // Populate Brand Menu dynamically from API
     const $brandMenu = $('#navBrandMenu');
     if ($brandMenu.length) {
-      $brandMenu.empty();
-      const brands = [
-        { name: 'Fender', slug: 'fender' },
-        { name: 'Gibson', slug: 'gibson' },
-        { name: 'Yamaha', slug: 'yamaha' },
-        { name: 'Roland', slug: 'roland' },
-        { name: 'Shure', slug: 'shure' },
-        { name: 'Ibanez', slug: 'ibanez' },
-        { name: 'Marshall', slug: 'marshall' }
-      ];
       const BRAND_ICONS = {
-        fender: 'fa-guitar',
-        gibson: 'fa-guitar',
-        yamaha: 'fa-keyboard',
-        roland: 'fa-drum',
-        shure: 'fa-microphone',
-        ibanez: 'fa-guitar',
+        fender: 'fa-guitar', gibson: 'fa-guitar', yamaha: 'fa-keyboard',
+        roland: 'fa-drum', shure: 'fa-microphone', ibanez: 'fa-guitar',
         marshall: 'fa-volume-up'
       };
-      brands.forEach(function (b) {
-        const icon = BRAND_ICONS[b.slug] || 'fa-tag';
-        $brandMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?brand=${b.slug}"><i class="fas ${icon} mr-2"></i> ${b.name}</a>`);
+      $.ajax({
+        method: 'GET',
+        url: `${url}api/v1/brands`,
+        dataType: 'json',
+        success: function (brands) {
+          $brandMenu.empty();
+          brands.forEach(function (b) {
+            const slug = b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const icon = BRAND_ICONS[slug] || 'fa-tag';
+            $brandMenu.append(`<a class="dropdown-item" href="${prefix}shop.html?brand=${slug}"><i class="fas ${icon} mr-2"></i> ${b.name}</a>`);
+          });
+        },
+        error: function () {
+          console.warn('Nav: could not load brands from API.');
+        }
       });
     }
 
