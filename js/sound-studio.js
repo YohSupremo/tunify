@@ -452,3 +452,7 @@ const SoundStudio = {
 $(document).ready(() => {
   SoundStudio.init();
 });
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  SoundStudio.init();
+}
+

@@ -55,3 +55,79 @@
     </div>
   </div>
 </footer>
+
+<!-- ══════════════════════════════════════════════════════
+   INTERACTIVE SOUND STUDIO WIDGET
+══════════════════════════════════════════════════════ -->
+<div class="sound-studio-trigger" id="studioTrigger" title="Open Sound Studio">
+  <i class="fas fa-music"></i>
+</div>
+
+<div class="sound-studio-panel" id="studioPanel">
+  <div class="sound-studio-header">
+    <div class="sound-studio-title">
+      <i class="fas fa-sliders-h mr-2"></i> Sound Studio
+    </div>
+    <button class="sound-studio-close" id="studioCloseBtn">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="sound-studio-visualizer-wrap">
+    <canvas class="sound-studio-visualizer" id="studioVisualizer"></canvas>
+  </div>
+  
+  <div class="sound-studio-controls">
+    <select class="studio-select" id="studioOscillator">
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="sawtooth">Sawtooth</option>
+      <option value="triangle">Triangle</option>
+    </select>
+    <i class="fas fa-volume-down text-gold"></i>
+    <input type="range" class="studio-vol-slider" id="studioVolume" min="0" max="1" step="0.05" value="0.3">
+    <i class="fas fa-volume-up text-gold"></i>
+  </div>
+  
+  <div class="sound-studio-tabs">
+    <button class="sound-studio-tab active" data-tab="keys">Keys</button>
+    <button class="sound-studio-tab" data-tab="drums">Drums</button>
+  </div>
+  
+  <div class="studio-content-pane active" id="pane-keys">
+    <div class="synth-keys-container">
+      <div class="synth-key" data-note="261.63" data-key="A"></div>
+      <div class="synth-key" data-note="293.66" data-key="S"></div>
+      <div class="synth-key" data-note="329.63" data-key="D"></div>
+      <div class="synth-key" data-note="349.23" data-key="F"></div>
+      <div class="synth-key" data-note="392.00" data-key="G"></div>
+      <div class="synth-key" data-note="440.00" data-key="H"></div>
+      <div class="synth-key" data-note="493.88" data-key="J"></div>
+      <div class="synth-key" data-note="523.25" data-key="K"></div>
+    </div>
+  </div>
+  
+  <div class="studio-content-pane" id="pane-drums">
+    <div class="drum-pads-container">
+      <div class="drum-pad" data-drum="kick" data-key="Q">
+        <div class="drum-pad-name">Kick</div>
+        <div class="drum-pad-key">Q</div>
+      </div>
+      <div class="drum-pad" data-drum="snare" data-key="W">
+        <div class="drum-pad-name">Snare</div>
+        <div class="drum-pad-key">W</div>
+      </div>
+      <div class="drum-pad" data-drum="hihat" data-key="E">
+        <div class="drum-pad-name">Hi-Hat</div>
+        <div class="drum-pad-key">E</div>
+      </div>
+      <div class="drum-pad" data-drum="tom" data-key="R">
+        <div class="drum-pad-name">Tom</div>
+        <div class="drum-pad-key">R</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/sound-studio.js"></script>
+
