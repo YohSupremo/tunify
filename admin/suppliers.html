@@ -98,6 +98,14 @@
               <label for="supplierAddress">Address</label>
               <input type="text" class="form-control" id="supplierAddress" placeholder="Street, City, Province" />
             </div>
+            <!-- Associated Products Checklist -->
+            <div class="form-group mt-3" id="prodChecklistGroup">
+              <label>Associate Products</label>
+              <div id="productChecklist" style="max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.25);">
+                <!-- JavaScript will inject checkboxes here -->
+              </div>
+              <small class="form-text text-muted" style="font-size:0.7rem;">Check the products that belong to this supplier. Products already supplied by other suppliers are hidden.</small>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>

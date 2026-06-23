@@ -139,8 +139,8 @@ $(document).ready(function () {
         data: [],
         dom: 'Bfrtip',
         buttons: [
-            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } },
-            { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } }
+            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } },
+            { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } }
         ],
         pageLength: 8,
         order: [[0, 'desc']],
@@ -180,6 +180,7 @@ $(document).ready(function () {
                     nameCel,
                     p.brand,
                     cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : '',
+                    `<div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.desc || ''}">${p.desc || ''}</div>`,
                     '₱' + (p.cost_price ? Number(p.cost_price).toLocaleString() : Math.round(p.price * 0.6).toLocaleString()),
                     '₱' + p.price.toLocaleString(),
                     p.stock,
@@ -189,8 +190,8 @@ $(document).ready(function () {
             }),
             dom: 'Bfrtip',
             buttons: [
-                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } },
-                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 6, 7] } }
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } },
+                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } }
             ],
             pageLength: 8,
             order: [[0, 'desc']],

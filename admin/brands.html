@@ -42,6 +42,7 @@
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Logo</th>
                 <th>Brand Name</th>
                 <th>Associated Products</th>
                 <th>Description</th>
@@ -78,6 +79,19 @@
                 <label for="brandName">Brand Name</label>
                 <input type="text" class="form-control" id="brandName" placeholder="e.g. Fender" required />
                 <div class="invalid-feedback">Please enter brand name.</div>
+              </div>
+
+              <!-- Brand Logo Input -->
+              <div class="form-group">
+                <label for="brandLogoFile">Brand Logo</label>
+                <div class="custom-file mb-2">
+                  <input type="file" class="custom-file-input" id="brandLogoFile" accept="image/png, image/jpeg, image/jpg" />
+                  <label class="custom-file-label" for="brandLogoFile" id="fileLabel">Choose logo file...</label>
+                </div>
+                <div id="logoPreviewContainer" class="mt-2" style="display:none;">
+                  <img id="logoPreview" src="" height="50" style="object-fit:contain; border-radius:4px; background: rgba(255,255,255,0.05); padding: 2px;" />
+                </div>
+                <small class="form-text text-muted" style="font-size:0.7rem;">Only .jpg, .jpeg, and .png allowed. Max size 2MB.</small>
               </div>
 
               <!-- Brand Description Input -->

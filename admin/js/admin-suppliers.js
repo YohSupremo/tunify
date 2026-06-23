@@ -62,6 +62,35 @@ $(document).ready(function () {
         return productsList;
     }
 
+    // Render checkboxes of products inside the supplier modal
+    function renderProductChecklist(supplierId) {
+        const $checklist = $('#productChecklist');
+        $checklist.empty();
+
+        const products = getProducts();
+        
+        products.forEach(p => {
+            // Checkbox state: checked if it belongs to this supplier
+            const isChecked = supplierId !== 0 && p.supplier_id == supplierId;
+            
+            // Visibility: visible if it belongs to this supplier OR has NO supplier (null or undefined)
+            const isVisible = (p.supplier_id == supplierId) || (p.supplier_id === null || p.supplier_id === undefined);
+
+            if (isVisible) {
+                $checklist.append(`
+                    <label class="d-block text-white" style="font-size:0.8rem; margin-bottom:0.4rem; cursor:pointer;">
+                        <input type="checkbox" class="prod-assign-cb" value="${p.id}" ${isChecked ? 'checked' : ''} /> 
+                        ${p.name} <span style="font-size:0.7rem; color:var(--text-dim);">(${p.category})</span>
+                    </label>
+                `);
+            }
+        });
+
+        if ($checklist.children().length === 0) {
+            $checklist.html('<div class="text-muted text-center py-2" style="font-size:0.8rem;">No products available for assignment</div>');
+        }
+    }
+
     /* ── DataTable init ─────────────────────────────────────────── */
     var table;
 
@@ -98,6 +127,10 @@ $(document).ready(function () {
     $('#btnAddNewSupplier').on('click', function () {
         $('#supplierForm')[0].reset();
         $('#supplierId').val('');
+
+        renderProductChecklist(0);
+        $('#prodChecklistGroup').show();
+
         $('#modalTitle').text('Add Supplier');
         $('#supplierForm').removeClass('was-validated');
         $('#supplierModal').modal('show');
@@ -115,6 +148,9 @@ $(document).ready(function () {
         $('#supplierEmail').val(s.email || '');
         $('#supplierPhone').val(s.phone || '');
         $('#supplierAddress').val(s.address_line || '');
+
+        renderProductChecklist(s.id);
+        $('#prodChecklistGroup').show();
 
         $('#modalTitle').text('Edit Supplier');
         $('#supplierForm').removeClass('was-validated');
@@ -167,12 +203,19 @@ $(document).ready(function () {
         }
 
         var id = $('#supplierId').val();
+
+        // Gather all checked product IDs from the checklist
+        const checkedProductIds = $('.prod-assign-cb:checked').map(function() {
+            return parseInt($(this).val());
+        }).get();
+
         var payload = {
             name: $('#supplierName').val().trim(),
             contact_name: $('#supplierContact').val().trim(),
             email: $('#supplierEmail').val().trim(),
             phone: $('#supplierPhone').val().trim(),
-            address_line: $('#supplierAddress').val().trim()
+            address_line: $('#supplierAddress').val().trim(),
+            productIds: checkedProductIds // Send product associations
         };
 
         if (id) {

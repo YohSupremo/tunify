@@ -669,6 +669,17 @@
   color: var(--gold);
 }
 
+.status-pending {
+  background: rgba(255, 255, 255, 0.08);
+  color: #9CA3AF;
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+}
+
+
 /* Profile */
 .profile-avatar {
   width: 80px;

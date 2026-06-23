@@ -29,6 +29,42 @@ $(document).ready(function () {
   // Now brandsList and productsList will store database objects
   let brandsList = [];
   let productsList = [];
+  let logoFile = null;
+
+  // File upload change handler
+  $(document).on('change', '#brandLogoFile', function (e) {
+    const file = e.target.files[0];
+    if (!file) {
+      logoFile = null;
+      $('#fileLabel').text('Choose logo file...');
+      $('#logoPreviewContainer').hide();
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({ icon: 'error', title: 'Invalid File', text: 'Please select an image file.' });
+      $(this).val('');
+      logoFile = null;
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      Swal.fire({ icon: 'error', title: 'File Too Large', text: 'Max size is 2MB.' });
+      $(this).val('');
+      logoFile = null;
+      return;
+    }
+
+    logoFile = file;
+    $('#fileLabel').text(file.name);
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      $('#logoPreview').attr('src', evt.target.result);
+      $('#logoPreviewContainer').show();
+    }
+    reader.readAsDataURL(file);
+  });
 
   // 1. Fetch brands and products from the database API
   const loadDataFromDB = () => {
@@ -91,18 +127,26 @@ $(document).ready(function () {
 
   const brandToSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
-  // Build Table Rows (Columns: ID, Name, Associated Products Count, Description, Actions)
+  // Build Table Rows (Columns: ID, Logo, Name, Associated Products Count, Description, Actions)
   const buildRows = () => brandsList.map(b => {
     const count = getProducts().filter(p => 
         p.brand_id == b.id || 
         (p.brand && p.brand.toLowerCase() === b.name.toLowerCase())
     ).length // Count by DB ID or Name string!
     const slug = brandToSlug(b.name)
+    const logoSrc = b.logo_path
+        ? (b.logo_path.startsWith('http') ? b.logo_path : `http://localhost:5000/${b.logo_path}`)
+        : null
+    const logoHtml = logoSrc 
+        ? `<img src="${logoSrc}" height="30" style="max-width:80px; object-fit:contain; border-radius:4px; background: rgba(255,255,255,0.05); padding: 2px;" onerror="this.style.display='none';">`
+        : `<i class="fas fa-tag" style="font-size:1.1rem; color:var(--gold); opacity:.5;"></i>`
+
     return [
       b.id, // Column 0: ID
-      b.name, // Column 1: Name
-      count + ' product(s)', // Column 2: Associated Products
-      b.description || '—', // Column 3: Description
+      logoHtml, // Column 1: Logo
+      b.name, // Column 2: Name
+      count + ' product(s)', // Column 3: Associated Products
+      b.description || '—', // Column 4: Description
       `<a href='#' class='editBtn' data-id='${b.id}' data-brand='${b.name}'><i class='fas fa-edit' style='font-size:20px'></i></a>  ` +
       `<a href='#' class='deletebtn' data-brand='${b.name}'><i class='fas fa-trash-alt' style='font-size:20px;color:red'></i></a>`
     ]
@@ -130,6 +174,11 @@ $(document).ready(function () {
     $('#brandForm')[0].reset()
     $('#brandOldName').val('')
     $('#brandId').val('')
+    logoFile = null
+    $('#brandLogoFile').val('')
+    $('#logoPreview').attr('src', '')
+    $('#logoPreviewContainer').hide()
+    $('#fileLabel').text('Choose logo file...')
     $('#modalTitle').text('Add Brand')
     
     // Render the product checklist and make it visible
@@ -153,6 +202,19 @@ $(document).ready(function () {
     $('#brandId').val(brandObj.id)
     $('#brandName').val(brandObj.name)
     $('#brandDesc').val(brandObj.description || '')
+
+    logoFile = null
+    $('#brandLogoFile').val('')
+    if (brandObj.logo_path) {
+      const logoSrc = brandObj.logo_path.startsWith('http') ? brandObj.logo_path : `http://localhost:5000/${brandObj.logo_path}`;
+      $('#logoPreview').attr('src', logoSrc)
+      $('#logoPreviewContainer').show()
+      $('#fileLabel').text('Keep current logo')
+    } else {
+      $('#logoPreview').attr('src', '')
+      $('#logoPreviewContainer').hide()
+      $('#fileLabel').text('Choose logo file...')
+    }
 
     // Render product checklist for this brand ID
     renderProductChecklist(brandObj.id)
@@ -219,18 +281,24 @@ $(document).ready(function () {
         return parseInt($(this).val());
     }).get();
 
+    const formData = new FormData();
+    formData.append('description', description);
+    formData.append('productIds', JSON.stringify(checkedProductIds));
+    if (logoFile) {
+      formData.append('logo', logoFile);
+    }
+
     if (oldName) {
       // Edit Mode (PUT request)
+      formData.append('oldName', oldName);
+      formData.append('newName', newName);
+
       $.ajax({
         method: "PUT",
         url: `${url}brands`,
-        data: JSON.stringify({ 
-            oldName, 
-            newName, 
-            description,
-            productIds: checkedProductIds // Send product associations
-        }),
-        contentType: "application/json; charset=utf-8",
+        data: formData,
+        processData: false,
+        contentType: false,
         dataType: "json",
         headers: {
           "Authorization": "Bearer " + getToken()
@@ -250,15 +318,14 @@ $(document).ready(function () {
       })
     } else {
       // Add Mode (POST request)
+      formData.append('name', newName);
+
       $.ajax({
         method: "POST",
         url: `${url}brands`,
-        data: JSON.stringify({ 
-            name: newName,
-            description,
-            productIds: checkedProductIds // Send product associations
-        }),
-        contentType: "application/json; charset=utf-8",
+        data: formData,
+        processData: false,
+        contentType: false,
         dataType: "json",
         headers: {
           "Authorization": "Bearer " + getToken()
