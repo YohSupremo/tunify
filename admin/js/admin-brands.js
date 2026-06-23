@@ -264,12 +264,43 @@ $(document).ready(function () {
     })
   })
 
+  // Initialize jQuery Validation
+  const brandValidator = $('#brandForm').validate({
+    errorClass: "is-invalid",
+    validClass: "is-valid",
+    errorElement: "div",
+    errorPlacement: function (error, element) {
+      error.addClass("invalid-feedback");
+      error.insertAfter(element);
+    },
+    rules: {
+      brandName: {
+        required: true,
+        minlength: 2,
+        maxlength: 50
+      },
+      brandDesc: {
+        maxlength: 500
+      }
+    },
+    messages: {
+      brandName: {
+        required: "Brand Name is required.",
+        minlength: "Brand Name must be at least 2 characters.",
+        maxlength: "Brand Name cannot exceed 50 characters."
+      },
+      brandDesc: {
+        maxlength: "Brand Description cannot exceed 500 characters."
+      }
+    }
+  });
+
   // CREATE / UPDATE Brand via API
   $('#brandForm').on('submit', function (e) {
     e.preventDefault()
-    if (!this.checkValidity()) {
-      $(this).addClass('was-validated')
-      return
+    if (!$(this).valid()) {
+      brandValidator.focusInvalid();
+      return;
     }
 
     const oldName = $('#brandOldName').val()

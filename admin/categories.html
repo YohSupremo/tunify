@@ -74,13 +74,12 @@
               
               <div class="form-group">
                 <label for="catName">Category Name</label>
-                <input type="text" class="form-control" id="catName" placeholder="e.g. Percussion" required />
-                <div class="invalid-feedback">Please enter category name.</div>
+                <input type="text" class="form-control" id="catName" name="catName" placeholder="e.g. Percussion" required />
               </div>
 
               <div class="form-group">
                 <label for="catDesc">Description</label>
-                <textarea class="form-control" id="catDesc" placeholder="Describe this category..." rows="3"></textarea>
+                <textarea class="form-control" id="catDesc" name="catDesc" placeholder="Describe this category..." rows="3"></textarea>
               </div>
 
               <div class="form-group" id="prodChecklistGroup">
@@ -117,6 +116,8 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <!-- Bootbox -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+  <!-- jQuery Validation -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>

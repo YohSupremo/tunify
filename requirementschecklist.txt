@@ -1,0 +1,78 @@
+TUNIFY PROJECT — REQUIREMENTS CHECKLIST
+
+This checklist evaluates the status of all criteria specified in Requirements.txt.
+
+================================================================================
+SECTION 1: MACHINE PROBLEMS (CRUD, AUTH, SEQUELIZE)
+================================================================================
+
+1. [x] mp1 & mp2: NodeJS CRUD API
+   - Status: Finished.
+   - Evidence: CRUD APIs exist for category, brand, supplier, and item resources.
+
+2. [x] mp3 & mp4: CRUD Jquery/datatables frontend
+   - Status: Finished.
+   - Evidence: Brands, categories, items, and suppliers tables are managed via DataTables in the admin panel.
+   - Multiple File Uploads: Items support multiple image uploads with interactive sort/primary controls using Multer and FormData. Brands support file upload for logos.
+
+3. [/] mp5: Authentication Tokens
+   - Status: Partially Finished.
+   - Token Generation & Send: [Finished] JWT is created and returned on login (controllers/user.js:93-109).
+   - Save Token on Users Table: [Unfinished] The token is NOT stored in the database. The `users` table schema does not have a `token` column.
+
+4. [x] mp6: User Registration & Login API
+   - Status: Finished.
+   - AJAX Registration: Handled in register.html via Jquery AJAX calls to registerUser.
+   - Admin Controls: Admin can deactivate, reactivate, or change user profile fields on admin/customers.html.
+
+5. [x] mp7: Use Sequelize ORM on CRUD functions
+   - Status: Finished.
+   - Evidence: Sequelize is used for Brand, Category, Supplier, and Item/ItemImage CRUD routes.
+
+================================================================================
+SECTION 2: TERM TEST LAB (TRANSACTIONS, EMAIL, PDF)
+================================================================================
+
+6. [x] Transactions CRUD API & jQuery Frontend
+   - Status: Finished.
+   - Evidence: Customers can place orders via cart.html (POST /api/v1/orders). Admins can view orders, check detailed receipt templates in the details modal, and update order statuses dynamically.
+
+7. [ ] Send an email when updating the transaction (5pts)
+   - Status: Unfinished.
+   - Note: Email sending logic (e.g. using nodemailer) is not yet integrated.
+
+8. [ ] Attach the receipt with order details in PDF (10pts)
+   - Status: Unfinished.
+   - Note: PDF invoice generation (e.g. using pdfkit) is not yet integrated.
+
+================================================================================
+SECTION 3: QUIZZES, CHARTS, AND ROUTING
+================================================================================
+
+9. [x] Quiz 4: jQuery validation for mp3 and mp4 (15pts)
+   - Status: Finished.
+   - Evidence: Front-end admin forms (Brands, Categories, Suppliers, Items) and client forms (Login, Register) are fully validated using the jQuery Validation plugin with custom rules (e.g. matching passwords, positive numbers, phone formats, and item cost/selling price relationship).
+
+10. [x] Quiz 5: jQuery/API search/autocomplete on homepage (15pts)
+    - Status: Finished.
+    - Evidence: Search features use Jquery UI autocomplete pulling live product/brand records from GET /api/v1/items.
+
+11. [x] Quiz 6: Route protection middleware for admin roles (15pts)
+    - Status: Finished.
+    - Evidence: Auth middleware enforces checks on user roles for admin panel CRUD requests.
+
+12. [x] Quiz 7: Three JS Charts (15pts)
+    - Status: Finished.
+    - Evidence: Dashboard utilizes three Chart.js charts: Monthly Sales (line), Sales by Category (pie), and Customer Addresses (bar).
+
+================================================================================
+SECTION 4: UNIT TESTS (UI/UX, PAGINATION, SCROLL)
+================================================================================
+
+13. [x] Unit Test 1: UI/UX Design (20pts)
+    - Status: Finished.
+    - Evidence: The storefront and control panels have beautiful custom styling, glassmorphic navbar effects, and hover styles.
+
+14. [ ] Unit Test 2: jQuery pagination / infinite scroll (20pts)
+    - Status: Unfinished.
+    - Note: The shop grid (js/shop.js) renders all filtered results at once. It does not implement custom jQuery pagination or infinite scrolling.

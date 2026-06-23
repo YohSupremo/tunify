@@ -199,10 +199,44 @@ $(document).ready(function () {
         })
     })
 
+    // Initialize jQuery Validation
+    const catValidator = $('#catForm').validate({
+        errorClass: "is-invalid",
+        validClass: "is-valid",
+        errorElement: "div",
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
+            error.insertAfter(element);
+        },
+        rules: {
+            catName: {
+                required: true,
+                minlength: 2,
+                maxlength: 50
+            },
+            catDesc: {
+                maxlength: 500
+            }
+        },
+        messages: {
+            catName: {
+                required: "Category Name is required.",
+                minlength: "Category Name must be at least 2 characters.",
+                maxlength: "Category Name cannot exceed 50 characters."
+            },
+            catDesc: {
+                maxlength: "Category Description cannot exceed 500 characters."
+            }
+        }
+    });
+
     // CREATE / UPDATE Category via API
     $('#catForm').on('submit', function (e) {
         e.preventDefault()
-        if (!this.checkValidity()) { $(this).addClass('was-validated'); return }
+        if (!$(this).valid()) {
+            catValidator.focusInvalid();
+            return;
+        }
 
         const oldName = $('#catOldName').val()
         const newName = $('#catName').val().trim().toLowerCase()

@@ -310,6 +310,9 @@ $(document).ready(function () {
         $('#imagePreviewContainer').empty();
         $('#fileLabel').text('Choose image files…');
         $('#modalTitle').text('Add Instrument');
+        if (window.itemValidator) {
+            window.itemValidator.resetForm();
+        }
         $('#itemForm').removeClass('was-validated');
         $('#itemModal').modal('show');
         $('#itemSubmit').show();
@@ -357,9 +360,89 @@ $(document).ready(function () {
         $(this).val(''); // Reset so the same file selection can be triggered again
     });
 
+    // Initialize jQuery Validation
+    $.validator.addMethod("minCost", function(value, element) {
+        const cost = Number($('#itemCostPrice').val()) || 0;
+        const sell = Number(value) || 0;
+        return this.optional(element) || sell >= cost;
+    }, "Selling price must be greater than or equal to cost price.");
+
+    window.itemValidator = $('#itemForm').validate({
+        errorClass: "is-invalid",
+        validClass: "is-valid",
+        errorElement: "div",
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
+            error.insertAfter(element);
+        },
+        rules: {
+            itemName: {
+                required: true,
+                minlength: 3,
+                maxlength: 100
+            },
+            itemBrand: {
+                required: true
+            },
+            itemCategory: {
+                required: true
+            },
+            itemCostPrice: {
+                required: true,
+                min: 1
+            },
+            itemPrice: {
+                required: true,
+                min: 1,
+                minCost: true
+            },
+            itemStock: {
+                required: true,
+                min: 0
+            },
+            itemDesc: {
+                required: true
+            }
+        },
+        messages: {
+            itemName: {
+                required: "Instrument/Item Name is required.",
+                minlength: "Instrument/Item Name must be at least 3 characters.",
+                maxlength: "Instrument/Item Name cannot exceed 100 characters."
+            },
+            itemBrand: {
+                required: "Brand is required. Please select a Brand."
+            },
+            itemCategory: {
+                required: "Category is required. Please select a Category."
+            },
+            itemCostPrice: {
+                required: "Cost Price is required.",
+                min: "Cost Price must be greater than 0."
+            },
+            itemPrice: {
+                required: "Selling Price is required.",
+                min: "Selling Price must be greater than 0.",
+                minCost: "Selling Price must be greater than or equal to the Cost Price."
+            },
+            itemStock: {
+                required: "Initial Stock Level is required.",
+                min: "Stock Level cannot be negative."
+            },
+            itemDesc: {
+                required: "Instrument Description is required."
+            }
+        }
+    });
+
     // ── Add item submit (POST to Backend DB) ─────────────────────
     $('#itemSubmit').on('click', function (e) {
         e.preventDefault()
+
+        if (!$("#itemForm").valid()) {
+            window.itemValidator.focusInvalid();
+            return;
+        }
 
         const name = $('#itemName').val().trim()
         const brandName = $('#itemBrand').val()
@@ -368,27 +451,6 @@ $(document).ready(function () {
         const cost_price = $('#itemCostPrice').val()
         const stock = $('#itemStock').val()
         const desc = $('#itemDesc').val().trim()
-
-        if (!name) {
-            Swal.fire({ icon: 'warning', text: 'Please enter the item name.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
-        if (!brandName) {
-            Swal.fire({ icon: 'warning', text: 'Please select a brand.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
-        if (!categoryName) {
-            Swal.fire({ icon: 'warning', text: 'Please select a category.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
-        if (!price || price < 1) {
-            Swal.fire({ icon: 'warning', text: 'Selling price must be greater than 0.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
-        if (stock === '' || stock === null || stock === undefined) {
-            Swal.fire({ icon: 'warning', text: 'Please enter initial stock quantity.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
 
         const token = getToken()
         if (!token) return
@@ -460,7 +522,10 @@ $(document).ready(function () {
         }
 
         renderPreviews();
-
+ 
+        if (window.itemValidator) {
+            window.itemValidator.resetForm();
+        }
         $('#modalTitle').text('Edit Instrument'); $('#itemForm').removeClass('was-validated')
         $('#itemSubmit').hide(); $('#itemUpdate').show()
         $('#itemModal').modal('show')
@@ -469,6 +534,11 @@ $(document).ready(function () {
     // ── Update item submit (PUT to Backend DB) ───────────────────
     $('#itemUpdate').on('click', function (e) {
         e.preventDefault()
+
+        if (!$("#itemForm").valid()) {
+            window.itemValidator.focusInvalid();
+            return;
+        }
 
         const id = parseInt($('#itemId').val())
         const name = $('#itemName').val().trim()
@@ -479,14 +549,7 @@ $(document).ready(function () {
         const stock = Number($('#itemStock').val())
         const desc = $('#itemDesc').val().trim()
 
-        if (!name) {
-            Swal.fire({ icon: 'warning', text: 'Please enter the item name.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
-        if (!price || price < 1) {
-            Swal.fire({ icon: 'warning', text: 'Selling price must be greater than 0.', showConfirmButton: false, position: 'bottom-right', timer: 2000, timerProgressBar: true })
-            return
-        }
+
 
         const token = getToken()
         if (!token) return

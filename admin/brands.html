@@ -77,15 +77,14 @@
               <!-- Brand Name Input -->
               <div class="form-group">
                 <label for="brandName">Brand Name</label>
-                <input type="text" class="form-control" id="brandName" placeholder="e.g. Fender" required />
-                <div class="invalid-feedback">Please enter brand name.</div>
+                <input type="text" class="form-control" id="brandName" name="brandName" placeholder="e.g. Fender" required />
               </div>
 
               <!-- Brand Logo Input -->
               <div class="form-group">
                 <label for="brandLogoFile">Brand Logo</label>
                 <div class="custom-file mb-2">
-                  <input type="file" class="custom-file-input" id="brandLogoFile" accept="image/png, image/jpeg, image/jpg" />
+                  <input type="file" class="custom-file-input" id="brandLogoFile" name="brandLogoFile" accept="image/png, image/jpeg, image/jpg" />
                   <label class="custom-file-label" for="brandLogoFile" id="fileLabel">Choose logo file...</label>
                 </div>
                 <div id="logoPreviewContainer" class="mt-2" style="display:none;">
@@ -97,7 +96,7 @@
               <!-- Brand Description Input -->
               <div class="form-group">
                 <label for="brandDesc">Description</label>
-                <textarea class="form-control" id="brandDesc" placeholder="Describe this brand..." rows="3"></textarea>
+                <textarea class="form-control" id="brandDesc" name="brandDesc" placeholder="Describe this brand..." rows="3"></textarea>
               </div>
 
               <!-- Associated Products Checklist -->
@@ -136,6 +135,8 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <!-- Bootbox -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+  <!-- jQuery Validation -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>

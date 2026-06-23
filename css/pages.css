@@ -1554,3 +1554,34 @@ table.dataTable thead th {
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.05);
 }
+
+/* jQuery Validation Bootstrap Integration */
+.is-invalid {
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.03) !important;
+}
+.is-valid {
+  border-color: #10B981 !important;
+  background-color: rgba(16, 185, 129, 0.03) !important;
+}
+.invalid-feedback {
+  color: #F87171 !important;
+  font-size: 0.76rem !important;
+  margin-top: 0.25rem !important;
+  font-weight: 500 !important;
+}
+/* Retain label.error fallback */
+label.error {
+  color: #F87171 !important;
+  font-size: 0.76rem !important;
+  margin-top: 0.25rem !important;
+  display: block;
+  font-weight: 500 !important;
+}
+input.error, select.error, textarea.error {
+  border-color: #EF4444 !important;
+  background-color: rgba(239, 68, 68, 0.04) !important;
+}
+input.valid, select.valid, textarea.valid {
+  border-color: #10B981 !important;
+}

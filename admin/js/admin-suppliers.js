@@ -127,6 +127,9 @@ $(document).ready(function () {
     $('#btnAddNewSupplier').on('click', function () {
         $('#supplierForm')[0].reset();
         $('#supplierId').val('');
+        if (window.supplierValidator) {
+            window.supplierValidator.resetForm();
+        }
 
         renderProductChecklist(0);
         $('#prodChecklistGroup').show();
@@ -148,6 +151,10 @@ $(document).ready(function () {
         $('#supplierEmail').val(s.email || '');
         $('#supplierPhone').val(s.phone || '');
         $('#supplierAddress').val(s.address_line || '');
+
+        if (window.supplierValidator) {
+            window.supplierValidator.resetForm();
+        }
 
         renderProductChecklist(s.id);
         $('#prodChecklistGroup').show();
@@ -194,11 +201,70 @@ $(document).ready(function () {
         });
     });
 
+    // Initialize jQuery Validation
+    $.validator.addMethod("phoneRegex", function (value, element) {
+        return this.optional(element) || /^\+?[0-9\s-]{7,15}$/.test(value);
+    }, "Please enter a valid phone number.");
+
+    window.supplierValidator = $('#supplierForm').validate({
+        errorClass: "is-invalid",
+        validClass: "is-valid",
+        errorElement: "div",
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
+            error.insertAfter(element);
+        },
+        rules: {
+            supplierName: {
+                required: true,
+                minlength: 3,
+                maxlength: 100
+            },
+            supplierContact: {
+                required: true,
+                minlength: 2
+            },
+            supplierEmail: {
+                required: true,
+                email: true
+            },
+            supplierPhone: {
+                required: true,
+                phoneRegex: true
+            },
+            supplierAddress: {
+                required: true
+            }
+        },
+        messages: {
+            supplierName: {
+                required: "Supplier Name is required.",
+                minlength: "Supplier Name must be at least 3 characters.",
+                maxlength: "Supplier Name cannot exceed 100 characters."
+            },
+            supplierContact: {
+                required: "Contact Person name is required.",
+                minlength: "Contact Person name must be at least 2 characters."
+            },
+            supplierEmail: {
+                required: "Supplier Email address is required.",
+                email: "Please enter a valid Supplier Email address."
+            },
+            supplierPhone: {
+                required: "Supplier Phone number is required.",
+                phoneRegex: "Please enter a valid Supplier Phone number (e.g. +63 912 345 6789)."
+            },
+            supplierAddress: {
+                required: "Supplier Address is required."
+            }
+        }
+    });
+
     /* ── Form Submit (Create & Update) ──────────────────────────── */
     $('#supplierForm').on('submit', function (e) {
         e.preventDefault();
-        if (!this.checkValidity()) {
-            $(this).addClass('was-validated');
+        if (!$(this).valid()) {
+            window.supplierValidator.focusInvalid();
             return;
         }
 

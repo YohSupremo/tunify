@@ -917,7 +917,7 @@
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-user input-icon"></i>
-                  <input type="text" class="tunify-input" id="fullname" placeholder="Your full name" autocomplete="name"/>
+                  <input type="text" class="tunify-input" id="fullname" name="fullname" placeholder="Your full name" autocomplete="name"/>
                   <div class="input-end-icon">
                     <i class="fas fa-check field-status-icon" id="nameStat" style="display:none;"></i>
                   </div>
@@ -932,7 +932,7 @@
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-envelope input-icon"></i>
-                  <input type="email" class="tunify-input" id="email" placeholder="you@example.com" autocomplete="email"/>
+                  <input type="email" class="tunify-input" id="email" name="email" placeholder="you@example.com" autocomplete="email"/>
                   <div class="input-end-icon">
                     <i class="fas fa-check field-status-icon" id="emailStat" style="display:none;"></i>
                   </div>
@@ -948,7 +948,7 @@
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-calendar-alt input-icon"></i>
-                  <input type="text" class="tunify-input" id="birthdate" placeholder="Select your birthdate" readonly/>
+                  <input type="text" class="tunify-input" id="birthdate" name="birthdate" placeholder="Select your birthdate" readonly/>
                   <div class="input-end-icon">
                     <i class="fas fa-chevron-down" style="color:var(--text-dim); font-size:.75rem;"></i>
                   </div>
@@ -989,7 +989,7 @@
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-lock input-icon"></i>
-                  <input type="password" class="tunify-input" id="password" placeholder="Create a strong password" autocomplete="new-password" style="padding-right: 5rem;"/>
+                  <input type="password" class="tunify-input" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password" style="padding-right: 5rem;"/>
                   <div class="input-end-icon" style="right:.75rem;">
                     <i class="fas fa-check field-status-icon" id="passStat" style="display:none;"></i>
                     <button type="button" class="pw-toggle-btn" id="togglePass">
@@ -1033,7 +1033,7 @@
                 </label>
                 <div class="input-wrap">
                   <i class="fas fa-lock input-icon"></i>
-                  <input type="password" class="tunify-input" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password" style="padding-right: 4rem;"/>
+                  <input type="password" class="tunify-input" id="confirmPassword" name="confirmPassword" placeholder="Repeat your password" autocomplete="new-password" style="padding-right: 4rem;"/>
                   <div class="input-end-icon" style="right:.75rem;">
                     <i class="fas fa-check field-status-icon" id="confirmStat" style="display:none;"></i>
                     <button type="button" class="pw-toggle-btn" id="toggleConfirm">
@@ -1053,7 +1053,7 @@
                   I agree to the Tunify <a href="#" onclick="return false;">Terms of Service</a> and <a href="#" onclick="return false;">Privacy Policy</a>. I understand my data will be used to provide services as described.
                 </div>
               </div>
-              <input type="checkbox" id="terms" style="display:none;"/>
+              <input type="checkbox" id="terms" name="terms" style="display:none;"/>
 
               <div class="step-nav">
                 <button type="button" class="btn-prev" id="toStep1">
@@ -1166,6 +1166,8 @@
 <!-- SweetAlert2 & Bootbox.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+<!-- jQuery Validation -->
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script src="js/user.js?v=2026"></script>

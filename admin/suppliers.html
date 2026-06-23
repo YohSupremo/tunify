@@ -75,28 +75,27 @@
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="supplierName">Supplier Name</label>
-                <input type="text" class="form-control" id="supplierName" placeholder="e.g. Fender Asia Pacific"
+                <input type="text" class="form-control" id="supplierName" name="supplierName" placeholder="e.g. Fender Asia Pacific"
                   required />
-                <div class="invalid-feedback">Please enter supplier name.</div>
               </div>
               <div class="form-group col-md-6">
                 <label for="supplierContact">Contact Person</label>
-                <input type="text" class="form-control" id="supplierContact" placeholder="e.g. Juan dela Cruz" />
+                <input type="text" class="form-control" id="supplierContact" name="supplierContact" placeholder="e.g. Juan dela Cruz" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="supplierEmail">Email</label>
-                <input type="email" class="form-control" id="supplierEmail" placeholder="supplier@example.com" />
+                <input type="email" class="form-control" id="supplierEmail" name="supplierEmail" placeholder="supplier@example.com" />
               </div>
               <div class="form-group col-md-6">
                 <label for="supplierPhone">Phone</label>
-                <input type="text" class="form-control" id="supplierPhone" placeholder="+63 912 345 6789" />
+                <input type="text" class="form-control" id="supplierPhone" name="supplierPhone" placeholder="+63 912 345 6789" />
               </div>
             </div>
             <div class="form-group">
               <label for="supplierAddress">Address</label>
-              <input type="text" class="form-control" id="supplierAddress" placeholder="Street, City, Province" />
+              <input type="text" class="form-control" id="supplierAddress" name="supplierAddress" placeholder="Street, City, Province" />
             </div>
             <!-- Associated Products Checklist -->
             <div class="form-group mt-3" id="prodChecklistGroup">
@@ -135,6 +134,8 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <!-- Bootbox -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+  <!-- jQuery Validation -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>

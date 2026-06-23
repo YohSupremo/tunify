@@ -59,21 +59,53 @@ $(document).ready(function () {
     }
 
     /* ── Login submit ───────────────────────────────────────────── */
+    let loginValidator;
+    if (page === 'login') {
+        loginValidator = $('#authForm').validate({
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div",
+            rules: {
+                email: {
+                    required: true,
+                    email: true
+                },
+                password: {
+                    required: true,
+                    minlength: 6
+                }
+            },
+            messages: {
+                email: {
+                    required: "Login Email is required.",
+                    email: "Please enter a valid Login Email address."
+                },
+                password: {
+                    required: "Login Password is required.",
+                    minlength: "Login Password must be at least 6 characters."
+                }
+            },
+            errorPlacement: function (error, element) {
+                error.addClass("invalid-feedback");
+                if (element.closest('.password-wrap').length) {
+                    error.insertAfter(element.closest('.password-wrap'));
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
+    }
+
     $('#login').on('click', function (e) {
         e.preventDefault();
+
+        if (loginValidator && !$('#authForm').valid()) {
+            loginValidator.focusInvalid();
+            return;
+        }
+
         const email = $('#email').val().trim();
         const password = $('#password').val();
-
-        if (!emailRegex.test(email)) {
-            $('#email').addClass('is-invalid');
-            Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Enter a valid email address.' });
-            return;
-        }
-        if (password.length < 6) {
-            $('#password').addClass('is-invalid');
-            Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Password must be at least 6 characters.' });
-            return;
-        }
 
         const $btn = $(this);
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Please wait…');
@@ -177,48 +209,82 @@ $(document).ready(function () {
             currentStep = step;
         }
 
-        function setFieldState(inputId, statIconId, msgId, state, msg) {
-            const $input = $('#' + inputId);
-            const $icon = $('#' + statIconId);
-            const $msgEl = $('#' + msgId);
-            if (!$input.length || !$icon.length) return;
+        // Initialize jQuery Validation for Register Form
+        $.validator.addMethod("strongPassword", function(value, element) {
+            const score = requirements.filter(req => req.test(value)).length;
+            return this.optional(element) || score >= 2;
+        }, "Password must meet at least 2 strength requirements.");
 
-            $input.removeClass('is-valid is-invalid');
-            $icon.removeClass('valid invalid');
-
-            if (state === 'valid') {
-                $input.addClass('is-valid');
-                $icon.attr('class', 'fas fa-check field-status-icon valid').show();
-                if ($msgEl.length) {
-                    $msgEl.attr('class', 'field-msg success').html('<i class="fas fa-check-circle"></i> ' + msg);
+        window.registerValidator = $('#authForm').validate({
+            ignore: [],
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div",
+            rules: {
+                fullname: {
+                    required: true,
+                    minlength: 2
+                },
+                email: {
+                    required: true,
+                    email: true
+                },
+                birthdate: {
+                    required: true
+                },
+                password: {
+                    required: true,
+                    minlength: 8,
+                    strongPassword: true
+                },
+                confirmPassword: {
+                    required: true,
+                    equalTo: "#password"
+                },
+                terms: {
+                    required: true
                 }
-            } else if (state === 'invalid') {
-                $input.addClass('is-invalid');
-                $icon.attr('class', 'fas fa-times field-status-icon invalid').show();
-                if ($msgEl.length) {
-                    $msgEl.attr('class', 'field-msg error').html('<i class="fas fa-exclamation-circle"></i> ' + msg);
+            },
+            messages: {
+                fullname: {
+                    required: "Full Name is required.",
+                    minlength: "Full Name must be at least 2 characters."
+                },
+                email: {
+                    required: "Email Address is required.",
+                    email: "Please enter a valid Email Address."
+                },
+                birthdate: {
+                    required: "Birthdate is required. Please select your Birthdate."
+                },
+                password: {
+                    required: "Password is required.",
+                    minlength: "Password must be at least 8 characters."
+                },
+                confirmPassword: {
+                    required: "Confirm Password is required.",
+                    equalTo: "Passwords do not match."
+                },
+                terms: {
+                    required: "You must accept the Terms of Service to proceed."
                 }
-            } else {
-                $icon.hide();
-                if ($msgEl.length) {
-                    $msgEl.attr('class', 'field-msg hint').html(msg || '');
+            },
+            errorPlacement: function (error, element) {
+                error.addClass("invalid-feedback");
+                if (element.attr("id") === "terms") {
+                    error.insertAfter("#termsBox");
+                } else if (element.closest('.input-wrap').length) {
+                    error.insertAfter(element.closest('.input-wrap'));
+                } else {
+                    error.insertAfter(element);
                 }
             }
-        }
-
-        $('#fullname').on('input', function () {
-            const v = $(this).val().trim();
-            if (v.length === 0) setFieldState('fullname', 'nameStat', 'nameMsg', 'none', '<i class="fas fa-info-circle"></i> At least 2 characters');
-            else if (v.length < 2) setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Name is too short');
-            else setFieldState('fullname', 'nameStat', 'nameMsg', 'valid', 'Looks good!');
         });
 
-        $('#email').on('input', function () {
-            const v = $(this).val().trim();
-            const ok = emailRegex.test(v);
-            if (v.length === 0) setFieldState('email', 'emailStat', 'emailMsg', 'none', '<i class="fas fa-info-circle"></i> We\'ll send a confirmation here');
-            else if (!ok) setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
-            else setFieldState('email', 'emailStat', 'emailMsg', 'valid', 'Valid email address');
+        $('#fullname, #email, #confirmPassword').on('input', function () {
+            if (window.registerValidator) {
+                window.registerValidator.element(this);
+            }
         });
 
         const requirements = [
@@ -263,27 +329,13 @@ $(document).ready(function () {
                 $lbl.css('color', score >= 3 ? '#A3E635' : score >= 2 ? '#FBBF24' : '#F87171');
             }
 
-            if (v.length === 0) {
-                setFieldState('password', 'passStat', null, 'none', null);
-            } else if (score < 2) {
-                setFieldState('password', 'passStat', null, 'invalid', null);
-            } else {
-                setFieldState('password', 'passStat', null, 'valid', null);
+            if (window.registerValidator) {
+                window.registerValidator.element(this);
+                const conf = $('#confirmPassword').val();
+                if (conf.length > 0) {
+                    window.registerValidator.element("#confirmPassword");
+                }
             }
-
-            const conf = $('#confirmPassword').val();
-            if (conf.length > 0) {
-                if (conf === v) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
-                else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
-            }
-        });
-
-        $('#confirmPassword').on('input', function () {
-            const v = $(this).val();
-            const pass = $('#password').val();
-            if (v.length === 0) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'none', '<i class="fas fa-info-circle"></i> Must match the password above');
-            else if (v === pass) setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'valid', 'Passwords match!');
-            else setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
         });
 
         function toggleTerms() {
@@ -291,6 +343,9 @@ $(document).ready(function () {
             $('#terms').prop('checked', termsChecked);
             $('#customCb').toggleClass('checked', termsChecked);
             $('#termsBox').toggleClass('checked', termsChecked);
+            if (window.registerValidator) {
+                window.registerValidator.element("#terms");
+            }
         }
 
         $('#profilePicture').on('change', function () {
@@ -336,28 +391,11 @@ $(document).ready(function () {
         }
 
         $('#toStep2').on('click', function () {
-            const name = $('#fullname').val().trim();
-            const email = $('#email').val().trim();
-            const birthdate = $('#birthdate').val().trim();
+            const isNameValid = window.registerValidator.element("#fullname");
+            const isEmailValid = window.registerValidator.element("#email");
+            const isBirthdateValid = window.registerValidator.element("#birthdate");
 
-            let ok = true;
-            if (name.length < 2) {
-                setFieldState('fullname', 'nameStat', 'nameMsg', 'invalid', 'Please enter your full name');
-                ok = false;
-            }
-            if (!emailRegex.test(email)) {
-                setFieldState('email', 'emailStat', 'emailMsg', 'invalid', 'Enter a valid email address');
-                ok = false;
-            }
-            if (!birthdate) {
-                $('#birthdate').addClass('is-invalid');
-                $('#birthdateMsg')
-                    .attr('class', 'field-msg error')
-                    .html('<i class="fas fa-exclamation-circle"></i> Please select your birthdate');
-                ok = false;
-            }
-
-            if (!ok) {
+            if (!isNameValid || !isEmailValid || !isBirthdateValid) {
                 Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Please complete all required fields' });
                 return;
             }
@@ -365,28 +403,20 @@ $(document).ready(function () {
         });
 
         $('#toStep3').on('click', function () {
-            const pass = $('#password').val();
-            const conf = $('#confirmPassword').val();
+            const isPassValid = window.registerValidator.element("#password");
+            const isConfValid = window.registerValidator.element("#confirmPassword");
+            const isTermsValid = window.registerValidator.element("#terms");
 
-            let ok = true;
-            const score = calculatePasswordScore(pass);
-            if (score < 2) {
-                setFieldState('password', 'passStat', null, 'invalid', null);
-                Swal.fire({ icon: 'error', title: 'Weak Password', text: 'Please use a stronger password (must meet at least 2 requirements)' });
-                ok = false;
+            if (!isPassValid || !isConfValid || !isTermsValid) {
+                if (!isTermsValid) {
+                    $('#termsBox').addClass('shake');
+                    setTimeout(() => $('#termsBox').removeClass('shake'), 400);
+                    Swal.fire({ icon: 'error', title: 'Terms of Service', text: 'Please agree to the Terms & Privacy Policy' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Please complete all required fields' });
+                }
+                return;
             }
-            if (pass !== conf) {
-                setFieldState('confirmPassword', 'confirmStat', 'confirmMsg', 'invalid', 'Passwords do not match');
-                if (ok) Swal.fire({ icon: 'error', title: 'Password Mismatch', text: 'Passwords do not match' });
-                ok = false;
-            }
-            if (!termsChecked) {
-                $('#termsBox').addClass('shake');
-                setTimeout(() => $('#termsBox').removeClass('shake'), 400);
-                if (ok) Swal.fire({ icon: 'error', title: 'Terms of Service', text: 'Please agree to the Terms & Privacy Policy' });
-                ok = false;
-            }
-            if (!ok) return;
 
             const name = $('#fullname').val().trim();
             $('#reviewName').text(name);
@@ -521,11 +551,9 @@ $(document).ready(function () {
                 maxDate: '-13y',
                 dateFormat: 'yy-mm-dd',
                 onSelect: function (dateText) {
-                    $(this).removeClass('is-invalid').addClass('is-valid');
-                    const $msgEl = $('#birthdateMsg');
-                    if ($msgEl.length) {
-                        $msgEl.attr('class', 'field-msg success')
-                            .html('<i class="fas fa-check-circle"></i> Birthdate selected');
+                    $(this).removeClass('is-invalid');
+                    if (window.registerValidator) {
+                        window.registerValidator.element("#birthdate");
                     }
                 }
             });
