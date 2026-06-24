@@ -221,16 +221,17 @@ $(document).ready(function () {
             validClass: "is-valid",
             errorElement: "div",
             rules: {
-                fullname: {
+                first_name: {
+                    required: true,
+                    minlength: 2
+                },
+                last_name: {
                     required: true,
                     minlength: 2
                 },
                 email: {
                     required: true,
                     email: true
-                },
-                birthdate: {
-                    required: true
                 },
                 password: {
                     required: true,
@@ -246,16 +247,17 @@ $(document).ready(function () {
                 }
             },
             messages: {
-                fullname: {
-                    required: "Full Name is required.",
-                    minlength: "Full Name must be at least 2 characters."
+                first_name: {
+                    required: "First Name is required.",
+                    minlength: "First Name must be at least 2 characters."
+                },
+                last_name: {
+                    required: "Last Name is required.",
+                    minlength: "Last Name must be at least 2 characters."
                 },
                 email: {
                     required: "Email Address is required.",
                     email: "Please enter a valid Email Address."
-                },
-                birthdate: {
-                    required: "Birthdate is required. Please select your Birthdate."
                 },
                 password: {
                     required: "Password is required.",
@@ -281,7 +283,7 @@ $(document).ready(function () {
             }
         });
 
-        $('#fullname, #email, #confirmPassword').on('input', function () {
+        $('#first_name, #last_name, #email, #confirmPassword').on('input', function () {
             if (window.registerValidator) {
                 window.registerValidator.element(this);
             }
@@ -391,11 +393,11 @@ $(document).ready(function () {
         }
 
         $('#toStep2').on('click', function () {
-            const isNameValid = window.registerValidator.element("#fullname");
+            const isFirstNameValid = window.registerValidator.element("#first_name");
+            const isLastNameValid = window.registerValidator.element("#last_name");
             const isEmailValid = window.registerValidator.element("#email");
-            const isBirthdateValid = window.registerValidator.element("#birthdate");
 
-            if (!isNameValid || !isEmailValid || !isBirthdateValid) {
+            if (!isFirstNameValid || !isLastNameValid || !isEmailValid) {
                 Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Please complete all required fields' });
                 return;
             }
@@ -418,14 +420,16 @@ $(document).ready(function () {
                 return;
             }
 
-            const name = $('#fullname').val().trim();
+            const firstName = $('#first_name').val().trim();
+            const lastName = $('#last_name').val().trim();
+            const name = (firstName + ' ' + lastName).trim();
             $('#reviewName').text(name);
             $('#reviewEmail').text($('#email').val().trim());
-            $('#reviewBirthdate').text($('#birthdate').val() || '—');
             if (selectedAvatar) {
                 $('#reviewAvatarCircle').html(`<img src="${selectedAvatar}"/>`);
             } else {
-                $('#reviewAvatarCircle').html(`<span style="font-size:1.3rem;font-weight:700;color:var(--gold);">${name.charAt(0).toUpperCase()}</span>`);
+                const initial = firstName ? firstName.charAt(0).toUpperCase() : '';
+                $('#reviewAvatarCircle').html(`<span style="font-size:1.3rem;font-weight:700;color:var(--gold);">${initial}</span>`);
             }
 
             goToStep(3);
@@ -440,14 +444,15 @@ $(document).ready(function () {
             if (!$btn.length) return;
             $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Creating your account…');
 
-            const name = $('#fullname').val().trim();
+            const firstName = $('#first_name').val().trim();
+            const lastName = $('#last_name').val().trim();
             const email = $('#email').val().trim();
             const password = $('#password').val();
 
             $.ajax({
                 method: "POST",
                 url: `${apiBaseUrl}api/v1/register`,
-                data: JSON.stringify({ name, email, password }),
+                data: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }),
                 processData: false,
                 contentType: 'application/json; charset=utf-8',
                 dataType: "json",
@@ -492,15 +497,8 @@ $(document).ready(function () {
                                 formData.append('user_id', loginData.user.id);
                                 formData.append('image', avatarFile);
 
-                                let fname = name || "";
-                                let lname = "";
-                                if (name && name.includes(" ")) {
-                                    const parts = name.split(" ");
-                                    fname = parts[0];
-                                    lname = parts.slice(1).join(" ");
-                                }
-                                formData.append('first_name', fname);
-                                formData.append('last_name', lname);
+                                formData.append('first_name', firstName);
+                                formData.append('last_name', lastName);
 
                                 $.ajax({
                                     method: "POST",
@@ -541,26 +539,7 @@ $(document).ready(function () {
             });
         });
 
-        // Initialize datepicker
-        const dpInput = $('#birthdate');
-        if (dpInput.length) {
-            dpInput.datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: '-80:-13',
-                maxDate: '-13y',
-                dateFormat: 'yy-mm-dd',
-                onSelect: function (dateText) {
-                    $(this).removeClass('is-invalid');
-                    if (window.registerValidator) {
-                        window.registerValidator.element("#birthdate");
-                    }
-                }
-            });
-            dpInput.on('click focus', function () {
-                $(this).datepicker('show');
-            });
-        }
+
     }
 
     /* ── Profile Loading & Display ──────────────────────────────── */

@@ -909,20 +909,34 @@
               </div>
               <input type="file" id="profilePicture" accept="image/*" style="display:none;"/>
 
-              <!-- Full Name -->
-              <div class="field-group">
-                <label class="field-label">
-                  <span>Full Name <span class="field-required">*</span></span>
-                  <span class="field-hint">As it appears on your ID</span>
-                </label>
-                <div class="input-wrap">
-                  <i class="fas fa-user input-icon"></i>
-                  <input type="text" class="tunify-input" id="fullname" name="fullname" placeholder="Your full name" autocomplete="name"/>
-                  <div class="input-end-icon">
-                    <i class="fas fa-check field-status-icon" id="nameStat" style="display:none;"></i>
+              <!-- First Name & Last Name -->
+              <div class="form-row">
+                <div class="col-sm-6 field-group">
+                  <label class="field-label">
+                    <span>First Name <span class="field-required">*</span></span>
+                  </label>
+                  <div class="input-wrap">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="tunify-input" id="first_name" name="first_name" placeholder="First name" autocomplete="given-name"/>
+                    <div class="input-end-icon">
+                      <i class="fas fa-check field-status-icon" id="firstNameStat" style="display:none;"></i>
+                    </div>
                   </div>
+                  <div class="field-msg hint" id="firstNameMsg"><i class="fas fa-info-circle"></i> At least 2 characters</div>
                 </div>
-                <div class="field-msg hint" id="nameMsg"><i class="fas fa-info-circle"></i> At least 2 characters</div>
+                <div class="col-sm-6 field-group">
+                  <label class="field-label">
+                    <span>Last Name <span class="field-required">*</span></span>
+                  </label>
+                  <div class="input-wrap">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="tunify-input" id="last_name" name="last_name" placeholder="Last name" autocomplete="family-name"/>
+                    <div class="input-end-icon">
+                      <i class="fas fa-check field-status-icon" id="lastNameStat" style="display:none;"></i>
+                    </div>
+                  </div>
+                  <div class="field-msg hint" id="lastNameMsg"><i class="fas fa-info-circle"></i> At least 2 characters</div>
+                </div>
               </div>
 
               <!-- Email -->
@@ -938,22 +952,6 @@
                   </div>
                 </div>
                 <div class="field-msg hint" id="emailMsg"><i class="fas fa-info-circle"></i> We'll send a confirmation here</div>
-              </div>
-
-              <!-- Birthdate -->
-              <div class="field-group">
-                <label class="field-label">
-                  <span>Birthdate <span class="field-required">*</span></span>
-                  <span class="field-hint">Must be 13+</span>
-                </label>
-                <div class="input-wrap">
-                  <i class="fas fa-calendar-alt input-icon"></i>
-                  <input type="text" class="tunify-input" id="birthdate" name="birthdate" placeholder="Select your birthdate" readonly/>
-                  <div class="input-end-icon">
-                    <i class="fas fa-chevron-down" style="color:var(--text-dim); font-size:.75rem;"></i>
-                  </div>
-                </div>
-                <div class="field-msg hint" id="birthdateMsg"><i class="fas fa-lock"></i> Used to personalize your experience</div>
               </div>
 
               <div class="step-nav">
@@ -1087,13 +1085,6 @@
                   <div>
                     <div class="review-name" id="reviewName">—</div>
                     <div class="review-email-sub" id="reviewEmail">—</div>
-                  </div>
-                </div>
-                <div class="review-row">
-                  <div class="review-icon"><i class="fas fa-calendar-alt"></i></div>
-                  <div>
-                    <span class="review-key">Birthdate</span>
-                    <span class="review-val" id="reviewBirthdate">—</span>
                   </div>
                 </div>
               </div>
