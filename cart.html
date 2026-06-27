@@ -37,10 +37,12 @@
             <table class="cart-table">
               <thead>
                 <tr>
+                  <th style="width: 50px; text-align: center;"><input type="checkbox" id="selectAllCart" checked style="transform: scale(1.2); cursor: pointer;"></th>
                   <th>Product</th>
                   <th class="d-none d-md-table-cell">Price</th>
-                  <th style="width:120px">Qty</th>
+                  <th style="width:160px">Qty</th>
                   <th style="width:120px">Total</th>
+                  <th style="width:50px"></th>
                 </tr>
               </thead>
               <tbody id="cartBody">
@@ -52,14 +54,10 @@
         <div class="col-lg-4">
           <div class="cart-summary">
             <h3 class="mb-3">Order Summary</h3>
-            <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₱0</span></div>
-            <div class="summary-row"><span>Shipping</span><span>Free</span></div>
-            <div class="promo-apply mb-3">
-              <input type="text" id="promoInput" placeholder="Promo code">
-              <button class="btn btn-light" id="applyPromo">Apply</button>
-            </div>
-            <div class="summary-row summary-total" id="summaryTotalRow"><span>Total</span><span
-                id="summaryTotal">₱0</span></div>
+            <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₱0.00</span></div>
+            <div class="summary-row"><span>Shipping</span><span id="summaryShipping">₱100.00</span></div>
+            <div class="summary-row summary-total" id="summaryTotalRow" style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem;"><span>Total</span><span
+                id="summaryTotal">₱0.00</span></div>
             <a href="#" id="checkoutBtn" class="btn-gold w-100 text-center d-block">Proceed to Checkout</a>
           </div>
         </div>

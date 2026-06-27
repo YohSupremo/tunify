@@ -48,20 +48,72 @@ const updateCartCount = () => {
 /* addToCart — called from inline onclick on product cards */
 const addToCart = (itemId, qty, description, price, image, stock) => {
   qty = parseInt(qty) || 1;
+  stock = parseInt(stock) || 0;
+  
+  if (stock <= 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Out of Stock',
+      text: 'This item is currently out of stock.'
+    });
+    return;
+  }
+
   let cart = getCart();
   const existing = cart.find(i => i.item_id == itemId);
+  
   if (existing) {
+    if (existing.quantity >= stock) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Limit Reached',
+        text: `You already have the maximum available stock (${stock}) of "${description}" in your cart.`
+      });
+      return;
+    }
+    
+    if (existing.quantity + qty > stock) {
+      const allowed = stock - existing.quantity;
+      existing.quantity = stock;
+      saveCart(cart);
+      Swal.fire({
+        icon: 'info',
+        title: 'Quantity Adjusted',
+        text: `Only ${allowed} more of "${description}" could be added. Your cart is now capped at the maximum available stock (${stock}).`
+      });
+      return;
+    }
+    
     existing.quantity += qty;
   } else {
+    if (qty > stock) {
+      cart.push({
+        item_id: itemId,
+        description,
+        price: parseFloat(price),
+        image,
+        stock: stock,
+        quantity: stock
+      });
+      saveCart(cart);
+      Swal.fire({
+        icon: 'info',
+        title: 'Quantity Adjusted',
+        text: `Requested quantity exceeds stock. Added the maximum available stock (${stock}) of "${description}" to your cart.`
+      });
+      return;
+    }
+    
     cart.push({
       item_id: itemId,
       description,
       price: parseFloat(price),
       image,
-      stock: parseInt(stock) || 0,
+      stock: stock,
       quantity: qty
     });
   }
+
   saveCart(cart);
   Swal.fire({
     icon: 'success',

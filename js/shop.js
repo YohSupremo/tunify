@@ -217,11 +217,12 @@ $(document).ready(function () {
       return;
     }
     list.forEach(function (p) {
+      const isOutOfStock = p.stock == 0;
       $grid.append(`
         <div class="col-6 col-md-4 col-lg-3 mb-4">
-          <a class="prod-card h-100 d-block text-decoration-none" href="product.html?id=${p.id}">
+          <a class="prod-card h-100 d-block text-decoration-none" href="product.html?id=${p.id}" style="${isOutOfStock ? 'opacity: 0.55;' : ''}">
             <div class="prod-img-area">
-              ${p.badge ? `<span class="prod-badge badge-${p.badge}">${p.badge}</span>` : ''}
+              ${isOutOfStock ? `<span class="prod-badge" style="background:#ef4444; color:#fff; font-size:.6rem; font-weight:600;">OUT OF STOCK</span>` : (p.badge ? `<span class="prod-badge badge-${p.badge}">${p.badge}</span>` : '')}
               ${p.image ? `<img src="${p.image}" class="prod-card-img img-fluid" alt="${p.name}">` : `<i class="fas fa-music"></i>`}
             </div>
             <div class="prod-body">
@@ -230,12 +231,21 @@ $(document).ready(function () {
               <p class="prod-brand">${p.brand}</p>
               <div class="prod-footer">
                 <div class="prod-price">₱${Number(p.price).toLocaleString()}</div>
-                <button type="button" class="btn-add-cart"
-                  data-id="${p.id}" data-desc="${p.name}"
-                  data-price="${p.price}" data-image="${p.image || ''}"
-                  data-stock="${p.stock}">
-                  <i class="fas fa-plus"></i>
-                </button>
+                ${isOutOfStock ? `
+                  <span style="color:#ef4444; font-size:0.72rem; font-weight:600; padding: 0.15rem 0.45rem; background: rgba(239, 68, 68, 0.1); border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.2);"><i class="fas fa-times-circle mr-1"></i> No Stock</span>
+                ` : `
+                  <div class="d-flex align-items-center" style="gap: .4rem;">
+                    <input type="number" class="form-control form-control-sm prod-qty-input" 
+                      value="1" min="1" max="${p.stock}" 
+                      style="width: 55px; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 0.15rem 0.3rem; text-align: center; font-size: 0.85rem; height: 28px; border-radius: 4px;" />
+                    <button type="button" class="btn-add-cart"
+                      data-id="${p.id}" data-desc="${p.name}"
+                      data-price="${p.price}" data-image="${p.image || ''}"
+                      data-stock="${p.stock}">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                `}
               </div>
             </div>
           </a>
@@ -244,12 +254,54 @@ $(document).ready(function () {
     $('#resultCount').text(`${list.length} product${list.length !== 1 ? 's' : ''}`);
     Tunify.triggerFadeIn();
 
+    // Prevent navigation when clicking on the quantity input
+    $(document).off('click.qtyInput').on('click.qtyInput', '.prod-qty-input', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // Validate quantity inputs on change
+    $(document).off('change input.qtyInput').on('change input.qtyInput', '.prod-qty-input', function (e) {
+      const $input = $(this);
+      const max = parseInt($input.attr('max')) || 9999;
+      let val = parseInt($input.val());
+      
+      if (isNaN(val) || val < 1) {
+        $input.val(1);
+      } else if (val > max) {
+        swalToast('warning', `Only ${max} items in stock.`);
+        $input.val(max);
+      } else {
+        $input.val(val); // forces integer, removes decimal
+      }
+    });
+
     // Add to cart from shop grid
     $(document).off('click.shopCart').on('click.shopCart', '.btn-add-cart', function (e) {
       e.preventDefault();
       e.stopPropagation();
       const $btn = $(this);
-      addToCart($btn.data('id'), 1, $btn.data('desc'), $btn.data('price'), $btn.data('image'), $btn.data('stock'));
+      const itemId = $btn.data('id');
+      const desc = $btn.data('desc');
+      const price = $btn.data('price');
+      const image = $btn.data('image');
+      const stock = parseInt($btn.data('stock')) || 0;
+      
+      const $qtyInput = $btn.siblings('.prod-qty-input');
+      let qty = parseInt($qtyInput.val()) || 1;
+      
+      if (qty < 1) {
+        swalToast('error', 'Please enter a valid quantity.');
+        $qtyInput.val(1);
+        return;
+      }
+      if (qty > stock) {
+        swalToast('error', `Cannot add more than available stock (${stock}).`);
+        $qtyInput.val(stock);
+        return;
+      }
+      
+      addToCart(itemId, qty, desc, price, image, stock);
     });
   }
 

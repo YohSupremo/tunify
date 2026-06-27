@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Tunify</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css" />
+  <link rel="stylesheet" href="css/style.css?v=20260622">
+  <link rel="stylesheet" href="css/pages.css?v=20260622">
+  <style>
+    /* Premium Checkout Styling */
+    .checkout-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .checkout-card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    .delivery-info {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .delivery-name-phone {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+    .delivery-address {
+      color: var(--silver);
+    }
+    .address-select-card:hover {
+      border-color: var(--gold-dim) !important;
+      background: rgba(212, 175, 55, 0.04) !important;
+    }
+    .address-select-card.selected-address {
+      border-color: var(--gold) !important;
+      background: rgba(212, 175, 55, 0.08) !important;
+      box-shadow: 0 0 0 2px var(--gold-glow);
+    }
+    .checkout-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .checkout-item-row:last-child {
+      border-bottom: none;
+    }
+    .checkout-item-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .checkout-item-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .checkout-item-name {
+      font-weight: 500;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+    .checkout-item-qty {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-top: 0.15rem;
+    }
+    .checkout-item-price {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--silver);
+      font-size: 0.92rem;
+    }
+    /* Payment Method selectors */
+    .payment-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 576px) {
+      .payment-options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .payment-option-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .payment-option-card:hover {
+      border-color: var(--gold-dim);
+      background: rgba(212, 175, 55, 0.05);
+    }
+    .payment-option-card.selected {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.08);
+      box-shadow: 0 0 0 2px var(--gold-glow);
+    }
+    .payment-option-card input[type="radio"] {
+      cursor: pointer;
+      transform: scale(1.1);
+      accent-color: var(--gold);
+    }
+    .payment-option-text {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .payment-option-icon {
+      font-size: 1.25rem;
+      color: var(--gold);
+      width: 24px;
+      text-align: center;
+    }
+    /* Shopee style payment block details */
+    .shopee-payment-details {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      position: sticky;
+      top: 100px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    }
+    .shopee-summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--silver);
+      margin-bottom: 0.85rem;
+    }
+    .shopee-summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-top: 1px dashed var(--border);
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .shopee-summary-total span:first-child {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .shopee-summary-total-price {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .btn-place-order {
+      background: var(--gold);
+      color: #000;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+    }
+    .btn-place-order:hover {
+      background: var(--gold-hover, #f3d060);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+      color: #000;
+      text-decoration: none;
+    }
+    .btn-place-order:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="tunifyNav"></div>
+  <div class="page-wrap">
+    <div class="container">
+      <div class="page-header fade-in-up">
+        <h1>Checkout</h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent p-0">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item"><a href="cart.html">Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="row">
+        <div class="col-lg-8">
+          <!-- Delivery Info Card -->
+          <div class="checkout-card">
+            <div class="checkout-card-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span><i class="fas fa-map-marker-alt"></i> Delivery Information</span>
+              <button class="btn btn-sm btn-outline-gold" id="btnManageDelivery" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;"><i class="fas fa-plus mr-1"></i> Add Address</button>
+            </div>
+            <div id="deliveryInfoContainer" class="delivery-info">
+              <!-- Loaded dynamically -->
+              <div class="text-center py-3">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Loading delivery details...
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected Products Card -->
+          <div class="checkout-card">
+            <div class="checkout-card-title">
+              <i class="fas fa-shopping-bag"></i> Products Ordered
+            </div>
+            <div id="productsOrderedContainer">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+
+          <!-- Payment Method Card -->
+          <div class="checkout-card">
+            <div class="checkout-card-title">
+              <i class="fas fa-credit-card"></i> Payment Method
+            </div>
+            <div class="payment-options-grid" id="paymentOptionsGrid">
+              <!-- Selectable options -->
+              <div class="payment-option-card selected" data-method="cod">
+                <input type="radio" name="paymentRadio" id="radioCod" checked>
+                <div class="payment-option-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="payment-option-text">Cash on Delivery (COD)</div>
+              </div>
+              <div class="payment-option-card" data-method="gcash">
+                <input type="radio" name="paymentRadio" id="radioGcash">
+                <div class="payment-option-icon"><i class="fas fa-mobile-alt"></i></div>
+                <div class="payment-option-text">GCash</div>
+              </div>
+              <div class="payment-option-card" data-method="card">
+                <input type="radio" name="paymentRadio" id="radioCard">
+                <div class="payment-option-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="payment-option-text">Credit / Debit Card</div>
+              </div>
+              <div class="payment-option-card" data-method="bank_transfer">
+                <input type="radio" name="paymentRadio" id="radioBank">
+                <div class="payment-option-icon"><i class="fas fa-university"></i></div>
+                <div class="payment-option-text">Bank Transfer</div>
+              </div>
+            </div>
+
+            <!-- Dynamic Sub-forms for Payment Methods -->
+            <div id="paymentDetailsForm" class="mt-3 form-tunify" style="display: none; padding: 1.25rem; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px;">
+              <!-- Dynamic sub-form appended here by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Checkout details -->
+        <div class="col-lg-4">
+          <div class="shopee-payment-details">
+            <h3 class="mb-4" style="font-family:var(--font-display); font-size:1.2rem; font-weight:600; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:0.75rem;">Payment Summary</h3>
+            <div class="shopee-summary-row">
+              <span>Merchandise Subtotal</span>
+              <span id="merchandiseSubtotal">₱0.00</span>
+            </div>
+            <div class="shopee-summary-row">
+              <span>Shipping Fee</span>
+              <span id="shippingFee">₱100.00</span>
+            </div>
+            <div class="shopee-summary-total">
+              <span>Total Payment</span>
+              <span class="shopee-summary-total-price" id="totalPayment">₱0.00</span>
+            </div>
+            <button class="btn-place-order" id="btnPlaceOrder">
+              <i class="fas fa-shopping-cart"></i> Place Order
+            </button>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Address & Contact Manager Modal -->
+  <div class="modal fade" id="addressManagerModal" tabindex="-1" role="dialog" aria-labelledby="addressManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" style="background: var(--surface2); border: 1px solid var(--border); color: var(--text);">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+          <h5 class="modal-title" id="addressManagerModalLabel" style="color: var(--gold); font-family: var(--font-display);"><i class="fas fa-map-marker-alt mr-2"></i> Manage Delivery Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text); opacity: 0.8;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <form id="checkoutDeliveryDetailsForm" class="form-tunify">
+            <!-- Contact Number Section -->
+            <div class="form-group mb-4">
+              <h6 style="color: var(--gold); font-weight: 600; margin-bottom: 0.75rem;"><i class="fas fa-phone mr-1"></i> Contact Number</h6>
+              <input type="text" class="form-control" id="checkoutPhoneInput" placeholder="e.g. +63 912 000 0000" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+              <div class="invalid-feedback" id="checkoutPhoneFeedback" style="display: none;">Please enter a valid phone number (starts with + or digit, 7-15 chars).</div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.08); margin: 1.5rem 0;" />
+
+            <!-- Address Section -->
+            <div>
+              <h6 style="color: var(--gold); font-weight: 600; margin-bottom: 1rem;"><i class="fas fa-map-marker-alt mr-1"></i> Address Details</h6>
+              <div class="row">
+                <div class="col-md-3 form-group">
+                  <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Label</label>
+                  <input type="text" class="form-control" id="checkoutAddrLabel" placeholder="Home" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                  <div class="invalid-feedback">Label must be at least 2 characters.</div>
+                </div>
+                <div class="col-md-9 form-group">
+                  <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Block/Lot and Street</label>
+                  <input type="text" class="form-control" id="checkoutAddrStreet" placeholder="e.g. Blk 1 Lot 2, 123 Music Ave" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                  <div class="invalid-feedback">Block/Lot and Street must be at least 5 characters.</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                  <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">City</label>
+                  <input type="text" class="form-control" id="checkoutAddrCity" placeholder="Quezon City" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                  <div class="invalid-feedback">City must be at least 2 characters.</div>
+                </div>
+                <div class="col-md-5 form-group">
+                  <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Province</label>
+                  <input type="text" class="form-control" id="checkoutAddrProvince" placeholder="Metro Manila" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                  <div class="invalid-feedback">Province must be at least 2 characters.</div>
+                </div>
+                <div class="col-md-3 form-group">
+                  <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Zip Code</label>
+                  <input type="text" class="form-control" id="checkoutAddrZip" placeholder="1100" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                  <div class="invalid-feedback">Zip code must be at least 4 digits.</div>
+                </div>
+              </div>
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="checkoutAddrDefault" style="cursor: pointer;" />
+                <label class="form-check-label" for="checkoutAddrDefault" style="font-size: .85rem; color: var(--silver); cursor: pointer;">Set as default address</label>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4 pt-3" style="border-top: 1px solid var(--border);">
+              <button type="submit" class="btn btn-gold px-4" id="btnSaveCheckoutDetails"><i class="fas fa-save mr-1"></i> Save Details</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tunifyFooter"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <!-- SweetAlert2 & Bootbox.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+
+</html>

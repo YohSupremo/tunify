@@ -522,7 +522,7 @@ $(document).ready(function () {
             isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
         } else if (id === 'customerPhone') {
             var phoneVal = val.trim();
-            isValid = phoneVal === "" || /^\+?[0-9][0-9\s-]{6,14}$/.test(phoneVal);
+            isValid = phoneVal === "" || /^\+?[0-9][0-9\s\-]{6,14}$/.test(phoneVal);
         } else if (id === 'customerPassword') {
             var isEdit = $('#customerId').val() !== '';
             if (isEdit && val === '') {

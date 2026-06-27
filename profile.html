@@ -73,7 +73,7 @@
               </div>
               <div class="form-group">
                 <label>Phone</label>
-                <input type="text" class="form-control" id="editPhone" pattern="^\+?[0-9][0-9\s-]{6,14}$" />
+                <input type="text" class="form-control" id="editPhone" pattern="^\+?[0-9][0-9\s\-]{6,14}$" />
                 <div class="invalid-feedback">Phone number must start with + or a digit, be 7-15 characters, and contain no letters.</div>
               </div>
               <button class="btn-gold" id="saveProfile"><i class="fas fa-save"></i> Save Changes</button>
@@ -121,6 +121,60 @@
               <div class="mt-2" id="orderList"></div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Address Modal -->
+  <div class="modal fade" id="profileAddressModal" tabindex="-1" role="dialog" aria-labelledby="profileAddressModalLabel" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="background: var(--surface2); border: 1px solid var(--border); color: var(--text);">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+          <h5 class="modal-title" id="profileAddressModalLabel" style="color: var(--gold); font-family: var(--font-display);"><i class="fas fa-edit mr-2"></i> Edit Address</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text); opacity: 0.8;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="profileAddressForm" class="form-tunify">
+            <div class="row">
+              <div class="col-md-4 form-group">
+                <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Label</label>
+                <input type="text" class="form-control" id="profileAddrLabel" placeholder="Home" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <div class="invalid-feedback">Label must be at least 2 characters.</div>
+              </div>
+              <div class="col-md-8 form-group">
+                <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Block/Lot and Street</label>
+                <input type="text" class="form-control" id="profileAddrStreet" placeholder="e.g. Blk 1 Lot 2, 123 Music Ave" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <div class="invalid-feedback">Block/Lot and Street must be at least 5 characters.</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 form-group">
+                <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">City</label>
+                <input type="text" class="form-control" id="profileAddrCity" placeholder="Quezon City" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <div class="invalid-feedback">City must be at least 2 characters.</div>
+              </div>
+              <div class="col-md-5 form-group">
+                <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Province</label>
+                <input type="text" class="form-control" id="profileAddrProvince" placeholder="Metro Manila" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <div class="invalid-feedback">Province must be at least 2 characters.</div>
+              </div>
+              <div class="col-md-3 form-group">
+                <label style="font-size: 0.72rem; font-weight: 600; color: var(--silver); text-transform: uppercase;">Zip Code</label>
+                <input type="text" class="form-control" id="profileAddrZip" placeholder="1100" style="background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <div class="invalid-feedback">Zip code must be at least 4 digits.</div>
+              </div>
+            </div>
+            <div class="form-check mb-3">
+              <input type="checkbox" class="form-check-input" id="profileAddrDefault" style="cursor: pointer;" />
+              <label class="form-check-label" for="profileAddrDefault" style="font-size: .85rem; color: var(--silver); cursor: pointer;">Set as default address</label>
+            </div>
+            <div class="d-flex justify-content-end mt-4 pt-3" style="border-top: 1px solid var(--border);">
+              <button type="submit" class="btn btn-gold px-4" id="btnSaveProfileAddress"><i class="fas fa-save mr-1"></i> Save Details</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

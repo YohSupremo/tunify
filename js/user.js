@@ -589,6 +589,12 @@ $(document).ready(function () {
                             return;
                         }
                         $('#orderList').html(dbOrders.map(function (o) {
+                            const isPending = o.status.toLowerCase() === 'pending';
+                            const cancelBtn = isPending
+                                ? `<button type="button" class="btn btn-sm btn-danger cancel-order-btn" data-raw-id="${o.raw_id}" data-id="${o.id}" style="font-size: 0.72rem; padding: 0.25rem 0.65rem; border-radius: 4px;">
+                                     <i class="fas fa-times-circle mr-1"></i> Cancel Order
+                                   </button>`
+                                : '';
                             return `
                                 <div class="order-card">
                                   <div class="order-card-header">
@@ -596,7 +602,13 @@ $(document).ready(function () {
                                     <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
                                   </div>
                                   <div class="order-card-date">${o.date} · ₱${o.total.toLocaleString()}</div>
-                                  <div style="font-size:.78rem;color:var(--text-dim);margin-top:.35rem">${o.items.join(', ')}</div>
+                                  <div style="font-size:.78rem;color:var(--text-dim);margin-top:.35rem;margin-bottom:1rem;">${o.items.join(', ')}</div>
+                                  <div class="d-flex justify-content-end" style="gap: 0.5rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem;">
+                                    ${cancelBtn}
+                                    <button type="button" class="btn btn-sm btn-outline-gold view-receipt-btn" data-raw-id="${o.raw_id}" data-id="${o.id}" style="font-size: 0.72rem; padding: 0.25rem 0.65rem; border-radius: 4px;">
+                                      <i class="fas fa-file-invoice mr-1"></i> View Receipt
+                                    </button>
+                                  </div>
                                 </div>`;
                         }).join(''));
                     },
@@ -653,6 +665,9 @@ $(document).ready(function () {
         loadAddresses();
     }
 
+    let profileSavedAddresses = [];
+    let editingProfileAddrId = null;
+
     function loadAddresses() {
         const token = getToken();
         if (!token) return;
@@ -665,6 +680,7 @@ $(document).ready(function () {
             },
             success: function (data) {
                 if (data && data.success && data.addresses) {
+                    profileSavedAddresses = data.addresses;
                     const addresses = data.addresses;
                     const $list = $('#addressList');
                     $list.empty();
@@ -678,7 +694,8 @@ $(document).ready(function () {
                         const defaultBtn = !isDefault
                             ? `<button class="btn-make-default make-default-addr" data-id="${addr.id}"><i class="fas fa-star mr-1"></i> Make Default</button>`
                             : '';
-                        const deleteBtn = `<button class="btn-delete-addr delete-addr" data-id="${addr.id}"><i class="fas fa-trash-alt mr-1"></i> Delete</button>`;
+                        const editBtn = `<button class="btn-edit-addr edit-addr btn btn-sm btn-outline-gold mr-2" data-id="${addr.id}" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; border-radius: 4px;"><i class="fas fa-edit mr-1"></i> Edit</button>`;
+                        const deleteBtn = `<button class="btn-delete-addr delete-addr btn btn-sm btn-danger" data-id="${addr.id}" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; border-radius: 4px;"><i class="fas fa-trash-alt mr-1"></i> Delete</button>`;
 
                         const cardHtml = `
                             <div class="address-card ${isDefault ? 'default-addr' : ''}">
@@ -690,12 +707,10 @@ $(document).ready(function () {
                                     <div style="font-size: .88rem; color: var(--silver); margin-top: 0.25rem;">
                                         ${addr.street}, ${addr.city}, ${addr.province}
                                     </div>
-                                    <div style="font-size: .78rem; color: var(--text-dim); margin-top: 0.15rem;">
-                                        Zip Code: ${addr.zip_code}
-                                    </div>
                                 </div>
-                                <div class="address-actions">
+                                <div class="address-actions d-flex align-items-center">
                                     ${defaultBtn}
+                                    ${editBtn}
                                     ${deleteBtn}
                                 </div>
                             </div>
@@ -710,6 +725,138 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Edit Profile Address Clicked
+    $(document).on('click', '.edit-addr', function (e) {
+        e.preventDefault();
+        const addressId = $(this).data('id');
+        editingProfileAddrId = addressId;
+
+        const addr = profileSavedAddresses.find(a => a.id == addressId);
+        if (addr) {
+            $('#profileAddrLabel').val(addr.label || '').removeClass('is-invalid is-valid');
+            $('#profileAddrStreet').val(addr.street || '').removeClass('is-invalid is-valid');
+            $('#profileAddrCity').val(addr.city || '').removeClass('is-invalid is-valid');
+            $('#profileAddrProvince').val(addr.province || '').removeClass('is-invalid is-valid');
+            $('#profileAddrZip').val(addr.zip_code || '').removeClass('is-invalid is-valid');
+            $('#profileAddrDefault').prop('checked', addr.is_default === 1 || addr.is_default === true);
+
+            $('#profileAddressModal').modal('show');
+        }
+    });
+
+    // Real-Time Profile Address Form Validation
+    function validateProfileAddrInput(el) {
+        const $el = $(el);
+        const id = $el.attr('id');
+        const val = $el.val().trim();
+        let isValid = false;
+
+        if (id === 'profileAddrLabel') {
+            isValid = val.length >= 2;
+        } else if (id === 'profileAddrStreet') {
+            isValid = val.length >= 5;
+        } else if (id === 'profileAddrCity' || id === 'profileAddrProvince') {
+            isValid = val.length >= 2;
+        } else if (id === 'profileAddrZip') {
+            isValid = /^\d{4,8}$/.test(val);
+        }
+
+        if (isValid) {
+            $el.removeClass('is-invalid').addClass('is-valid');
+        } else {
+            $el.removeClass('is-valid').addClass('is-invalid');
+        }
+        return isValid;
+    }
+
+    $('#profileAddrLabel, #profileAddrStreet, #profileAddrCity, #profileAddrProvince, #profileAddrZip').on('input change', function () {
+        validateProfileAddrInput(this);
+    });
+
+    // Profile Edit Address Submit
+    $('#profileAddressForm').on('submit', function (e) {
+        e.preventDefault();
+
+        let isFormValid = true;
+        let invalidFields = [];
+        
+        const fieldNames = {
+            'profileAddrLabel': 'Label',
+            'profileAddrStreet': 'Block/Lot and Street',
+            'profileAddrCity': 'City',
+            'profileAddrProvince': 'Province',
+            'profileAddrZip': 'Zip Code'
+        };
+
+        $('#profileAddrLabel, #profileAddrStreet, #profileAddrCity, #profileAddrProvince, #profileAddrZip').each(function() {
+            const valid = validateProfileAddrInput(this);
+            if (!valid) {
+                isFormValid = false;
+                const labelName = fieldNames[$(this).attr('id')] || 'Field';
+                invalidFields.push(labelName);
+            }
+        });
+
+        if (!isFormValid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation Failed',
+                html: `Please correct the errors in the following fields:<br><strong style="color: #ef4444; display: block; margin-top: 0.5rem;">${invalidFields.join(', ')}</strong>`
+            });
+            return;
+        }
+
+        const label = $('#profileAddrLabel').val().trim();
+        const street = $('#profileAddrStreet').val().trim();
+        const city = $('#profileAddrCity').val().trim();
+        const province = $('#profileAddrProvince').val().trim();
+        const zip_code = $('#profileAddrZip').val().trim();
+        const is_default = $('#profileAddrDefault').prop('checked');
+
+        const token = getToken();
+        if (!token) return;
+
+        const $btn = $('#btnSaveProfileAddress');
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Saving…');
+
+        $.ajax({
+            method: "PUT",
+            url: `${apiBaseUrl}api/v1/addresses/${editingProfileAddrId}`,
+            data: JSON.stringify({ label, street, city, province, zip_code, is_default }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            success: function (data) {
+                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Details');
+                if (data && data.success) {
+                    $('#profileAddressModal').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Address Updated',
+                        text: 'Your address details have been updated.',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true,
+                        position: 'bottom-right'
+                    });
+                    loadAddresses();
+                }
+            },
+            error: function (err) {
+                console.error("Failed to update profile address:", err);
+                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Details');
+                const errMsg = err.responseJSON && err.responseJSON.error ? err.responseJSON.error : 'Failed to update address.';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: errMsg
+                });
+            }
+        });
+    });
 
     // Add Address Form Submit
     $('#addAddressForm').on('submit', function (e) {
@@ -1019,7 +1166,7 @@ $(document).ready(function () {
             isValid = val.trim().length >= 2;
         } else if (id === 'editPhone') {
             var phoneVal = val.trim();
-            isValid = phoneVal === "" || /^\+?[0-9][0-9\s-]{6,14}$/.test(phoneVal);
+            isValid = phoneVal === "" || /^\+?[0-9][0-9\s\-]{6,14}$/.test(phoneVal);
         }
 
         if (isValid) {
@@ -1032,5 +1179,179 @@ $(document).ready(function () {
     $('#editFirstName, #editLastName, #editPhone').on('input change', function () {
         validateProfileInput(this);
     });
+
+    // View Receipt click handler
+    $(document).on('click', '.view-receipt-btn', function (e) {
+        e.preventDefault();
+        const rawId = $(this).data('raw-id');
+        const formattedId = $(this).data('id');
+        const token = getToken();
+        if (!token) return;
+
+        Swal.fire({
+            title: 'Loading Receipt...',
+            html: '<div class="py-3"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--gold);"></i></div>',
+            showConfirmButton: false,
+            allowOutsideClick: false
+        });
+
+        $.ajax({
+            method: "GET",
+            url: `${apiBaseUrl}api/v1/orders/${rawId}`,
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            success: function (res) {
+                let itemsHtml = '';
+                let totalMerchandise = 0;
+
+                res.items.forEach(function (item) {
+                    const lineTotal = item.price * item.quantity;
+                    totalMerchandise += lineTotal;
+                    itemsHtml += `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 0.5rem 0; text-align: left; color: var(--text);">${item.name}</td>
+                            <td style="padding: 0.5rem 0; text-align: center; color: var(--silver);">${item.quantity}</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: var(--silver); font-family: var(--font-mono);">₱${Number(item.price).toFixed(2)}</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: var(--text); font-family: var(--font-mono);">₱${Number(lineTotal).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                const totalPaid = Number(res.shipping_fee) + totalMerchandise;
+                const statusColor = res.status === 'Pending' ? '#f59e0b' : res.status === 'Cancelled' ? '#ef4444' : '#10b981';
+                const txRefHtml = res.transaction_ref 
+                    ? `<div style="font-size: 0.8rem; color: var(--text-dim);">Transaction Ref: <span style="font-family: var(--font-mono); font-weight: bold; color: var(--silver);">${res.transaction_ref}</span></div>`
+                    : '';
+                
+                const receiptHtml = `
+                    <div style="font-family: var(--font-sans); color: var(--text); text-align: left; font-size: 0.88rem; max-height: 70vh; overflow-y: auto; padding: 0.5rem;">
+                        <div style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                            <h4 style="color: var(--gold); font-family: var(--font-display); font-weight: bold; margin-bottom: 0.25rem;">TUNIFY RECEIPT</h4>
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">Order ID: <span style="font-family: var(--font-mono); font-weight: bold; color: var(--silver);">${formattedId}</span></div>
+                            ${txRefHtml}
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">Placed on: ${res.date_placed}</div>
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem; background: rgba(255,255,255,0.02); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+                            <div style="font-weight: bold; color: var(--gold); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;"><i class="fas fa-shipping-fast mr-1"></i> Shipping Address</div>
+                            <div style="font-weight: 600; color: var(--text); margin-bottom: 0.15rem;">${res.customer_name} (${res.customer_phone || 'No phone'})</div>
+                            <div style="color: var(--silver);">${res.shipping_street}, ${res.shipping_city}, ${res.shipping_province}, ${res.shipping_zip}</div>
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem;">
+                            <div style="font-weight: bold; color: var(--gold); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;"><i class="fas fa-shopping-bag mr-1"></i> Order Items</div>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border); font-size: 0.78rem; text-transform: uppercase; color: var(--text-dim);">
+                                        <th style="padding-bottom: 0.5rem; text-align: left;">Item</th>
+                                        <th style="padding-bottom: 0.5rem; text-align: center;">Qty</th>
+                                        <th style="padding-bottom: 0.5rem; text-align: right;">Price</th>
+                                        <th style="padding-bottom: 0.5rem; text-align: right;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="border-top: 1px dashed var(--border); padding-top: 1rem; margin-top: 1rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--silver);">
+                                <span>Merchandise Subtotal:</span>
+                                <span style="font-family: var(--font-mono);">₱${totalMerchandise.toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--silver);">
+                                <span>Shipping Fee:</span>
+                                <span style="font-family: var(--font-mono);">₱${Number(res.shipping_fee).toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; color: var(--text);">
+                                <span>Total Amount Paid:</span>
+                                <span style="font-family: var(--font-mono); color: var(--gold);">₱${totalPaid.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: bold;">Payment Method</div>
+                                <div style="font-weight: bold; color: var(--text); margin-top: 0.1rem;">${res.payment_method ? res.payment_method.toUpperCase().replace('_', ' ') : 'COD'}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: bold;">Order Status</div>
+                                <div style="font-weight: bold; color: ${statusColor}; margin-top: 0.1rem; text-transform: uppercase;">${res.status}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                Swal.fire({
+                    html: receiptHtml,
+                    width: '600px',
+                    confirmButtonText: '<i class="fas fa-times mr-1"></i> Close Receipt',
+                    confirmButtonColor: 'var(--gold)',
+                    background: '#121622',
+                    customClass: {
+                        popup: 'border-gold rounded'
+                    }
+                });
+            },
+            error: function (err) {
+                console.error("Failed to load receipt details:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to Load',
+                    text: 'Could not retrieve receipt details.'
+                });
+            }
+        });
+    });
+
+    // Cancel Order click handler
+    $(document).on('click', '.cancel-order-btn', function (e) {
+        e.preventDefault();
+        const rawId = $(this).data('raw-id');
+        const formattedId = $(this).data('id');
+        const token = getToken();
+        if (!token) return;
+
+        confirmDialog(`Are you sure you want to cancel order ${formattedId}?`, function (result) {
+            if (result) {
+                $.ajax({
+                    method: "PUT",
+                    url: `${apiBaseUrl}api/v1/orders/${rawId}/status`,
+                    data: JSON.stringify({ status: 5 }), // 5 corresponds to 'Cancelled'
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function (data) {
+                        if (data && data.success) {
+                            swalToast('success', `Order ${formattedId} has been successfully cancelled.`);
+                            // Refresh orders list
+                            fetchProfile();
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Failed to cancel order:", error);
+                        const errMsg = error.responseJSON && error.responseJSON.error 
+                            ? error.responseJSON.error 
+                            : "Failed to cancel order.";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Cancellation Failed',
+                            text: errMsg
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    // Auto-select tab based on URL hash
+    if (window.location.hash === '#orders') {
+        $('.nav-tabs a[href="#tabOrders"]').tab('show');
+    }
 
 });
