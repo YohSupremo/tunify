@@ -37,6 +37,8 @@ $(document).ready(function () {
     let selectedAddressId = null;
     let editingAddressId = null; // Track which address is being edited (null for new address)
 
+    let currentShippingFee = 100.00;
+
     /* ── Fetch Delivery & Customer Details ────────────────────── */
     function loadDeliveryDetails() {
         // 1. Fetch Profile info (Full name & Phone)
@@ -239,12 +241,11 @@ $(document).ready(function () {
             `);
         });
 
-        // Update Summary block details
-        const shippingFee = 100.00;
-        const totalPayment = subtotal + shippingFee;
+        // Update Summary block details from settings
+        const totalPayment = subtotal + currentShippingFee;
 
         $('#merchandiseSubtotal').text('₱ ' + subtotal.toFixed(2));
-        $('#shippingFee').text('₱ ' + shippingFee.toFixed(2));
+        $('#shippingFee').text('₱ ' + currentShippingFee.toFixed(2));
         $('#totalPayment').text('₱ ' + totalPayment.toFixed(2));
     }
 
@@ -665,6 +666,9 @@ $(document).ready(function () {
 
     /* ── Main Initialization ────────────────────────────────────── */
     loadDeliveryDetails();
-    renderProducts();
+    applyGlobalSettings(function(settings) {
+        currentShippingFee = parseFloat(settings.default_shipping_fee || 100.00);
+        renderProducts();
+    });
 
 });

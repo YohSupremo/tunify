@@ -135,7 +135,6 @@ CREATE TABLE settings (
   id                   INT            NOT NULL DEFAULT 1,
   low_stock_threshold  INT            NOT NULL DEFAULT 5,
   default_shipping_fee DECIMAL(10,2)  NOT NULL DEFAULT 100.00,
-  tax_rate             DECIMAL(5,4)   NOT NULL DEFAULT 0.12,
   store_name           VARCHAR(100)   NOT NULL DEFAULT 'Tunify',
   store_contact_email  VARCHAR(255)   NOT NULL,
   store_contact_phone  VARCHAR(30)    NOT NULL,
@@ -242,8 +241,8 @@ INSERT INTO customer_addresses (id, user_id, label, street, city, province, zip_
 VALUES (1, 1, 'Home', '123 Maginhawa St., Brgy. Teachers Village', 'Quezon City', 'Metro Manila', '1100', TRUE);
 
 -- Seed global settings (single row of store-wide config)
-INSERT INTO settings (id, low_stock_threshold, default_shipping_fee, tax_rate, store_name, store_contact_email, store_contact_phone)
-VALUES (1, 5, 100.00, 0.12, 'Tunify', 'support@tunify.com', '+63 912 000 0000');
+INSERT INTO settings (id, low_stock_threshold, default_shipping_fee, store_name, store_contact_email, store_contact_phone)
+VALUES (1, 5, 100.00, 'Tunify', 'support@tunify.com', '+63 912 000 0000');
 
 -- Seed Order Statuses
 INSERT INTO order_statuses (id, status_name) VALUES

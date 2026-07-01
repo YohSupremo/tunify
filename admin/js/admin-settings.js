@@ -36,7 +36,6 @@ $(document).ready(function () {
           $("#storeEmail").val(data.store_contact_email || "");
           $("#storePhone").val(data.store_contact_phone || "");
           $("#shippingFee").val(data.default_shipping_fee || "");
-          $("#taxRate").val(data.tax_rate || "");
           $("#stockThreshold").val(data.low_stock_threshold || "");
         }
       },
@@ -65,7 +64,6 @@ $(document).ready(function () {
       store_contact_email: { required: true, email: true },
       store_contact_phone: { required: true },
       default_shipping_fee: { required: true, number: true, min: 0 },
-      tax_rate: { required: true, number: true, min: 0, max: 1 },
       low_stock_threshold: { required: true, digits: true, min: 0 }
     },
     messages: {
@@ -73,7 +71,6 @@ $(document).ready(function () {
       store_contact_email: "Please enter a valid store email address",
       store_contact_phone: "Please enter store contact phone",
       default_shipping_fee: "Enter a positive shipping fee",
-      tax_rate: "Enter a decimal tax rate between 0 and 1 (e.g., 0.1200)",
       low_stock_threshold: "Enter a valid non-negative integer threshold"
     },
     errorElement: "div",
@@ -97,7 +94,6 @@ $(document).ready(function () {
         store_contact_email: $("#storeEmail").val().trim(),
         store_contact_phone: $("#storePhone").val().trim(),
         default_shipping_fee: parseFloat($("#shippingFee").val()),
-        tax_rate: parseFloat($("#taxRate").val()),
         low_stock_threshold: parseInt($("#stockThreshold").val(), 10)
       };
 

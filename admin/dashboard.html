@@ -38,6 +38,16 @@
       align-items: center;
       gap: 0.5rem;
     }
+
+    @keyframes outOfStockPulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(239,68,68,0.2), 0 15px 35px rgba(0,0,0,0.4); }
+      50%       { box-shadow: 0 0 28px rgba(239,68,68,0.6), 0 15px 35px rgba(0,0,0,0.4); }
+    }
+
+    @keyframes lowStockPulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(251,191,36,0.15), 0 15px 35px rgba(0,0,0,0.4); }
+      50%       { box-shadow: 0 0 24px rgba(251,191,36,0.45), 0 15px 35px rgba(0,0,0,0.4); }
+    }
   </style>
 </head>
 
@@ -69,10 +79,33 @@
           <div class="stat-card-value" id="statCustomers">0</div>
           <div class="stat-card-change">Unique shopper profiles</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Out of Stock / Alert</div>
-          <div class="stat-card-value" id="statLowStock" style="color:var(--accent)">0</div>
-          <div class="stat-card-change">Requires restock priority</div>
+        <div class="stat-card" id="outOfStockCard" style="cursor:pointer; position:relative; transition: border-color 0.3s, box-shadow 0.3s;" onclick="window.location.href='stock.html?filter=outofstock'">
+          <div class="stat-card-label">Out of Stock</div>
+          <div class="stat-card-value" id="statOutOfStock" style="color:#f87171">0</div>
+          <div class="stat-card-change">Items with zero quantity</div>
+          <div class="mt-2">
+            <a href="stock.html?filter=outofstock" class="btn btn-sm"
+              style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35); color: #f87171; font-size: 0.72rem; border-radius: 8px; padding: 0.25rem 0.75rem; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(239,68,68,0.3)'"
+              onmouseout="this.style.background='rgba(239,68,68,0.15)'"
+              onclick="event.stopPropagation()">
+              <i class="fas fa-exclamation-circle mr-1"></i> Restock Now
+            </a>
+          </div>
+        </div>
+        <div class="stat-card" id="lowStockCard" style="cursor:pointer; position:relative; transition: border-color 0.3s, box-shadow 0.3s;" onclick="window.location.href='stock.html?filter=lowstock'">
+          <div class="stat-card-label">Low Stock Alert</div>
+          <div class="stat-card-value" id="statLowStock" style="color:#FBBF24">0</div>
+          <div class="stat-card-change">Items nearing depletion</div>
+          <div class="mt-2">
+            <a href="stock.html?filter=lowstock" class="btn btn-sm"
+              style="background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35); color: #FBBF24; font-size: 0.72rem; border-radius: 8px; padding: 0.25rem 0.75rem; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(251,191,36,0.25)'"
+              onmouseout="this.style.background='rgba(251,191,36,0.12)'"
+              onclick="event.stopPropagation()">
+              <i class="fas fa-boxes mr-1"></i> Manage Stock
+            </a>
+          </div>
         </div>
       </div>
 

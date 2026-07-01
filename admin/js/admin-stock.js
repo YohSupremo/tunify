@@ -26,6 +26,27 @@ $(document).ready(function () {
     }
 
     let stocksList = [];
+    let lowStockThreshold = 5;
+    let activeFilter = 'all';
+
+    /* ── Custom DataTables status filter ──────────────────────────── */
+    $.fn.dataTable.ext.search.push(function (settings, data) {
+        if (settings.nTable.id !== 'stockTable') return true;
+        if (activeFilter === 'all') return true;
+        var qty = parseInt(data[3]);
+        if (activeFilter === 'outofstock') return qty === 0;
+        if (activeFilter === 'lowstock')   return qty > 0 && qty <= lowStockThreshold;
+        if (activeFilter === 'instock')    return qty > lowStockThreshold;
+        return true;
+    });
+
+    function applyFilter(filterKey) {
+        activeFilter = filterKey;
+        // Update active button state
+        $('.stock-filter-btn').css('opacity', '0.55');
+        $('.stock-filter-btn[data-filter="' + filterKey + '"]').css('opacity', '1');
+        if (table) table.draw();
+    }
 
     // 1. Fetch stocks from Database
     const loadStocksFromDB = () => {
@@ -48,7 +69,7 @@ $(document).ready(function () {
 
     function stockStatus(qty) {
         if (qty === 0) return '<span class="badge badge-danger">Out of Stock</span>';
-        if (qty <= 5) return '<span class="badge badge-warning text-dark">Low Stock</span>';
+        if (qty <= lowStockThreshold) return '<span class="badge badge-warning text-dark">Low Stock</span>';
         return '<span class="badge badge-success">In Stock</span>';
     }
 
@@ -79,10 +100,23 @@ $(document).ready(function () {
             createdRow: function (row, rowData) {
                 var qty = parseInt(rowData[3]);
                 if (qty === 0) $(row).css('background', 'rgba(239,68,68,0.08)');
-                else if (qty <= 5) $(row).css('background', 'rgba(251,191,36,0.08)');
+                else if (qty <= lowStockThreshold) $(row).css('background', 'rgba(251,191,36,0.08)');
             }
         });
+
+        // Apply any pending URL filter param after table is ready
+        var urlParams = new URLSearchParams(window.location.search);
+        var filterParam = urlParams.get('filter');
+        if (filterParam && ['outofstock', 'lowstock', 'instock'].includes(filterParam)) {
+            applyFilter(filterParam);
+        }
     }
+
+    /* ── Filter button click handler ────────────────────────────── */
+    $(document).on('click', '.stock-filter-btn', function () {
+        var f = $(this).data('filter');
+        applyFilter(f);
+    });
 
     /* ── Edit stock button (delegated) ──────────────────────────── */
     $('#stockTable').on('click', '.edit-stock-btn', function () {
@@ -142,5 +176,8 @@ $(document).ready(function () {
     });
 
     // Initialize Page
-    loadStocksFromDB();
+    applyGlobalSettings(function (settings) {
+        lowStockThreshold = parseInt(settings.low_stock_threshold || 5, 10);
+        loadStocksFromDB();
+    });
 });

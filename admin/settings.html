@@ -73,7 +73,7 @@
             <i class="fas fa-coins mr-2"></i> Financials & Inventory
           </h3>
           <div class="row">
-            <div class="col-md-4 form-group">
+            <div class="col-md-6 form-group">
               <label for="shippingFee">Default Shipping Fee <span class="text-danger">*</span></label>
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -82,12 +82,7 @@
                 <input type="number" step="0.01" min="0" class="form-control" id="shippingFee" name="default_shipping_fee" placeholder="100.00" required />
               </div>
             </div>
-            <div class="col-md-4 form-group">
-              <label for="taxRate">Tax Rate (decimal) <span class="text-danger">*</span></label>
-              <input type="number" step="0.0001" min="0" max="1" class="form-control" id="taxRate" name="tax_rate" placeholder="0.1200" required />
-              <small class="form-text text-muted" style="font-size: 0.65rem;">e.g., 0.1200 for 12% VAT</small>
-            </div>
-            <div class="col-md-4 form-group">
+            <div class="col-md-6 form-group">
               <label for="stockThreshold">Low Stock Threshold <span class="text-danger">*</span></label>
               <input type="number" min="0" step="1" class="form-control" id="stockThreshold" name="low_stock_threshold" placeholder="5" required />
             </div>

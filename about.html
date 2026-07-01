@@ -110,13 +110,159 @@
       </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faqs" class="mb-5 fade-in-up">
+      <h2 class="mb-2" style="font-family: var(--font-display)">Frequently Asked Questions</h2>
+      <p class="text-secondary mb-4" style="font-size: 0.92rem;">Everything you need to know before placing your order.</p>
+
+      <style>
+        .faq-item {
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px;
+          margin-bottom: 0.75rem;
+          overflow: hidden;
+          background: rgba(15,23,42,0.4);
+          backdrop-filter: blur(8px);
+          transition: border-color 0.2s;
+        }
+        .faq-item:hover { border-color: rgba(251,191,36,0.25); }
+        .faq-question {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          background: transparent;
+          border: none;
+          padding: 1.1rem 1.4rem;
+          text-align: left;
+          color: var(--text);
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          gap: 1rem;
+        }
+        .faq-question:focus { outline: none; }
+        .faq-chevron {
+          color: var(--gold);
+          font-size: 0.8rem;
+          flex-shrink: 0;
+          transition: transform 0.3s ease;
+        }
+        .faq-item.open .faq-chevron { transform: rotate(180deg); }
+        .faq-answer {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.35s ease, padding 0.3s ease;
+          padding: 0 1.4rem;
+          color: var(--text-dim);
+          font-size: 0.88rem;
+          line-height: 1.7;
+        }
+        .faq-item.open .faq-answer {
+          max-height: 300px;
+          padding: 0 1.4rem 1.1rem;
+        }
+      </style>
+
+      <div id="faqAccordion">
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I place an order?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Browse our shop, add items to your cart, then proceed to checkout. You'll need to be logged in and have a saved shipping address. We accept Cash on Delivery, GCash, Credit/Debit Card, and Bank Transfer.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How long does shipping take?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Orders are typically processed within 1–2 business days. Standard nationwide delivery takes 3–7 business days depending on your location. You'll receive an email notification when your order has been shipped.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            Can I return or exchange an item?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Yes! We accept returns within 7 days of delivery for items in original, unused condition with complete packaging. Contact our support team via email to initiate a return or exchange request.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            Do you offer warranties on instruments?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Most instruments and electronics come with a manufacturer's warranty ranging from 6 months to 1 year. Warranty details are listed on each product page. Our team can assist with warranty claims.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            I'm a beginner — can you help me choose the right instrument?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Absolutely! Feel free to reach out through our contact email and one of our music specialists will help you pick the best instrument based on your budget, music style, and experience level.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I track my order?
+            <i class="fas fa-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            Once your order is shipped, you'll receive an email receipt with your order details. You can also log in and visit your Profile page to view all past and active orders and their statuses.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- Contact CTA -->
-    <section id="contact" class="fade-in-up">
+    <section id="contact" class="mb-5 fade-in-up">
       <div class="bg-gradient-3 rounded-lg p-5 text-center border border-surface2">
-        <i class="fas fa-envelope fa-3x mb-3" style="color: var(--gold)"></i>
-        <h3 class="mb-3">Have Questions?</h3>
-        <p class="mb-4 text-secondary">We'd love to hear from you. Reach out to our team anytime!</p>
-        <a href="profile.html" class="btn-gold">Contact Us</a>
+        <i class="fas fa-headset fa-3x mb-3" style="color: var(--gold)"></i>
+        <h3 class="mb-2">Still Have Questions?</h3>
+        <p class="mb-4 text-secondary">Can't find what you're looking for? Our team is happy to help.</p>
+
+        <div class="d-flex justify-content-center flex-wrap" style="gap: 1.25rem;">
+
+          <!-- Email Button -->
+          <div class="text-center">
+            <a id="contactEmailBtn" href="#" target="_blank"
+              class="btn d-flex align-items-center justify-content-center"
+              style="background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.4); color: var(--gold); border-radius: 12px; padding: 0.75rem 1.75rem; font-size: 0.9rem; font-weight: 600; gap: 0.5rem; min-width: 200px; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(251,191,36,0.22)'"
+              onmouseout="this.style.background='rgba(251,191,36,0.12)'">
+              <i class="fas fa-envelope"></i> Send us an Email
+            </a>
+            <div id="contactEmailDisplay" class="mt-2" style="font-size: 0.78rem; color: var(--text-dim);">—</div>
+          </div>
+
+          <!-- Phone Button -->
+          <div class="text-center">
+            <a id="contactPhoneBtn" href="#"
+              class="btn d-flex align-items-center justify-content-center"
+              style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.35); color: #7dd3fc; border-radius: 12px; padding: 0.75rem 1.75rem; font-size: 0.9rem; font-weight: 600; gap: 0.5rem; min-width: 200px; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(56,189,248,0.2)'"
+              onmouseout="this.style.background='rgba(56,189,248,0.1)'">
+              <i class="fas fa-phone-alt"></i> Call Us
+            </a>
+            <div id="contactPhoneDisplay" class="mt-2" style="font-size: 0.78rem; color: var(--text-dim);">—</div>
+          </div>
+
+        </div>
       </div>
     </section>
 
@@ -139,6 +285,41 @@
     document.body.dataset.page = 'about';
     loadNav();
     loadFooter();
+
+    // FAQ accordion
+    $(document).on('click', '.faq-question', function () {
+      const item = $(this).closest('.faq-item');
+      const isOpen = item.hasClass('open');
+      // close all
+      $('.faq-item').removeClass('open');
+      // toggle clicked
+      if (!isOpen) item.addClass('open');
+    });
+
+    // Populate contact buttons from settings
+    applyGlobalSettings(function (settings) {
+      const email = settings.store_contact_email || '';
+      const phone = settings.store_contact_phone || '';
+
+      // Email button → opens Gmail compose
+      if (email) {
+        const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email);
+        $('#contactEmailBtn').attr('href', gmailUrl);
+        $('#contactEmailDisplay').text(email);
+      } else {
+        $('#contactEmailBtn').css('opacity', '0.45').removeAttr('href');
+        $('#contactEmailDisplay').text('Not configured');
+      }
+
+      // Phone button → opens tel:
+      if (phone) {
+        $('#contactPhoneBtn').attr('href', 'tel:' + phone.replace(/\s/g, ''));
+        $('#contactPhoneDisplay').text(phone);
+      } else {
+        $('#contactPhoneBtn').css('opacity', '0.45').removeAttr('href');
+        $('#contactPhoneDisplay').text('Not configured');
+      }
+    });
   });
 </script>
 </body>

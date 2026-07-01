@@ -48,7 +48,23 @@ $(document).ready(function () {
             $('#statRevenue').text('₱' + Math.round(data.revenue).toLocaleString());
             $('#statOrders').text(data.orders);
             $('#statCustomers').text(data.customers);
+            $('#statOutOfStock').text(data.outOfStock);
             $('#statLowStock').text(data.lowStock);
+
+            // Red pulse on Out of Stock card
+            if (parseInt(data.outOfStock) > 0) {
+                $('#outOfStockCard').css({
+                    'border-color': 'rgba(239,68,68,0.6)',
+                    'animation': 'outOfStockPulse 2s ease-in-out infinite'
+                });
+            }
+            // Amber pulse on Low Stock card
+            if (parseInt(data.lowStock) > 0) {
+                $('#lowStockCard').css({
+                    'border-color': 'rgba(251,191,36,0.55)',
+                    'animation': 'lowStockPulse 2s ease-in-out infinite'
+                });
+            }
         },
         error: function (err) {
             console.error("Failed to load dashboard stats:", err);

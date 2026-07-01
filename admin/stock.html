@@ -32,8 +32,29 @@
         </div>
       </div>
 
+      <!-- Stock Status Filter Bar -->
+      <div class="d-flex align-items-center flex-wrap mb-3 fade-in-up" id="stockFilterBar" style="gap:0.5rem;">
+        <span style="font-size:0.8rem; color:var(--text-dim); margin-right:0.25rem;"><i class="fas fa-filter mr-1"></i>Filter:</span>
+        <button class="btn btn-sm stock-filter-btn active" data-filter="all"
+          style="border-radius:20px; font-size:0.78rem; padding:0.3rem 1rem; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:var(--text);">
+          All
+        </button>
+        <button class="btn btn-sm stock-filter-btn" data-filter="outofstock"
+          style="border-radius:20px; font-size:0.78rem; padding:0.3rem 1rem; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#f87171;">
+          <i class="fas fa-times-circle mr-1"></i>Out of Stock
+        </button>
+        <button class="btn btn-sm stock-filter-btn" data-filter="lowstock"
+          style="border-radius:20px; font-size:0.78rem; padding:0.3rem 1rem; border:1px solid rgba(251,191,36,0.35); background:rgba(251,191,36,0.06); color:#FBBF24;">
+          <i class="fas fa-exclamation-triangle mr-1"></i>Low Stock
+        </button>
+        <button class="btn btn-sm stock-filter-btn" data-filter="instock"
+          style="border-radius:20px; font-size:0.78rem; padding:0.3rem 1rem; border:1px solid rgba(16,185,129,0.35); background:rgba(16,185,129,0.08); color:#34d399;">
+          <i class="fas fa-check-circle mr-1"></i>In Stock
+        </button>
+      </div>
+
       <!-- Data Table Card -->
-      <div class="panel-card fade-in-up mt-4">
+      <div class="panel-card fade-in-up mt-2">
         <div class="table-responsive">
           <table id="stockTable" class="display nowrap" style="width:100%">
             <thead>
