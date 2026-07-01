@@ -15,10 +15,11 @@ SECTION 1: MACHINE PROBLEMS (CRUD, AUTH, SEQUELIZE)
    - Evidence: Brands, categories, items, and suppliers tables are managed via DataTables in the admin panel.
    - Multiple File Uploads: Items support multiple image uploads with interactive sort/primary controls using Multer and FormData. Brands support file upload for logos.
 
-3. [/] mp5: Authentication Tokens
-   - Status: Partially Finished.
+3. [x] mp5: Authentication Tokens
+   - Status: Finished.
    - Token Generation & Send: [Finished] JWT is created and returned on login (controllers/user.js:93-109).
-   - Save Token on Users Table: [Unfinished] The token is NOT stored in the database. The `users` table schema does not have a `token` column.
+   - Save Token on Users Table: [Finished] Added `token` column (VARCHAR(500)) to `users` table and configured [User.js](file:///c:/advancedwebproj/tunify_backend/models/User.js) model to update and persist it upon user login, and clear it upon deactivation.
+
 
 4. [x] mp6: User Registration & Login API
    - Status: Finished.
