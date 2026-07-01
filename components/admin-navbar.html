@@ -1,34 +1,460 @@
-<nav class="navbar navbar-expand-lg tunify-nav" id="mainNav">
-  <div class="container">
-    <a class="navbar-brand" href="dashboard.html">
-      <div class="brand-icon" style="background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);"><i class="fas fa-user-shield"></i></div>
-      <div>
-        Tunify Admin
-        <span class="brand-sub">Control Panel</span>
-      </div>
-    </a>
+<style>
+  /* ─── Admin Sidebar styles ────────────────────────────────── */
+  body {
+    background-color: #040914 !important;
+  }
+  
+  /* Shift content for sidebar */
+  .page-wrap {
+    margin-left: 260px !important;
+    padding-top: 2rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarAdmin">
-      <i class="fas fa-bars"></i>
-    </button>
+  /* Sidebar main panel container */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: rgba(10, 15, 30, 0.95);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(251, 191, 36, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 1040;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-    <div class="collapse navbar-collapse" id="navbarAdmin">
-      <ul class="navbar-nav mx-auto">
-        <li class="nav-item"><a class="nav-link" href="dashboard.html"  data-page="admin-dash">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="items.html"      data-page="admin-items">Items</a></li>
-        <li class="nav-item"><a class="nav-link" href="categories.html" data-page="admin-cats">Categories</a></li>
-        <li class="nav-item"><a class="nav-link" href="brands.html"     data-page="admin-brands">Brands</a></li>
-        <li class="nav-item"><a class="nav-link" href="suppliers.html"  data-page="admin-suppliers">Suppliers</a></li>
-        <li class="nav-item"><a class="nav-link" href="stock.html"      data-page="admin-stock">Stock</a></li>
-        <li class="nav-item"><a class="nav-link" href="orders.html"     data-page="admin-orders">Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="customers.html"  data-page="admin-customers">Customers</a></li>
-      </ul>
+  /* Sidebar header section */
+  .sidebar-brand {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .sidebar-brand .brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #040914;
+    font-size: 1.1rem;
+  }
+  .sidebar-brand div {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .sidebar-brand .brand-sub {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 1px;
+  }
 
-      <div class="d-flex align-items-center" style="gap:.9rem">
-        <a href="../index.html" class="btn-outline-gold py-1 px-3 d-inline-block text-decoration-none" style="font-size:.75rem; white-space: nowrap;">
-          <i class="fas fa-arrow-left"></i> Back to Store
+  /* Scrollable Navigation section */
+  .sidebar-nav-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Category Header Label */
+  .sidebar-category-header {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 0.75rem 0.25rem 0.75rem;
+  }
+
+  /* Navigation Link styles */
+  .admin-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-dim) !important;
+    padding: 0.65rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
+  .admin-sidebar .nav-link i {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
+  .admin-sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--gold) !important;
+  }
+  .admin-sidebar .nav-link:hover i {
+    color: var(--gold) !important;
+    opacity: 1;
+  }
+  .admin-sidebar .nav-link.active {
+    background: rgba(245, 158, 11, 0.08) !important;
+    color: var(--gold) !important;
+    border-left: 2px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+    padding-left: calc(0.75rem - 2px);
+  }
+  .admin-sidebar .nav-link.active i {
+    color: var(--gold) !important;
+    opacity: 1;
+  }
+
+  /* Footer section */
+  .sidebar-footer {
+    padding: 1.25rem 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Mobile header styled bar */
+  .admin-mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: rgba(10, 15, 30, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    z-index: 1030;
+  }
+  .admin-mobile-header .mobile-brand {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  .admin-mobile-header .mobile-brand i {
+    font-size: 1.2rem;
+  }
+  .admin-mobile-header .sidebar-toggle-btn {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+
+  /* Background overlay on mobile when sidebar drawer is active */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1035;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Media Queries for responsive drawer toggle layout */
+  @media (max-width: 991.98px) {
+    .page-wrap {
+      margin-left: 0 !important;
+      padding-top: 80px !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    .admin-sidebar {
+      left: -260px;
+    }
+    .admin-sidebar.active {
+      left: 0;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+  }
+  #logoutBtn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  #logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #f87171 !important;
+  }
+  .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text) !important;
+  }
+  /* Hide Bootstrap default caret, use our own chevron */
+  #adminAccountDropdown::after {
+    display: none !important;
+  }
+  #adminNavChevron {
+    transform: rotate(-90deg); /* points right by default */
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 0.7rem;
+    opacity: 0.75;
+  }
+  #adminAccountDropdown:hover #adminNavChevron,
+  #adminAccountDropdown[aria-expanded="true"] #adminNavChevron {
+    transform: rotate(0deg); /* points down when hovered or open */
+    opacity: 1;
+  }
+</style>
+
+<!-- Mobile Top Header Bar -->
+<div class="admin-mobile-header d-lg-none">
+  <a href="dashboard.html" class="mobile-brand">
+    <i class="fas fa-user-shield text-gold mr-2"></i> <span class="store-name-display">Tunify</span> Admin
+  </a>
+  <button class="btn sidebar-toggle-btn text-white">
+    <i class="fas fa-bars"></i>
+  </button>
+</div>
+
+<!-- Admin Sidebar Navigation -->
+<div class="admin-sidebar">
+  <!-- Brand Header -->
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="fas fa-user-shield"></i></div>
+    <div>
+      <span class="store-name-display">Tunify</span> Admin
+      <span class="brand-sub">Control Panel</span>
+    </div>
+  </div>
+
+  <!-- Account Dropdown Section -->
+  <div class="sidebar-account-section p-3" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 1rem;">
+    <div class="dropdown w-100">
+      <button class="btn btn-gold w-100 dropdown-toggle d-flex align-items-center justify-content-between" type="button" id="adminAccountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0.5rem 0.85rem; border-radius: 8px;">
+        <div class="d-flex align-items-center" style="gap: 0.5rem;">
+          <div id="adminNavAvatarContainer" class="d-flex align-items-center justify-content-center rounded-circle" style="width: 24px; height: 24px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3); overflow: hidden;">
+            <i class="fas fa-user" style="font-size: 0.72rem; color: #ffffff;"></i>
+          </div>
+          <span id="adminNavName">Account</span>
+        </div>
+        <i class="fas fa-chevron-down" id="adminNavChevron"></i>
+      </button>
+      <div class="dropdown-menu w-100 p-2 border-0" aria-labelledby="adminAccountDropdown" style="background: rgba(10, 15, 30, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(251, 191, 36, 0.1) !important; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="dropdown-header text-muted font-weight-bold" style="font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 0.25rem 0.5rem 0.1rem 0.5rem;">My Account</div>
+        <a class="dropdown-item d-flex align-items-center" href="../profile.html" style="font-size: 0.8rem; color: var(--text-dim) !important; padding: 0.5rem; gap: 0.5rem; border-radius: 4px; transition: all 0.2s;">
+          <i class="fas fa-user-cog" style="color: var(--gold); width: 16px;"></i> Profile
         </a>
+        <div class="dropdown-divider" style="border-top: 1px solid rgba(255,255,255,0.05);"></div>
+        <button class="dropdown-item d-flex align-items-center" id="logoutBtn" style="font-size: 0.8rem; color: #ef4444; padding: 0.5rem; gap: 0.5rem; border-radius: 4px; transition: background 0.2s, color 0.2s; cursor: pointer;">
+          <i class="fas fa-sign-out-alt" style="color: #ef4444; width: 16px;"></i> Logout
+        </button>
       </div>
     </div>
   </div>
-</nav>
+
+  <!-- Scrollable Nav Links -->
+  <div class="sidebar-nav-scroll">
+    <div class="sidebar-section">
+      <a href="dashboard.html" class="nav-link sidebar-link" data-page="admin-dash">
+        <i class="fas fa-chart-pie mr-2"></i> Dashboard
+      </a>
+    </div>
+
+    <!-- Product Management Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-category-header">Product Management</div>
+      <a href="items.html" class="nav-link sidebar-link" data-page="admin-items">
+        <i class="fas fa-guitar mr-2"></i> Instruments
+      </a>
+      <a href="categories.html" class="nav-link sidebar-link" data-page="admin-cats">
+        <i class="fas fa-tags mr-2"></i> Categories
+      </a>
+      <a href="brands.html" class="nav-link sidebar-link" data-page="admin-brands">
+        <i class="fas fa-copyright mr-2"></i> Brands
+      </a>
+      <a href="suppliers.html" class="nav-link sidebar-link" data-page="admin-suppliers">
+        <i class="fas fa-truck mr-2"></i> Suppliers
+      </a>
+    </div>
+
+    <!-- Inventory & Sales Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-category-header">Inventory & Sales</div>
+      <a href="stock.html" class="nav-link sidebar-link" data-page="admin-stock">
+        <i class="fas fa-warehouse mr-2"></i> Stock Control
+      </a>
+      <a href="orders.html" class="nav-link sidebar-link" data-page="admin-orders">
+        <i class="fas fa-shopping-bag mr-2"></i> Manage Orders
+      </a>
+    </div>
+
+    <!-- User & Feedback Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-category-header">User & Feedback</div>
+      <a href="customers.html" class="nav-link sidebar-link" data-page="admin-customers">
+        <i class="fas fa-users mr-2"></i> Customers
+      </a>
+      <a href="reviews.html" class="nav-link sidebar-link" data-page="admin-reviews">
+        <i class="fas fa-star mr-2"></i> Product Reviews
+      </a>
+    </div>
+
+    <!-- System Config Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-category-header">System Settings</div>
+      <a href="settings.html" class="nav-link sidebar-link" data-page="admin-settings">
+        <i class="fas fa-cogs mr-2"></i> Store Settings
+      </a>
+    </div>
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <a href="../index.html" class="btn btn-outline-gold btn-sm w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.72rem; gap: 0.25rem;">
+      <i class="fas fa-arrow-left"></i> Back to Store
+    </a>
+  </div>
+</div>
+
+<!-- Overlay Background (Mobile) -->
+<div class="sidebar-overlay"></div>
+
+<!-- Mobile Toggle Behavior Script -->
+<script>
+  // Clean up any existing listeners to prevent duplicates
+  $(document).off('click', '.sidebar-toggle-btn');
+  $(document).on('click', '.sidebar-toggle-btn', function(e) {
+    e.stopPropagation();
+    $('.admin-sidebar').toggleClass('active');
+    $('.sidebar-overlay').toggleClass('active');
+  });
+  
+  $(document).off('click', '.sidebar-overlay');
+  $(document).on('click', '.sidebar-overlay', function() {
+    $('.admin-sidebar').removeClass('active');
+    $('.sidebar-overlay').removeClass('active');
+  });
+
+  // Automatically close slide-out drawer on navigation click (mobile)
+  $(document).off('click', '.sidebar-link');
+  $(document).on('click', '.sidebar-link', function() {
+    if ($(window).width() < 992) {
+      $('.admin-sidebar').removeClass('active');
+      $('.sidebar-overlay').removeClass('active');
+    }
+  });
+
+  // ── Populate avatar and name ────────────────────────────────────
+  // Step 1: Apply immediately from sessionStorage (fast, no flicker)
+  (function applyStoredProfile() {
+    const avatarUrl = sessionStorage.getItem('tunify_avatar');
+    const firstName = sessionStorage.getItem('tunify_first_name') || '';
+    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+      $('#adminNavAvatarContainer').html(`<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover;" />`);
+    }
+    if (firstName && firstName !== 'null') {
+      $('#adminNavName').text(firstName);
+    }
+  })();
+
+  // Step 2: If avatar is still missing (fresh login), silently fetch from API
+  (function fetchProfileIfNeeded() {
+    const avatarUrl = sessionStorage.getItem('tunify_avatar');
+    const tokenRaw = sessionStorage.getItem('token');
+    const userId = sessionStorage.getItem('userId') ? JSON.parse(sessionStorage.getItem('userId')) : null;
+    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') return; // already have it
+    if (!tokenRaw || !userId) return; // not logged in
+
+    let token;
+    try { token = JSON.parse(tokenRaw); } catch(e) { token = tokenRaw; }
+
+    $.ajax({
+      method: 'POST',
+      url: 'http://localhost:5000/api/v1/update-profile',
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      data: JSON.stringify({ user_id: userId }),
+      headers: { 'Authorization': 'Bearer ' + token },
+      success: function(data) {
+        if (data && data.customer) {
+          const c = data.customer;
+          // Store in sessionStorage for subsequent page loads
+          if (c.profile_image_path) {
+            const fullUrl = 'http://localhost:5000/' + c.profile_image_path;
+            sessionStorage.setItem('tunify_avatar', fullUrl);
+            $('#adminNavAvatarContainer').html(`<img src="${fullUrl}" style="width:100%; height:100%; object-fit:cover;" />`);
+          }
+          const firstName = c.first_name || '';
+          if (firstName) {
+            sessionStorage.setItem('tunify_first_name', firstName);
+            sessionStorage.setItem('tunify_last_name', c.last_name || '');
+            $('#adminNavName').text(firstName);
+          }
+        }
+      }
+    });
+  })();
+
+  // ── Admin Sidebar Logout ────────────────────────────────────────
+  // Direct handler here since Bootstrap dropdown may swallow bubbled events
+  $(document).off('click.adminLogout', '#logoutBtn');
+  $(document).on('click.adminLogout', '#logoutBtn', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // Close the dropdown first
+    $('#adminAccountDropdown').dropdown('hide');
+    Swal.fire({
+      title: 'Log Out?',
+      text: 'Are you sure you want to log out of the admin panel?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-sign-out-alt mr-1"></i> Yes, Log Out',
+      cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancel',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#374151',
+      background: '#0a0f1e',
+      color: '#e2e8f0'
+    }).then(function(result) {
+      if (result.isConfirmed) {
+        sessionStorage.clear();
+        Swal.fire({
+          text: 'Logged out',
+          showConfirmButton: false,
+          position: 'bottom-right',
+          timer: 1000,
+          timerProgressBar: true,
+          background: '#0a0f1e',
+          color: '#e2e8f0'
+        }).then(function() {
+          window.location.href = '../login.html';
+        });
+      }
+    });
+  });
+</script>

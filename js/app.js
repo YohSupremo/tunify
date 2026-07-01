@@ -125,12 +125,62 @@ const addToCart = (itemId, qty, description, price, image, stock) => {
   });
 };
 
+/* ─── Global Settings Syncer ────────────────────────────────── */
+// In-memory cache only (cleared on every page load/hard refresh)
+let _settingsCache = null;
+
+const applyGlobalSettings = (callback) => {
+  if (_settingsCache) {
+    applySettingsToDOM(_settingsCache);
+    if (callback) callback(_settingsCache);
+    return;
+  }
+
+  const apiBase = typeof url !== 'undefined' ? url : 'http://localhost:5000/';
+  $.ajax({
+    method: 'GET',
+    url: `${apiBase}api/v1/settings`,
+    dataType: 'json',
+    success: function (settings) {
+      if (settings) {
+        _settingsCache = settings;
+        applySettingsToDOM(settings);
+        if (callback) callback(settings);
+      }
+    },
+    error: function () {
+      const defaults = { store_name: 'Tunify' };
+      applySettingsToDOM(defaults);
+      if (callback) callback(defaults);
+    }
+  });
+};
+
+const applySettingsToDOM = (settings) => {
+  if (!settings) return;
+  const name = settings.store_name || 'Tunify';
+  $('.store-name-display').text(name);
+
+  // Dynamically update document title - replace all occurrences of "Tunify"
+  if (document.title && document.title.includes('Tunify')) {
+    document.title = document.title.replace(/Tunify/g, name);
+  }
+};
+
+// Apply settings as soon as jQuery and DOM are ready.
+// Using $(document).ready() ensures this works even when app.js is loaded at
+// the bottom of <body> (where DOMContentLoaded may have already fired).
+$(document).ready(function () {
+  applyGlobalSettings();
+});
+
 /* ─── Nav / Footer loader ───────────────────────────────────── */
 const loadNav = () => {
   const isAdmin = window.location.pathname.includes('/admin/');
   const prefix = isAdmin ? '../' : '';
   const navFile = isAdmin ? 'components/admin-navbar.html' : 'components/navbar.html';
   $('#tunifyNav').load(prefix + navFile + '?v=' + Date.now(), () => {
+    applyGlobalSettings();
     updateCartCount();
     $(window).on('scroll', function () {
       if ($(this).scrollTop() > 40) $('#mainNav').addClass('scrolled');
@@ -256,7 +306,9 @@ const loadFooter = () => {
   const isAdmin = window.location.pathname.includes('/admin/');
   const prefix = isAdmin ? '../' : '';
   const footerFile = isAdmin ? 'components/admin-footer.html' : 'components/footer.html';
-  $('#tunifyFooter').load(prefix + footerFile + '?v=' + Date.now());
+  $('#tunifyFooter').load(prefix + footerFile + '?v=' + Date.now(), () => {
+    applyGlobalSettings();
+  });
 };
 
 /* ─── SweetAlert2 themed helper ────────────────────────────── */

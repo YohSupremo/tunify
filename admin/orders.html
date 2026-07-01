@@ -80,7 +80,10 @@
             </select>
             <button type="button" class="btn-gold py-1 px-3 ml-2" id="btnUpdateStatus" style="font-size: 0.85rem; border-radius: 6px; height: 35px; vertical-align: top;"><i class="fas fa-save mr-1"></i> Update</button>
           </div>
-          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="border-radius: 6px; height: 35px; font-size: 0.85rem;">Close</button>
+          <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-outline-light mr-2" id="btnDownloadReceipt" style="border-radius: 6px; height: 35px; font-size: 0.85rem;"><i class="fas fa-file-pdf mr-1"></i> Download Receipt</button>
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="border-radius: 6px; height: 35px; font-size: 0.85rem;">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -107,6 +110,9 @@
 
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>
+  <!-- pdfmake (Lab 8 - PDF Receipt) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
   <script src="js/admin-orders.js?v=2026"></script>
 </body>
 

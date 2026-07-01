@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Store Settings — Tunify Control Panel</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css"
+    integrity="sha512-fjO3Vy3QodX9c6G9AUmr6WuIaEPdGRxBjD7gjatG5gGylzYyrEq3U0q+smkG6CwIY0L8XALRFHh4KPHig0Q1ug=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    .form-group label {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+    .form-control:disabled {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border-color: rgba(255, 255, 255, 0.05) !important;
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+  </style>
+</head>
+
+<body data-page="admin-settings">
+  <div id="tunifyNav"></div>
+
+  <div class="page-wrap">
+    <div class="container">
+      <div class="page-header fade-in-up">
+        <div>
+          <p class="section-eyebrow">System Configuration</p>
+          <h1 class="section-title">Store Settings</h1>
+          <p class="section-sub">Configure low stock alert thresholds, default shipping fees, tax rates, currency parameters, and official store contact information.</p>
+        </div>
+      </div>
+
+      <!-- Settings Panel Form Card -->
+      <div class="panel-card fade-in-up mt-4" style="max-width: 800px; margin: 0 auto;">
+        <form id="settingsForm" class="form-tunify">
+          
+          <h3 class="mb-4" style="font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.75rem;">
+            <i class="fas fa-store mr-2"></i> General Info
+          </h3>
+          <div class="row mb-4">
+            <div class="col-md-4 form-group">
+              <label for="storeName">Store Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="storeName" name="store_name" placeholder="Tunify" required />
+            </div>
+            <div class="col-md-4 form-group">
+              <label for="storeEmail">Contact Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="storeEmail" name="store_contact_email" placeholder="support@tunify.com" required />
+            </div>
+            <div class="col-md-4 form-group">
+              <label for="storePhone">Contact Phone <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="storePhone" name="store_contact_phone" placeholder="+63 912 000 0000" required />
+            </div>
+          </div>
+
+          <h3 class="mb-4" style="font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.75rem;">
+            <i class="fas fa-coins mr-2"></i> Financials & Inventory
+          </h3>
+          <div class="row">
+            <div class="col-md-4 form-group">
+              <label for="shippingFee">Default Shipping Fee <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.08); color: var(--text-dim); font-size: 0.8rem; font-weight: bold;">₱</span>
+                </div>
+                <input type="number" step="0.01" min="0" class="form-control" id="shippingFee" name="default_shipping_fee" placeholder="100.00" required />
+              </div>
+            </div>
+            <div class="col-md-4 form-group">
+              <label for="taxRate">Tax Rate (decimal) <span class="text-danger">*</span></label>
+              <input type="number" step="0.0001" min="0" max="1" class="form-control" id="taxRate" name="tax_rate" placeholder="0.1200" required />
+              <small class="form-text text-muted" style="font-size: 0.65rem;">e.g., 0.1200 for 12% VAT</small>
+            </div>
+            <div class="col-md-4 form-group">
+              <label for="stockThreshold">Low Stock Threshold <span class="text-danger">*</span></label>
+              <input type="number" min="0" step="1" class="form-control" id="stockThreshold" name="low_stock_threshold" placeholder="5" required />
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.06);">
+            <button type="submit" class="btn-gold" id="btnSaveSettings">
+              <i class="fas fa-save mr-1"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="tunifyFooter"></div>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JS Dependencies -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"
+    integrity="sha512-LGHBR+kJ5jZSIzhhdfytPoEHzgaYuTRifq9g5l6ja6/k9NAOsAi5dQh4zQF6JIRB8cAYxTRedERUF+97/KuivQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- jQuery Validation -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="js/admin-settings.js?v=2026"></script>
+</body>
+
+</html>

@@ -38,13 +38,13 @@ SECTION 2: TERM TEST LAB (TRANSACTIONS, EMAIL, PDF)
    - Status: Finished.
    - Evidence: Customers can place orders via cart.html (POST /api/v1/orders). Admins can view orders, check detailed receipt templates in the details modal, and update order statuses dynamically.
 
-7. [ ] Send an email when updating the transaction (5pts)
-   - Status: Unfinished.
-   - Note: Email sending logic (e.g. using nodemailer) is not yet integrated.
+7. [x] Send an email when updating the transaction (5pts)
+   - Status: Finished.
+   - Evidence: `nodemailer` installed in tunify_backend. `utils/sendEmail.js` created following the node-ns-2026 reference pattern (SMTP transport with `SMTP_HOST/PORT/EMAIL/PASSWORD/FROM_NAME/FROM_EMAIL` env vars). `updateOrderStatus` in `controllers/order.js` calls `sendEmail()` after `transaction.commit()` — sends an HTML notification email to the customer's address with the new order status. Mailtrap sandbox is configured for testing.
 
-8. [ ] Attach the receipt with order details in PDF (10pts)
-   - Status: Unfinished.
-   - Note: PDF invoice generation (e.g. using pdfkit) is not yet integrated.
+8. [x] Attach the receipt with order details in PDF (10pts)
+   - Status: Finished.
+   - Evidence: `pdfmake` CDN scripts added to `admin/orders.html` following the itcp237-js-ns-2026 reference pattern. A "Download Receipt" button in the order details modal uses `pdfmake.createPdf()` to generate and download a client-side PDF receipt containing: order ID, dates, customer info, shipping address, itemized table (name/qty/price/subtotal), subtotal, shipping fee, grand total, and payment info.
 
 ================================================================================
 SECTION 3: QUIZZES, CHARTS, AND ROUTING

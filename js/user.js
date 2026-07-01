@@ -1206,12 +1206,16 @@ $(document).ready(function () {
                 let itemsHtml = '';
                 let totalMerchandise = 0;
 
+                const isDelivered = res.status && res.status.toLowerCase() === 'delivered';
                 res.items.forEach(function (item) {
                     const lineTotal = item.price * item.quantity;
                     totalMerchandise += lineTotal;
+                    const reviewLink = isDelivered && item.item_id
+                        ? `<br><a href="product.html?id=${item.item_id}#tabReviews" style="font-size: 0.72rem; color: var(--gold); text-decoration: underline; display: inline-block; margin-top: 3px;"><i class="fas fa-star mr-1"></i> Review this product</a>`
+                        : '';
                     itemsHtml += `
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 0.5rem 0; text-align: left; color: var(--text);">${item.name}</td>
+                            <td style="padding: 0.5rem 0; text-align: left; color: var(--text);">${item.name}${reviewLink}</td>
                             <td style="padding: 0.5rem 0; text-align: center; color: var(--silver);">${item.quantity}</td>
                             <td style="padding: 0.5rem 0; text-align: right; color: var(--silver); font-family: var(--font-mono);">₱${Number(item.price).toFixed(2)}</td>
                             <td style="padding: 0.5rem 0; text-align: right; color: var(--text); font-family: var(--font-mono);">₱${Number(lineTotal).toFixed(2)}</td>

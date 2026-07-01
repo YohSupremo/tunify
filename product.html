@@ -64,7 +64,34 @@
             <ul class="spec-list mt-3" id="specList"></ul>
           </div>
           <div class="tab-pane fade tab-pane-content" id="tabReviews">
-            <p class="mt-3">Customers love the build quality and fast shipping. Leave a review after purchase!</p>
+            <div id="reviewsSummary" class="mb-4">
+              <!-- Average stars and review count -->
+            </div>
+            <div id="reviewsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 2rem;">
+              <!-- Individual reviews will render here -->
+            </div>
+            <div id="reviewFormContainer" class="form-tunify border-top pt-4" style="display: none; border-color: rgba(255,255,255,0.08) !important;">
+              <h4 style="font-family:var(--font-display); font-size:1.1rem; color:var(--gold); margin-bottom:1rem;">Write a Review</h4>
+              <div class="form-group">
+                <label>Rating</label>
+                <div class="rating-stars-input" style="font-size: 1.5rem; color: var(--gold-dim); cursor: pointer; display: flex; gap: 6px;">
+                  <i class="far fa-star star-btn" data-value="1"></i>
+                  <i class="far fa-star star-btn" data-value="2"></i>
+                  <i class="far fa-star star-btn" data-value="3"></i>
+                  <i class="far fa-star star-btn" data-value="4"></i>
+                  <i class="far fa-star star-btn" data-value="5"></i>
+                </div>
+                <input type="hidden" id="reviewRatingInput" value="0" />
+              </div>
+              <div class="form-group">
+                <label>Comments</label>
+                <textarea class="form-control" id="reviewCommentInput" rows="3" placeholder="Share your experience with this product..." style="background: var(--surface); border: 1px solid var(--border); color: var(--text);"></textarea>
+              </div>
+              <button class="btn-gold" id="btnSubmitReview"><i class="fas fa-paper-plane mr-1"></i> Submit Review</button>
+            </div>
+            <div id="reviewEligibilityMessage" style="color: var(--silver); font-size: 0.85rem; margin-top: 1rem;">
+              <!-- Message if guest or not eligible -->
+            </div>
           </div>
         </div>
       </div>

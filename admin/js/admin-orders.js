@@ -243,6 +243,138 @@ $(document).ready(function () {
         });
     });
 
+    /* ── Lab 8: Download Receipt PDF (pdfmake) ──────────────────── */
+    $('#orderModal').on('click', '#btnDownloadReceipt', function () {
+        if (!currentOrder) return;
+        var o = currentOrder;
+
+        var orderSubtotal = (o.items || []).reduce(function (sum, item) {
+            return sum + (parseFloat(item.price) * parseInt(item.quantity));
+        }, 0);
+        var shippingFee = parseFloat(o.shipping_fee || 100);
+        var grandTotal = orderSubtotal + shippingFee;
+
+        var paymentMethodLabel = {
+            'cod': 'Cash on Delivery (COD)',
+            'gcash': 'GCash',
+            'card': 'Credit/Debit Card',
+            'bank_transfer': 'Bank Transfer'
+        }[o.payment_method] || 'Cash on Delivery';
+
+        // Build item rows for pdfmake table
+        var itemRows = [
+            [
+                { text: 'Item Description', bold: true, fillColor: '#1a1a2e', color: '#ffffff' },
+                { text: 'Price', bold: true, fillColor: '#1a1a2e', color: '#ffffff', alignment: 'right' },
+                { text: 'Qty', bold: true, fillColor: '#1a1a2e', color: '#ffffff', alignment: 'center' },
+                { text: 'Subtotal', bold: true, fillColor: '#1a1a2e', color: '#ffffff', alignment: 'right' }
+            ]
+        ];
+        (o.items || []).forEach(function (item) {
+            var price = parseFloat(item.price || 0);
+            var qty = parseInt(item.quantity || 1);
+            itemRows.push([
+                item.name,
+                { text: '₱ ' + price.toLocaleString(), alignment: 'right' },
+                { text: String(qty), alignment: 'center' },
+                { text: '₱ ' + (price * qty).toLocaleString(), alignment: 'right' }
+            ]);
+        });
+
+        // Safely construct customer stack to avoid empty object pdfmake crash
+        var customerStack = [
+            { text: 'CUSTOMER & SHIPPING', style: 'sectionLabel' },
+            { text: o.customer_name || 'Guest', bold: true, fontSize: 10 },
+            { text: (o.shipping_street || '') + ', ' + (o.shipping_city || ''), fontSize: 9, color: '#555' },
+            { text: (o.shipping_province || '') + ' ' + (o.shipping_zip || ''), fontSize: 9, color: '#555' },
+            { text: 'Email: ' + (o.customer_email || ''), fontSize: 9, color: '#555' }
+        ];
+        if (o.customer_phone) {
+            customerStack.push({ text: 'Phone: ' + o.customer_phone, fontSize: 9, color: '#555' });
+        }
+
+        var docDefinition = {
+            content: [
+                // Header
+                { text: 'TUNIFY', style: 'header' },
+                { text: 'Order Receipt', style: 'subheader' },
+                { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1, lineColor: '#c8a96e' }] },
+                { text: ' ' },
+
+                // Order info columns
+                {
+                    columns: [
+                        {
+                            width: '50%',
+                            stack: customerStack
+                        },
+                        {
+                            width: '50%',
+                            stack: [
+                                { text: 'ORDER DETAILS', style: 'sectionLabel' },
+                                { text: 'Order ID: ' + (o.id || ''), fontSize: 10, bold: true },
+                                { text: 'Date Placed: ' + (o.date_placed || ''), fontSize: 9, color: '#555' },
+                                { text: 'Date Shipped: ' + (o.date_shipped || 'Processing'), fontSize: 9, color: '#555' },
+                                { text: 'Status: ' + (o.status || ''), fontSize: 9, color: '#555' },
+                                { text: 'Payment: ' + paymentMethodLabel, fontSize: 9, color: '#555' },
+                                { text: 'Payment Status: ' + (o.payment_status || 'Pending'), fontSize: 9, color: '#555' }
+                            ]
+                        }
+                    ]
+                },
+                { text: ' ' },
+
+                // Items table
+                { text: 'ORDER ITEMS', style: 'sectionLabel' },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['*', 100, 50, 100],
+                        body: itemRows
+                    },
+                    layout: 'lightHorizontalLines'
+                },
+                { text: ' ' },
+
+                // Totals
+                {
+                    columns: [
+                        { width: '*', text: '' },
+                        {
+                            width: 250,
+                            table: {
+                                widths: ['*', 'auto'],
+                                body: [
+                                    ['Subtotal', { text: '₱ ' + orderSubtotal.toLocaleString(), alignment: 'right' }],
+                                    ['Shipping Fee', { text: '₱ ' + shippingFee.toLocaleString(), alignment: 'right' }],
+                                    [
+                                        { text: 'Grand Total', bold: true, fontSize: 11 },
+                                        { text: '₱ ' + grandTotal.toLocaleString(), bold: true, fontSize: 11, alignment: 'right', color: '#c8a96e' }
+                                    ]
+                                ]
+                            },
+                            layout: 'lightHorizontalLines'
+                        }
+                    ]
+                },
+
+                // Footer
+                { text: ' ' },
+                { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 0.5, lineColor: '#cccccc' }] },
+                { text: 'Thank you for shopping with Tunify!', alignment: 'center', italics: true, fontSize: 9, color: '#777', margin: [0, 8, 0, 0] }
+            ],
+            styles: {
+                header: { fontSize: 22, bold: true, alignment: 'center', color: '#c8a96e', margin: [0, 0, 0, 4] },
+                subheader: { fontSize: 12, alignment: 'center', color: '#555', margin: [0, 0, 0, 8] },
+                sectionLabel: { fontSize: 8, bold: true, color: '#888', margin: [0, 0, 0, 4] }
+            },
+            defaultStyle: { font: 'Roboto', fontSize: 10, color: '#222' }
+        };
+
+        var orderId = o.id ? String(o.id).replace(/[^a-zA-Z0-9-]/g, '') : 'receipt';
+        pdfMake.createPdf(docDefinition).download('Tunify-Receipt-' + orderId + '.pdf');
+    });
+
     // Initialize Page
     loadOrdersFromDB();
 });
