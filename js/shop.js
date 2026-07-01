@@ -8,6 +8,12 @@ $(document).ready(function () {
 
   let filters = { categories: [], brands: [], minPrice: 0, maxPrice: 999999, search: '', saleOnly: false };
 
+  // Infinite Scroll State
+  let currentPage = 1;
+  const itemsPerPage = 12; // safe page size to fill most viewports on load
+  let isLoading = false;
+  let allFilteredProducts = []; // Caches the filtered products list for pagination
+
   /* ── Fetch items, brands, and categories from API then boot page ─
      Pattern: nested $.ajax GET calls, same as admin-brands.js loadDataFromDB
      and itcp237-js-ns-2026/js/home.js                                        */
@@ -178,6 +184,14 @@ $(document).ready(function () {
       $('#priceMax').text(max.toLocaleString());
       applyFilters(products);
     });
+
+    // Infinite Scroll Event
+    $(window).off('scroll.infinite').on('scroll.infinite', function () {
+      // Trigger when scrolled to within 150px of the bottom of the page
+      if ($(window).scrollTop() + $(window).height() >= $(document).height() - 150) {
+        renderNextPage();
+      }
+    });
   }
 
   /* ── Filter + sort products ─────────────────────────────────── */
@@ -203,10 +217,16 @@ $(document).ready(function () {
 
   /* ── Render product grid ────────────────────────────────────── */
   function applyFilters(products) {
-    const list = getFiltered(products);
+    allFilteredProducts = getFiltered(products);
+    currentPage = 1;
     const $grid = $('#shopGrid');
     $grid.empty();
-    if (!list.length) {
+
+    // Remove old completion message and loader if they exist
+    $('#endOfCatalogMessage').remove();
+    $('#infiniteScrollLoader').remove();
+
+    if (!allFilteredProducts.length) {
       $grid.html(`
         <div class="col-12 text-center py-5">
           <i class="fas fa-search fa-2x mb-3" style="color:var(--text-dim)"></i>
@@ -214,9 +234,84 @@ $(document).ready(function () {
           <button class="btn-outline-gold mt-2" id="clearFiltersInline">Clear Filters</button>
         </div>`);
       $('#clearFiltersInline').on('click', function () { $('#clearFilters').click(); });
+      $('#resultCount').text('0 products');
       return;
     }
-    list.forEach(function (p) {
+
+    $('#resultCount').text(`${allFilteredProducts.length} product${allFilteredProducts.length !== 1 ? 's' : ''}`);
+
+    // Append the loader container immediately after the grid
+    if (!$('#infiniteScrollLoader').length) {
+      $grid.after(`
+        <div id="infiniteScrollLoader" class="text-center py-4 w-100 d-none">
+          <div class="spinner-border text-warning" role="status" style="width: 2rem; height: 2rem;">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        <div id="endOfCatalogMessage" class="text-center py-4 w-100 d-none text-muted" style="font-size: 0.85rem; color: var(--silver) !important;">
+          <i class="fas fa-check-circle mr-1"></i> You've viewed all ${allFilteredProducts.length} products.
+        </div>
+      `);
+    }
+
+    renderNextPage();
+  }
+
+  /* ── Paging / Chunk rendering ───────────────────────────────── */
+  function renderNextPage() {
+    if (isLoading) return;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    if (startIndex >= allFilteredProducts.length) {
+      $('#infiniteScrollLoader').addClass('d-none');
+      if (allFilteredProducts.length > itemsPerPage) {
+        $('#endOfCatalogMessage').removeClass('d-none');
+      }
+      return;
+    }
+
+    const endIndex = Math.min(startIndex + itemsPerPage, allFilteredProducts.length);
+    const batch = allFilteredProducts.slice(startIndex, endIndex);
+    const $grid = $('#shopGrid');
+
+    if (currentPage > 1) {
+      isLoading = true;
+      $('#infiniteScrollLoader').removeClass('d-none');
+
+      // 400ms delay for premium loading animation visual effect
+      setTimeout(function () {
+        appendBatch(batch, $grid);
+        currentPage++;
+        isLoading = false;
+        $('#infiniteScrollLoader').addClass('d-none');
+
+        if (endIndex >= allFilteredProducts.length) {
+          if (allFilteredProducts.length > itemsPerPage) {
+            $('#endOfCatalogMessage').removeClass('d-none');
+          }
+        } else {
+          // If viewport is not filled, load the next page automatically
+          checkViewportFill();
+        }
+      }, 400);
+    } else {
+      appendBatch(batch, $grid);
+      currentPage++;
+
+      // If the first page is not tall enough to fill viewport, auto-trigger next load
+      checkViewportFill();
+    }
+  }
+
+  function checkViewportFill() {
+    // If the document height is not taller than the window viewport, load the next page
+    if ($(document).height() <= $(window).height() && (currentPage - 1) * itemsPerPage < allFilteredProducts.length) {
+      renderNextPage();
+    }
+  }
+
+  function appendBatch(batch, $grid) {
+    batch.forEach(function (p) {
       const isOutOfStock = p.stock == 0;
       $grid.append(`
         <div class="col-6 col-md-4 col-lg-3 mb-4">
@@ -251,7 +346,6 @@ $(document).ready(function () {
           </a>
         </div>`);
     });
-    $('#resultCount').text(`${list.length} product${list.length !== 1 ? 's' : ''}`);
     Tunify.triggerFadeIn();
 
     // Prevent navigation when clicking on the quantity input

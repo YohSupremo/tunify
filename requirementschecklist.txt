@@ -73,6 +73,7 @@ SECTION 4: UNIT TESTS (UI/UX, PAGINATION, SCROLL)
     - Status: Finished.
     - Evidence: The storefront and control panels have beautiful custom styling, glassmorphic navbar effects, and hover styles.
 
-14. [ ] Unit Test 2: jQuery pagination / infinite scroll (20pts)
-    - Status: Unfinished.
-    - Note: The shop grid (js/shop.js) renders all filtered results at once. It does not implement custom jQuery pagination or infinite scrolling.
+14. [x] Unit Test 2: jQuery pagination / infinite scroll (20pts)
+    - Status: Finished.
+    - Evidence: Custom client-side infinite scroll is implemented in [shop.js](file:///c:/advancedwebproj/tunify/js/shop.js). Products are rendered in batches (pages of 12), with dynamic loading spinners and "end of catalog" messages appearing on scroll near the bottom of the page.
+
