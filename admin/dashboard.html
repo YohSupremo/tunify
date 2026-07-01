@@ -1,139 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard — Tunify Control Panel</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet" />
+  <meta name="description" content="Tunify admin dashboard — financial overview and live stock activity." />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/pages.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css"
-    integrity="sha512-fjO3Vy3QodX9c6G9AUmr6WuIaEPdGRxBjD7gjatG5gGylzYyrEq3U0q+smkG6CwIY0L8XALRFHh4KPHig0Q1ug=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.css" crossorigin="anonymous" />
   <style>
-    /* Admin-specific style refinements */
-    .admin-chart-card {
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
+    /* ── Card shell ── */
+    .d-card {
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
       padding: 1.5rem;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-      margin-bottom: 2rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      height: 100%;
     }
-
-    .admin-chart-card h3 {
-      font-size: 1.05rem;
+    .d-card-title {
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--gold);
-      margin-bottom: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748B;
+      margin-bottom: 1.1rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
+    /* ── Net Profit hero ── */
+    .hero-profit {
+      background: linear-gradient(135deg, rgba(10,18,36,0.9) 0%, rgba(15,23,42,0.7) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 2rem 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-profit::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(248,113,113,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #64748B;
+      margin-bottom: 0.5rem;
+    }
+    .hero-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .hero-sub {
+      font-size: 0.78rem;
+      color: #64748B;
+      margin-bottom: 1rem;
+    }
+    .recovery-track {
+      background: rgba(255,255,255,0.06);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .recovery-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.4s cubic-bezier(.4,0,.2,1);
+    }
+    .recovery-caption {
+      font-size: 0.68rem;
+      color: #475569;
+      margin-top: 0.35rem;
+    }
+
+    /* ── Financial breakdown rows ── */
+    .fin-table { width: 100%; border-collapse: collapse; }
+    .fin-table tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .fin-table tr:last-child { border-bottom: none; }
+    .fin-table td { padding: 0.6rem 0; font-size: 0.85rem; vertical-align: middle; }
+    .fin-table .lbl { color: #94A3B8; }
+    .fin-table .val { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .fin-divider { border-top: 1px solid rgba(255,255,255,0.1) !important; }
+    .fin-divider td { padding-top: 0.85rem !important; }
+
+    /* ── Activity feed ── */
+    .activity-scroll {
+      max-height: 430px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .activity-scroll::-webkit-scrollbar { width: 3px; }
+    .activity-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .ev-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .ev-item:last-child { border-bottom: none; }
+    .ev-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; flex-shrink: 0;
+    }
+    .dot-restock { background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
+    .ev-body { flex: 1; min-width: 0; }
+    .ev-name { font-size: 0.83rem; font-weight: 500; color: #E2E8F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ev-meta { font-size: 0.7rem; color: #475569; margin-top: 1px; }
+    .ev-qty  { font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; padding: 0.15rem 0.5rem; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+    .qty-restock { background: rgba(16,185,129,0.12); color: #10B981; }
+
+    /* ── Colour tokens ── */
+    .c-gold   { color: #FBBF24; }
+    .c-green  { color: #10B981; }
+    .c-red    { color: #F87171; }
+    .c-blue   { color: #38BDF8; }
+
+    /* ── Pulsing alert cards ── */
     @keyframes outOfStockPulse {
-      0%, 100% { box-shadow: 0 0 12px rgba(239,68,68,0.2), 0 15px 35px rgba(0,0,0,0.4); }
-      50%       { box-shadow: 0 0 28px rgba(239,68,68,0.6), 0 15px 35px rgba(0,0,0,0.4); }
+      0%,100% { box-shadow: 0 0 10px rgba(239,68,68,0.15), 0 12px 32px rgba(0,0,0,0.4); }
+      50%      { box-shadow: 0 0 24px rgba(239,68,68,0.5),  0 12px 32px rgba(0,0,0,0.4); }
+    }
+    @keyframes lowStockPulse {
+      0%,100% { box-shadow: 0 0 10px rgba(251,191,36,0.1),  0 12px 32px rgba(0,0,0,0.4); }
+      50%      { box-shadow: 0 0 22px rgba(251,191,36,0.4),  0 12px 32px rgba(0,0,0,0.4); }
     }
 
-    @keyframes lowStockPulse {
-      0%, 100% { box-shadow: 0 0 12px rgba(251,191,36,0.15), 0 15px 35px rgba(0,0,0,0.4); }
-      50%       { box-shadow: 0 0 24px rgba(251,191,36,0.45), 0 15px 35px rgba(0,0,0,0.4); }
-    }
+    /* ── Row spacing ── */
+    .dash-row { margin-bottom: 1.5rem; }
   </style>
 </head>
-
 <body>
   <div id="tunifyNav"></div>
 
   <div class="page-wrap">
     <div class="container">
+
       <div class="page-header fade-in-up">
         <p class="section-eyebrow">Control Panel</p>
-        <h1 class="section-title">System Analytics</h1>
-        <p class="section-sub">Real-time charts, revenue metrics, and customer distribution stats.</p>
+        <h1 class="section-title">Business Dashboard</h1>
+        <p class="section-sub">Sales, profit, inventory, and live stock activity.</p>
       </div>
 
-      <!-- Stat Grid -->
+      <!-- ── Net Profit Hero ── -->
+      <div class="hero-profit fade-in-up">
+        <div class="hero-eyebrow"><i class="fas fa-chart-line mr-1"></i> Net Profit / Loss &nbsp;·&nbsp; Revenue minus Total Capital Invested</div>
+        <div class="hero-value" id="heroNetProfit">—</div>
+        <div class="hero-sub" id="heroNetSub">Calculating…</div>
+        <div class="recovery-track">
+          <div class="recovery-fill" id="recoveryBar" style="width:0%"></div>
+        </div>
+        <div class="recovery-caption" id="recoveryCaption"></div>
+      </div>
+
+      <!-- ── Stat Cards ── -->
       <div class="stat-cards fade-in-up">
         <div class="stat-card">
-          <div class="stat-card-label">Total Revenue</div>
-          <div class="stat-card-value" id="statRevenue">₱0</div>
-          <div class="stat-card-change" style="color:#10B981"><i class="fas fa-arrow-up"></i> +12% this month</div>
+          <div class="stat-card-label">Total Sales</div>
+          <div class="stat-card-value c-gold" id="statRevenue">₱0</div>
+          <div class="stat-card-change" style="color:#64748B" id="statOrderCount">— paid orders</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-label">Orders</div>
-          <div class="stat-card-value" id="statOrders">0</div>
-          <div class="stat-card-change">Total store orders</div>
+          <div class="stat-card-label">Gross Profit</div>
+          <div class="stat-card-value" id="statGrossProfit">₱0</div>
+          <div class="stat-card-change" style="color:#64748B">Sales minus COGS</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-label">Active Customers</div>
-          <div class="stat-card-value" id="statCustomers">0</div>
-          <div class="stat-card-change">Unique shopper profiles</div>
+          <div class="stat-card-label">Inventory Value</div>
+          <div class="stat-card-value c-blue" id="statInventory">₱0</div>
+          <div class="stat-card-change" style="color:#64748B">Stock on hand × last cost</div>
         </div>
-        <div class="stat-card" id="outOfStockCard" style="cursor:pointer; position:relative; transition: border-color 0.3s, box-shadow 0.3s;" onclick="window.location.href='stock.html?filter=outofstock'">
-          <div class="stat-card-label">Out of Stock</div>
-          <div class="stat-card-value" id="statOutOfStock" style="color:#f87171">0</div>
-          <div class="stat-card-change">Items with zero quantity</div>
-          <div class="mt-2">
-            <a href="stock.html?filter=outofstock" class="btn btn-sm"
-              style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35); color: #f87171; font-size: 0.72rem; border-radius: 8px; padding: 0.25rem 0.75rem; transition: all 0.2s;"
-              onmouseover="this.style.background='rgba(239,68,68,0.3)'"
-              onmouseout="this.style.background='rgba(239,68,68,0.15)'"
-              onclick="event.stopPropagation()">
-              <i class="fas fa-exclamation-circle mr-1"></i> Restock Now
-            </a>
-          </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Customers</div>
+          <div class="stat-card-value c-gold" id="statCustomers">0</div>
+          <div class="stat-card-change" style="color:#64748B">Registered profiles</div>
         </div>
-        <div class="stat-card" id="lowStockCard" style="cursor:pointer; position:relative; transition: border-color 0.3s, box-shadow 0.3s;" onclick="window.location.href='stock.html?filter=lowstock'">
-          <div class="stat-card-label">Low Stock Alert</div>
-          <div class="stat-card-value" id="statLowStock" style="color:#FBBF24">0</div>
-          <div class="stat-card-change">Items nearing depletion</div>
+        <div class="stat-card" id="stockAlertCard" style="cursor:pointer;" onclick="window.location.href='stock.html?filter=lowstock'">
+          <div class="stat-card-label">Stock Alerts</div>
+          <div class="stat-card-value c-red" id="statStockAlerts">0</div>
+          <div class="stat-card-change" id="statStockBreakdown" style="color:#64748B">Items need attention</div>
           <div class="mt-2">
             <a href="stock.html?filter=lowstock" class="btn btn-sm"
-              style="background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35); color: #FBBF24; font-size: 0.72rem; border-radius: 8px; padding: 0.25rem 0.75rem; transition: all 0.2s;"
-              onmouseover="this.style.background='rgba(251,191,36,0.25)'"
-              onmouseout="this.style.background='rgba(251,191,36,0.12)'"
-              onclick="event.stopPropagation()">
-              <i class="fas fa-boxes mr-1"></i> Manage Stock
-            </a>
+              style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:0.7rem;border-radius:8px;padding:0.2rem 0.65rem;"
+              onclick="event.stopPropagation()"><i class="fas fa-exclamation-circle mr-1"></i>Manage Stock</a>
           </div>
         </div>
       </div>
 
-      <!-- Charts Section -->
-      <div class="row">
-        <!-- Monthly Sales Chart -->
-        <div class="col-lg-8 mb-4">
-          <div class="admin-chart-card fade-in-up" style="min-height: 380px;">
-            <h3><i class="fas fa-chart-line"></i> Monthly Sales &amp; Revenue Trends</h3>
-            <canvas id="monthlySalesChart" style="max-height: 280px;"></canvas>
+      <!-- ── Row: Financial Breakdown + Monthly Chart ── -->
+      <div class="row dash-row">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <div class="d-card fade-in-up">
+            <div class="d-card-title"><i class="fas fa-receipt"></i> Financial Breakdown</div>
+            <table class="fin-table">
+              <tr>
+                <td class="lbl"><i class="fas fa-shopping-bag mr-1 c-gold" style="font-size:.75rem"></i> Total Revenue</td>
+                <td class="val c-gold" id="finRevenue">₱0</td>
+              </tr>
+              <tr>
+                <td class="lbl" style="padding-left:1rem;font-size:0.75rem;color:#475569">↳ paid orders</td>
+                <td class="val" style="color:#475569;font-size:0.75rem" id="finOrders">0</td>
+              </tr>
+              <tr>
+                <td class="lbl"><i class="fas fa-tag mr-1 c-red" style="font-size:.75rem"></i> COGS (items sold)</td>
+                <td class="val c-red" id="finCOGS">₱0</td>
+              </tr>
+              <tr>
+                <td class="lbl"><i class="fas fa-chart-line mr-1 c-green" style="font-size:.75rem"></i> Gross Profit</td>
+                <td class="val" id="finGrossProfit">₱0</td>
+              </tr>
+              <tr class="fin-divider">
+                <td class="lbl"><i class="fas fa-warehouse mr-1 c-blue" style="font-size:.75rem"></i> Inventory on Hand</td>
+                <td class="val c-blue" id="finInventory">₱0</td>
+              </tr>
+              <tr class="fin-divider">
+                <td class="lbl" style="font-weight:600;color:#E2E8F0">Net Profit / Loss</td>
+                <td class="val" id="finNetProfit" style="font-size:1rem">₱0</td>
+              </tr>
+            </table>
           </div>
         </div>
-
-        <!-- Items Sold Distribution (Pie) -->
-        <div class="col-lg-4 mb-4">
-          <div class="admin-chart-card fade-in-up" style="min-height: 380px;">
-            <h3><i class="fas fa-chart-pie"></i> Sales by Product Category</h3>
-            <canvas id="itemsSoldChart" style="max-height: 280px;"></canvas>
+        <div class="col-lg-8">
+          <div class="d-card fade-in-up">
+            <div class="d-card-title"><i class="fas fa-chart-bar"></i> Monthly Revenue vs. COGS</div>
+            <canvas id="monthlySalesChart" style="max-height:280px;"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="row">
-        <!-- Customer Address Distribution (Horizontal Bar) -->
-        <div class="col-lg-12 mb-4">
-          <div class="admin-chart-card fade-in-up">
-            <h3><i class="fas fa-map-marker-alt"></i> Customer Address Distribution</h3>
-            <canvas id="addressDistributionChart" style="max-height: 250px;"></canvas>
+      <!-- ── Row: Activity Feed + Category Pie ── -->
+      <div class="row dash-row">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+          <div class="d-card fade-in-up">
+            <div class="d-card-title">
+              <i class="fas fa-boxes"></i> Recent Restock Logs
+            </div>
+            <div class="activity-scroll" id="activityFeed">
+              <div style="padding:2rem;text-align:center;color:#475569"><i class="fas fa-spinner fa-spin mr-2"></i>Loading…</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="d-card fade-in-up">
+            <div class="d-card-title"><i class="fas fa-chart-pie"></i> Sales by Category</div>
+            <canvas id="itemsSoldChart" style="max-height:300px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Row: Address Map ── -->
+      <div class="row dash-row">
+        <div class="col-12">
+          <div class="d-card fade-in-up">
+            <div class="d-card-title"><i class="fas fa-map-marker-alt"></i> Customer Distribution by Location</div>
+            <canvas id="addressDistributionChart" style="max-height:230px;"></canvas>
           </div>
         </div>
       </div>
@@ -144,20 +284,13 @@
   <div id="tunifyFooter"></div>
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- JS Dependencies -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- SweetAlert2 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js"
-    integrity="sha512-LGHBR+kJ5jZSIzhhdfytPoEHzgaYuTRifq9g5l6ja6/k9NAOsAi5dQh4zQF6JIRB8cAYxTRedERUF+97/KuivQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.min.js" crossorigin="anonymous"></script>
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>
-  <script src="js/admin-dashboard.js?v=2026"></script>
+  <script src="js/admin-dashboard.js?v=2026d"></script>
 </body>
-
 </html>

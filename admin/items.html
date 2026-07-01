@@ -186,7 +186,6 @@
                 <th>Brand</th>
                 <th>Category</th>
                 <th>Description</th>
-                <th>Cost Price</th>
                 <th>Sell Price</th>
                 <th>Stock</th>
                 <th>Status</th>
@@ -218,7 +217,7 @@
             <input type="hidden" id="itemId" value="" />
 
             <div class="form-row">
-              <div class="form-group col-md-6">
+              <div class="form-group col-md-4">
                 <label for="itemName">Instrument / Item Name</label>
                 <input type="text" class="form-control" id="itemName" name="itemName" placeholder="e.g. Stratocaster Player" required />
               </div>
@@ -228,7 +227,7 @@
                   <!-- Populated dynamically -->
                 </select>
               </div>
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-2">
                 <label for="itemCategory">Category</label>
                 <select class="form-control" id="itemCategory" name="itemCategory" required>
                   <option value="string">String</option>
@@ -239,22 +238,22 @@
                   <option value="accessories">Accessories</option>
                 </select>
               </div>
+              <div class="form-group col-md-3">
+                <label for="itemSupplier">Supplier</label>
+                <select class="form-control" id="itemSupplier" name="itemSupplier" required>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
             </div>
 
             <div class="form-row">
-              <div class="form-group col-md-4">
-                <label for="itemCostPrice">Cost Price (₱)</label>
-                <input type="number" class="form-control" id="itemCostPrice" name="itemCostPrice" placeholder="Wholesale cost" min="1" />
-                <small class="form-text text-muted" style="font-size:0.7rem">Auto-fills from sell price (60%). You can change it.</small>
-              </div>
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-6">
                 <label for="itemPrice">Selling Price (₱)</label>
                 <input type="number" class="form-control" id="itemPrice" name="itemPrice" placeholder="Retail price" min="1" required />
               </div>
-              <div class="form-group col-md-4">
-                <label for="itemStock">Initial Stock Level</label>
-                <input type="number" class="form-control" id="itemStock" name="itemStock" placeholder="Quantity on hand" min="0"
-                  required />
+              <div class="form-group col-md-6">
+                <label for="itemStock">Stock Level</label>
+                <input type="number" class="form-control" id="itemStock" name="itemStock" value="0" readonly required />
               </div>
             </div>
 

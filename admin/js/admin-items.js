@@ -103,26 +103,38 @@ $(document).ready(function () {
                         $('#itemCategory').empty().append('<option value="" disabled selected>Select Category</option>');
                         categoriesList.forEach(c => $('#itemCategory').append(`<option value="${c.name}">${c.name.charAt(0).toUpperCase() + c.name.slice(1)}</option>`));
 
-                        populateFilterDropdowns();
-
-                        // 3. Fetch Items (all statuses so client-side filter works)
+                        // 2.b Fetch Suppliers
                         $.ajax({
                             method: "GET",
-                            url: `${url}items?status=all`,
+                            url: `${url}suppliers`,
                             dataType: "json",
-                            success: function (items) {
-                                productsList = items.map(item => {
-                                    const staticProd = typeof TunifyProducts !== 'undefined'
-                                        ? TunifyProducts.find(sp => sp.name.toLowerCase() === item.name.toLowerCase())
-                                        : null;
-                                    return {
-                                        ...item,
-                                        desc: item.desc || (staticProd ? staticProd.desc : '')
-                                    };
+                            success: function (suppliers) {
+                                $('#itemSupplier').empty().append('<option value="" disabled selected>Select Supplier</option>');
+                                suppliers.forEach(s => $('#itemSupplier').append(`<option value="${s.name}">${s.name}</option>`));
+
+                                populateFilterDropdowns();
+
+                                // 3. Fetch Items (all statuses so client-side filter works)
+                                $.ajax({
+                                    method: "GET",
+                                    url: `${url}items?status=all`,
+                                    dataType: "json",
+                                    success: function (items) {
+                                        productsList = items.map(item => {
+                                            const staticProd = typeof TunifyProducts !== 'undefined'
+                                                ? TunifyProducts.find(sp => sp.name.toLowerCase() === item.name.toLowerCase())
+                                                : null;
+                                            return {
+                                                ...item,
+                                                desc: item.desc || (staticProd ? staticProd.desc : '')
+                                            };
+                                        });
+                                        reloadTable()
+                                    },
+                                    error: function (err) { console.error("Failed to load items:", err); }
                                 });
-                                reloadTable()
                             },
-                            error: function (err) { console.error("Failed to load items:", err); }
+                            error: function (err) { console.error("Failed to load suppliers:", err); }
                         });
                     },
                     error: function (err) { console.error("Failed to load categories:", err); }
@@ -139,8 +151,8 @@ $(document).ready(function () {
         data: [],
         dom: 'Bfrtip',
         buttons: [
-            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } },
-            { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } }
+            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 6, 7] } },
+            { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 6, 7] } }
         ],
         pageLength: 8,
         order: [[0, 'desc']],
@@ -181,7 +193,6 @@ $(document).ready(function () {
                     p.brand,
                     cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : '',
                     `<div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.desc || ''}">${p.desc || ''}</div>`,
-                    '₱' + (p.cost_price ? Number(p.cost_price).toLocaleString() : Math.round(p.price * 0.6).toLocaleString()),
                     '₱' + p.price.toLocaleString(),
                     p.stock,
                     statusBadge,
@@ -190,8 +201,8 @@ $(document).ready(function () {
             }),
             dom: 'Bfrtip',
             buttons: [
-                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } },
-                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 7, 8] } }
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Export Excel', title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 6, 7] } },
+                { extend: 'pdfHtml5',   text: '<i class="fas fa-file-pdf mr-1"></i> Export PDF',    title: 'Tunify Inventory', exportOptions: { columns: [0, 2, 3, 4, 5, 6, 7] } }
             ],
             pageLength: 8,
             order: [[0, 'desc']],
@@ -319,15 +330,7 @@ $(document).ready(function () {
         $('#itemUpdate').hide();
     });
 
-    // ── Auto-calculate cost price (60% of sell price) ─────────────
-    $(document).on('input', '#itemPrice', function () {
-        const sell = Number($(this).val())
-        if (sell > 0) {
-            $('#itemCostPrice').val(Math.round(sell * 0.6))
-        } else {
-            $('#itemCostPrice').val('')
-        }
-    })
+
 
     // ── Image file input ─────────────────────────────────────────
     $('#itemImageFile').on('change', function (e) {
@@ -361,12 +364,6 @@ $(document).ready(function () {
     });
 
     // Initialize jQuery Validation
-    $.validator.addMethod("minCost", function(value, element) {
-        const cost = Number($('#itemCostPrice').val()) || 0;
-        const sell = Number(value) || 0;
-        return this.optional(element) || sell >= cost;
-    }, "Selling price must be greater than or equal to cost price.");
-
     window.itemValidator = $('#itemForm').validate({
         errorClass: "is-invalid",
         validClass: "is-valid",
@@ -387,18 +384,12 @@ $(document).ready(function () {
             itemCategory: {
                 required: true
             },
-            itemCostPrice: {
-                required: true,
-                min: 1
+            itemSupplier: {
+                required: true
             },
             itemPrice: {
                 required: true,
-                min: 1,
-                minCost: true
-            },
-            itemStock: {
-                required: true,
-                min: 0
+                min: 1
             },
             itemDesc: {
                 required: true
@@ -416,18 +407,12 @@ $(document).ready(function () {
             itemCategory: {
                 required: "Category is required. Please select a Category."
             },
-            itemCostPrice: {
-                required: "Cost Price is required.",
-                min: "Cost Price must be greater than 0."
+            itemSupplier: {
+                required: "Supplier is required. Please select a Supplier."
             },
             itemPrice: {
                 required: "Selling Price is required.",
-                min: "Selling Price must be greater than 0.",
-                minCost: "Selling Price must be greater than or equal to the Cost Price."
-            },
-            itemStock: {
-                required: "Initial Stock Level is required.",
-                min: "Stock Level cannot be negative."
+                min: "Selling Price must be greater than 0."
             },
             itemDesc: {
                 required: "Instrument Description is required."
@@ -447,9 +432,8 @@ $(document).ready(function () {
         const name = $('#itemName').val().trim()
         const brandName = $('#itemBrand').val()
         const categoryName = $('#itemCategory').val()
+        const supplierName = $('#itemSupplier').val()
         const price = Number($('#itemPrice').val())
-        const cost_price = $('#itemCostPrice').val()
-        const stock = $('#itemStock').val()
         const desc = $('#itemDesc').val().trim()
 
         const token = getToken()
@@ -459,9 +443,9 @@ $(document).ready(function () {
         formData.append("name", name);
         formData.append("brandName", brandName);
         formData.append("categoryName", categoryName);
+        formData.append("supplierName", supplierName);
         formData.append("price", price);
-        if (cost_price !== '') formData.append("cost_price", Number(cost_price));
-        formData.append("stock", Number(stock));
+        formData.append("stock", 0); // Always starts at 0; stock is managed via Restock page
         formData.append("desc", desc);
         
         newFiles.forEach(file => {
@@ -505,7 +489,8 @@ $(document).ready(function () {
 
         $('#itemId').val(p.id); $('#itemName').val(p.name); $('#itemBrand').val(p.brand)
         $('#itemCategory').val(p.category); $('#itemPrice').val(p.price)
-        $('#itemCostPrice').val(p.cost_price ? Math.round(p.cost_price) : Math.round(p.price * 0.6)); $('#itemStock').val(p.stock)
+        $('#itemSupplier').val(p.supplier || '')
+        $('#itemStock').val(p.stock)
         $('#itemDesc').val(p.desc || '')
         
         // Reset image states
@@ -544,9 +529,8 @@ $(document).ready(function () {
         const name = $('#itemName').val().trim()
         const brandName = $('#itemBrand').val()
         const categoryName = $('#itemCategory').val()
+        const supplierName = $('#itemSupplier').val()
         const price = Number($('#itemPrice').val())
-        const cost_price = $('#itemCostPrice').val()
-        const stock = Number($('#itemStock').val())
         const desc = $('#itemDesc').val().trim()
 
 
@@ -559,9 +543,9 @@ $(document).ready(function () {
         formData.append("name", name);
         if (brandName) formData.append("brandName", brandName);
         if (categoryName) formData.append("categoryName", categoryName);
+        if (supplierName) formData.append("supplierName", supplierName);
         formData.append("price", price);
-        if (cost_price !== '') formData.append("cost_price", Number(cost_price));
-        formData.append("stock", stock);
+        // stock is intentionally NOT sent on update — stock changes go through the Restock page
         formData.append("desc", desc);
 
         // Send existing images kept
